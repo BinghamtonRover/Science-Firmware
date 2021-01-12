@@ -1,12 +1,10 @@
 //user notes -- should calibrate the co2 sensor using sensor calibration code -- need to first let sensor read value from room then let it read from bag filled with exhaled air
 //Pump4 and Pump5 have A1 & A2 tied to B1 & B2 (suspect they will run at same time)
-//update calibration function to mirror what is done in the mg811 calibration example code on github
-
-//Code needs to have all pins mapped to teensy 4.1 pins 
+//update calibration function to mirror what is done in the mg811 calibration example code on github 
 
 //Arduino code for BURT 20202-2021 Science Subsystem written by Dillon Kane
 
-
+#include <rocs.hpp>
 #include <SparkFun_TB6612.h> //ROB 14451 
 #include <DRV8834.h> //closest to MP6500
 #include <MultiDriver.h>
@@ -75,6 +73,8 @@ MG811 co2Sensor = 21; //define Co2 Sensor pin
 int Co2Value, methaneValue; //global variables used to store & write final values of co2 and methane
 float pHValue; //global variable used to store & write final value of pH
 int temperature, humidity; //global variable to store temp & humidity values
+const char* ROCS_NAME = "ScienceSubsystem";
+uint8_t selector = 0;
 
 //create motors
 Sparkfun_Motor Pump1(Pump1_in1, Pump1_in2, Pump1_PWM, motor_offset, STBY);
@@ -93,7 +93,10 @@ void setup() {
     Serial.begin(115200);
     pinMode(MQ4, INPUT);
     pinMode(pH, INPUT);
-    pinMode(DHT11, INPUT);   
+    pinMode(DHT11, INPUT);
+    rocs::init(0x11, ROCS_NAME, strlen(ROCS_NAME));
+    rocs::set_read_handler(read_handler);
+    rocs::set_write_handler(write_handler);   
     Dirt_stepper.begin(RPM, MICROSTEPS); //rotate dirt carousel
     Dirt_stepper.enable();
     Auger_stepper.begin(RPM, MICROSTEPS); //lower auger head
@@ -103,33 +106,54 @@ void setup() {
     
 }
 
-void loop() { //for now this code just calls each function but we want each function to be called when a button on the remote is pressed 
+void loop() { 
 
-    calibrate_sensors();
-    delay(1000);
-    lower_auger();
-    delay(1000);
-    collect_dirt();
-    delay(1000);
-    raise_auger();
-    delay(1000);
-    move_dirt_to_auger();
-    delay(1000);
-    dispense_dirt();
-    delay(1000);
-    move_dirt_to_tests();
-    delay(1000);
-    lower_tests();
-    delay(1000);
-    distribute_liquids();
-    delay(1000);
-    collect_data();
-    delay(1000);
-    raise_tests();
-    delay(1000);
-    rotate_dirt();
-    delay(1000);
-   
+    switch(selector){
+      
+      case 1: 
+        calibrate_sensors();
+        delay(100);
+        break;
+      case 2: 
+        lower_auger();
+        delay(100);
+        break;
+      case 3: 
+        collect_dirt();
+        delay(100);
+        break;
+      case 4: 
+        raise_auger();
+        delay(100);
+        break;
+      case 5: 
+        move_dirt_to_auger();
+        delay(100);
+        break;
+      case 6: 
+        move_dirt_to_tests();
+        delay(100);
+        break;
+      case 7: 
+        distribute_liquids();
+        delay(100);
+        break;
+      case 8: 
+        collect_data();
+        delay(100);
+        break;
+      case 9: 
+        raise_tests();
+        delay(100);
+        break;
+      case 10: 
+        rotate_dirt();
+        delay(100);
+        break;  
+      default:
+        delay(10);
+        break;  
+    }   
    
 }
 
@@ -222,7 +246,7 @@ int collect_data(void)
     int methaneValue = analogRead(MQ4); //read MQ4 sensor ///need to figure out singificance of this value and convert it to useful data
     int Co2Value = co2Sensor.read();  //read co2 sensor (value in ppm)
     int checkDHT = DHT.read11(DHT11); //used to check if DHT sensor is operating correctly
-    pHValue = find_pH(); //call the pH function to calculate the average pH ///code for this was taken from an example online -- need to rework the code to be personalizd to what we need
+    pHValue = find_pH(); //call the pH function to calculate the average pH
     switch (checkDHT){ //checks DHT sensor is working ok, prints status
           case DHTLIB_OK:  
           Serial.print("OK,\n"); 
@@ -346,4 +370,21 @@ void calibrate_sensors(void){ //figure out if other sensors need calibration
     co2Sensor.begin(v400, v40000); // set the reference values for co2 sensor in the library  (this stays here (only remove above line)
     Serial.print("Co2 Sensor calibrated \n");
     
+}
+
+void write_handler(uint8_t reg, uint8_t val) {
+    switch (reg) {
+        case 1:
+            selector = val;
+            break;
+    }
+}
+
+uint8_t read_handler(uint8_t reg) {
+    switch (reg) {
+        case 1:
+            return selector;
+    }
+
+    return 0;
 }
