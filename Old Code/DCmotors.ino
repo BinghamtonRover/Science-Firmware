@@ -20,7 +20,7 @@
 #define DC_motor_in2 8 //will need to be changed for final board integration
 #define DC_motor_PWM 6 //will need to be changed for final board integration
 #define STBY 9 //will need to be changed for final board integration
-const int motor_offset = 1;
+const int motor_offset = 1; 
 
 //create motors
 Motor Pump1 = Motor(Pump1_in1, Pump1_in2, Pump1_PWM, motor_offset, STBY);
