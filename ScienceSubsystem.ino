@@ -4,6 +4,7 @@
 
 //Arduino code for BURT 20202-2021 Science Subsystem written by Dillon Kane
 
+#include <Wire.h>
 #include <rocs.hpp>
 #include <SparkFun_TB6612.h> //ROB 14451 
 #include <DRV8834.h> //closest to MP6500
@@ -94,6 +95,7 @@ void setup() {
     pinMode(MQ4, INPUT);
     pinMode(pH, INPUT);
     pinMode(DHT11, INPUT);
+    Wire.begin();
     rocs::init(0x11, ROCS_NAME, strlen(ROCS_NAME));
     rocs::set_read_handler(read_handler);
     rocs::set_write_handler(write_handler);   
@@ -108,6 +110,13 @@ void setup() {
 
 void loop() { 
 
+  Wire.requestFrom(8, 6);    // request 6 bytes from slave device #8
+
+  while (Wire.available()) { // slave may send less than requested
+    selector = Wire.read(); // receive a byte as character
+    Serial.print(selector);         // print the character
+  }
+  
     switch(selector){
       
       case 1: 
