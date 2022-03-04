@@ -25,7 +25,8 @@ void StepperMotor::setup() {
 		pinMode(currentPin1, OUTPUT);
 		pinMode(currentPin2, INPUT);
 		digitalWrite(currentPin1, LOW);		
-	} else if (current == 1.5) {  // INPUT, LOW
+	} 
+	else if (current == 1.5) {  // INPUT, LOW
 		pinMode(currentPin1, INPUT);
 		pinMode(currentPin2, OUTPUT);
 		digitalWrite(currentPin2, LOW);
@@ -54,7 +55,7 @@ int LinearStepperMotor::distanceToSteps(float distance) {
 }
 
 bool LinearStepperMotor::isHittingLimit() { 
-	return limitPin != 0 && digitalRead(limitPin) == 1; 
+	return digitalRead(limitPin) == 1; 
 }
 
 void LinearStepperMotor::calibrate() {
@@ -62,15 +63,13 @@ void LinearStepperMotor::calibrate() {
 	distance = 0;
 }
 
-void LinearStepperMotor::moveDistance(float distance) {
-	int steps = distanceToSteps(distance);
+void LinearStepperMotor::moveDistance(float offset) {
+	int steps = distanceToSteps(offset);
 	writeSteps(steps);
-	Serial.print("Moved to distance: ");
-	Serial.println(distance);
 }
 
 void LinearStepperMotor::setPosition(float position) {
-	int stepDifference = distanceToSteps(distance - position);
+	int stepDifference = distanceToSteps(position - distance);
 	writeSteps(stepDifference);
 }
 
@@ -103,12 +102,21 @@ void RotatingStepperMotor::rotate(float degrees) {
 
 void RotatingStepperMotor::nextTube() {
 	/* Each tube is 30 degrees apart from the last. */
-	rotate(30);
+	// okay so the motor isn't working, let's do 15 instead of 30
+	rotate(15);  
 }
 
 void RotatingStepperMotor::nextSection() {
 	/* There are 3 sections, hence each occupies 120 degrees. */
-	rotate(120);
+	// rotate(120);
+	nextTube();
+	delay(500);
+	nextTube();
+	delay(500);
+	nextTube();
+	delay(500);
+	nextTube();
+	delay(500);	
 }
 
 // ---------- DC Motors ----------

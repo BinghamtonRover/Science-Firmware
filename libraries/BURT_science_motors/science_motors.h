@@ -4,9 +4,9 @@
 #include "Arduino.h"
 
 #define DISTANCE_PER_STEP 0.01519  // mm / step
-#define DEGREE_PER_STEP 0.1125  // deg / step
+#define DEGREE_PER_STEP 0.375  // deg / step
 
-#define PWM_DELAY 2000  // μs
+#define PWM_DELAY 1000  // μs
 
 class StepperMotor { 
 	/* Controls basic functionality for all stepper motors */
@@ -24,7 +24,8 @@ class StepperMotor {
 			directionPin(directionPin), 
 			stepPin(stepPin),
 			currentPin1(currentPin1),
-			currentPin2(currentPin2) { }
+			currentPin2(currentPin2),
+			current(current) { }
 
 		virtual void setup();
 };

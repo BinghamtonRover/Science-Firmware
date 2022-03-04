@@ -7,10 +7,11 @@
 // #define AUGER_DIG_DELAY 1000 // ms
 // #define AUGER_DROP_DELAY 1000  // ms
 
-#define AUGER_LINEAR_MAX_HEIGHT 0  // mm
-#define DIRT_LINEAR_OUTER_RADIUS 0  // mm
-#define DIRT_LINEAR_INNER_RADIUS 0  // mm
-#define SCIENCE_LINEAR_MAX_HEIGHT 0  // mm
+#define AUGER_LINEAR_MAX_HEIGHT 215 // 200  // mm
+#define DIRT_LINEAR_OUTER_RADIUS 35  // mm
+#define DIRT_LINEAR_INNER_RADIUS 35  // mm
+#define DIRT_LINEAR_TEST_OFFSET 10   // mm
+#define SCIENCE_LINEAR_MAX_HEIGHT 35  // mm
 
 #define SENSORS_READ_DELAY 1000  // ms
 
@@ -19,6 +20,7 @@
 
 void block() {
 	while (!Serial.available());
+	Serial.readString();  // empty the buffer
 }
 
 void setup() {
@@ -55,13 +57,14 @@ void calibrate() {
 	dirtCarousel.calibrate();
 	dirtLinear.calibrate();
 	scienceLinear.calibrate();
-	// augerLinear.calibrate();  // WARNING: will go through the table!
+	augerLinear.calibrate();  // WARNING: will go through the table!
 }
 
 void dig() {  // all motor movements are blocking
 	// Lower and dig
 	dirtLinear.setPosition(0);
 	augerLinear.setPosition(0);
+
 	// auger.setSpeed(AUGER_FAST_SPEED); 
 	// delay(AUGER_DIG_DELAY); 
 	// auger.softBrake();
@@ -75,7 +78,6 @@ void dig() {  // all motor movements are blocking
 	// Drop in each tube.
 	// 
 	// Tube 1
-	dirtCarousel.nextTube();
 	// auger.setSpeed(AUGER_DROP_SPEED);
 	// delay(AUGER_DROP_DELAY);
 	// // auger.softBreak();
@@ -115,6 +117,8 @@ void dig() {  // all motor movements are blocking
 	// // auger.softBreak();
 	Serial.println("Press Enter when the drop is finished.");
 	block();
+	dirtCarousel.nextSection();
+	// dirtCarousel.nextSection();
 
 	// // Reset
 	dirtLinear.setPosition(0);	
@@ -124,22 +128,21 @@ void dig() {  // all motor movements are blocking
 	Serial.println("Press Enter when the excess is dropped.");
 	block();
 
-	// testSamples();
+	testSamples();
 }
 
 void testSamples() {
-	dirtLinear.setPosition(0);
-	dirtCarousel.nextSection();
+	dirtLinear.setPosition(DIRT_LINEAR_TEST_OFFSET);
 	scienceLinear.setPosition(SCIENCE_LINEAR_MAX_HEIGHT);
-	pump1.setSpeed(PUMP_SPEED);
-	pump2.setSpeed(PUMP_SPEED);
-	pump3.setSpeed(PUMP_SPEED);
-	pump4.setSpeed(PUMP_SPEED);
-	delay(PUMP_DELAY);
-	pump1.hardBrake();
-	pump2.hardBrake();
-	pump3.hardBrake();
-	pump4.hardBrake();
+	// pump1.setSpeed(PUMP_SPEED);
+	// pump2.setSpeed(PUMP_SPEED);
+	// pump3.setSpeed(PUMP_SPEED);
+	// pump4.setSpeed(PUMP_SPEED);
+	// delay(PUMP_DELAY);
+	// pump1.hardBrake();
+	// pump2.hardBrake();
+	// pump3.hardBrake();
+	// pump4.hardBrake();
 	Serial.println("Transmitting data. (not really)..");
 	delay(SENSORS_READ_DELAY);
 	scienceLinear.setPosition(0);
@@ -151,6 +154,7 @@ void parseSerialCommand(String input) {
 	// Accept the command
 	if (input == "calibrate") return calibrate();
 	else if (input  == "dig") return dig();
+	else if (input == "temp") return dirtCarousel.nextSection();
 
 	// Parse the command
 	int delimiter = input.indexOf(" ");

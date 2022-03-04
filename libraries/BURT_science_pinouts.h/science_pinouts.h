@@ -72,7 +72,7 @@ LinearStepperMotor augerLinear(  // Stepper1 on the PCB
 	AUGER_LINEAR_CURRENT1_PIN,  
 	AUGER_LINEAR_CURRENT2_PIN, 
 	AUGER_LINEAR_LIMIT_PIN,
-	32  // TODO
+	215
 );
 
 LinearStepperMotor dirtLinear(  // Stepper2 on the PCB
@@ -81,7 +81,7 @@ LinearStepperMotor dirtLinear(  // Stepper2 on the PCB
 	DIRT_LINEAR_CURRENT1_PIN,
 	DIRT_LINEAR_CURRENT2_PIN,
 	DIRT_LINEAR_LIMIT_PIN,
-	38  // TODO: 42
+	35
 );
 
 LinearStepperMotor scienceLinear(  // Stepper3 on the PCB
@@ -90,7 +90,7 @@ LinearStepperMotor scienceLinear(  // Stepper3 on the PCB
 	SCIENCE_LINEAR_CURRENT1_PIN,
 	SCIENCE_LINEAR_CURRENT2_PIN,
 	SCIENCE_LINEAR_LIMIT_PIN,
-	32  // TODO
+	35
 );
 
 RotatingStepperMotor dirtCarousel(  // Stepper4 on the PCB
