@@ -2,6 +2,25 @@
 // Also includes <science_motors.h> 
 #include <science_pinouts.h>
 
+// #define AUGER_FAST_SPEED 50
+// #define AUGER_DROP_SPEED -25
+// #define AUGER_DIG_DELAY 1000 // ms
+// #define AUGER_DROP_DELAY 1000  // ms
+
+#define AUGER_LINEAR_MAX_HEIGHT 0  // mm
+#define DIRT_LINEAR_OUTER_RADIUS 0  // mm
+#define DIRT_LINEAR_INNER_RADIUS 0  // mm
+#define SCIENCE_LINEAR_MAX_HEIGHT 0  // mm
+
+#define SENSORS_READ_DELAY 1000  // ms
+
+#define PUMP_SPEED 0
+#define PUMP_DELAY 0  // ms
+
+void block() {
+	while (!Serial.available());
+}
+
 void setup() {
 	Serial.begin(9600);
 	// TODO: Add CAN bus initialization here.
@@ -14,7 +33,7 @@ void setup() {
 	calibrate();
 	Serial.println("Stepper motors initialized.");
 
-	auger.setup();
+	// auger.setup();
 	pump1.setup();
 	pump2.setup();
 	pump3.setup();
@@ -33,16 +52,97 @@ void loop() {
 
 void calibrate() {
 	/* Calibrates the 4 stepper motors. */
+	dirtCarousel.calibrate();
 	dirtLinear.calibrate();
 	scienceLinear.calibrate();
-	dirtCarousel.calibrate();
-
-	// WARNING: Auger will go through the table!
-	// augerLinear.calibrate();
+	// augerLinear.calibrate();  // WARNING: will go through the table!
 }
 
-void dig() {
-	Serial.println("Automatic digging not yet implemented.");
+void dig() {  // all motor movements are blocking
+	// Lower and dig
+	dirtLinear.setPosition(0);
+	augerLinear.setPosition(0);
+	// auger.setSpeed(AUGER_FAST_SPEED); 
+	// delay(AUGER_DIG_DELAY); 
+	// auger.softBrake();
+	Serial.println("Press Enter when the digging is finished.");
+	block();
+
+	// Lift and dump
+	augerLinear.setPosition(AUGER_LINEAR_MAX_HEIGHT);
+	dirtLinear.setPosition(DIRT_LINEAR_OUTER_RADIUS);
+
+	// Drop in each tube.
+	// 
+	// Tube 1
+	dirtCarousel.nextTube();
+	// auger.setSpeed(AUGER_DROP_SPEED);
+	// delay(AUGER_DROP_DELAY);
+	// // auger.softBreak();
+	Serial.println("Press Enter when the drop is finished.");
+	block();
+
+	// Tube 2
+	dirtCarousel.nextTube();
+	// // auger.setSpeed(AUGER_DROP_SPEED);
+	// delay(AUGER_DROP_DELAY);
+	// // auger.softBreak();
+	Serial.println("Press Enter when the drop is finished.");
+	block();
+
+	// Inner tube
+	dirtLinear.setPosition(DIRT_LINEAR_INNER_RADIUS);
+	// // auger.setSpeed(AUGER_DROP_SPEED);
+	// delay(AUGER_DROP_DELAY);
+	// // auger.softBreak();
+	Serial.println("Press Enter when the drop is finished.");
+	block();
+
+
+	// Tube 3
+	dirtLinear.setPosition(DIRT_LINEAR_OUTER_RADIUS);
+	dirtCarousel.nextTube();
+	// // auger.setSpeed(AUGER_DROP_SPEED);
+	// delay(AUGER_DROP_DELAY);
+	// // auger.softBreak();
+	Serial.println("Press Enter when the drop is finished.");
+	block();
+
+	// // Tube 4
+	dirtCarousel.nextTube();
+	// // auger.setSpeed(AUGER_DROP_SPEED);
+	// delay(AUGER_DROP_DELAY);
+	// // auger.softBreak();
+	Serial.println("Press Enter when the drop is finished.");
+	block();
+
+	// // Reset
+	dirtLinear.setPosition(0);	
+	// // auger.setSpeed(AUGER_DROP_SPEED);
+	// delay(AUGER_DROP_DELAY);
+	// auger.softBreak();
+	Serial.println("Press Enter when the excess is dropped.");
+	block();
+
+	// testSamples();
+}
+
+void testSamples() {
+	dirtLinear.setPosition(0);
+	dirtCarousel.nextSection();
+	scienceLinear.setPosition(SCIENCE_LINEAR_MAX_HEIGHT);
+	pump1.setSpeed(PUMP_SPEED);
+	pump2.setSpeed(PUMP_SPEED);
+	pump3.setSpeed(PUMP_SPEED);
+	pump4.setSpeed(PUMP_SPEED);
+	delay(PUMP_DELAY);
+	pump1.hardBrake();
+	pump2.hardBrake();
+	pump3.hardBrake();
+	pump4.hardBrake();
+	Serial.println("Transmitting data. (not really)..");
+	delay(SENSORS_READ_DELAY);
+	scienceLinear.setPosition(0);
 }
 
 void parseSerialCommand(String input) {
@@ -66,7 +166,7 @@ void parseSerialCommand(String input) {
 	else if (motor == "dirt-linear") dirtLinear.moveDistance(distance);
 	else if (motor == "science-linear") scienceLinear.moveDistance(distance);
 	else if (motor == "dirt-carousel") dirtCarousel.rotate(distance);
-	else if (motor == "auger") auger.setSpeed(speed);
+	// else if (motor == "auger") auger.setSpeed(speed);
 	else if (motor == "pump1") pump1.setSpeed(speed);
 	else if (motor == "pump2") pump2.setSpeed(speed);
 	else if (motor == "pump3") pump3.setSpeed(speed);
