@@ -33,9 +33,16 @@
 #define DIRT_CAROUSEL_CURRENT2_PIN 3    // I2
 
 // Auger:
-#define AUGER_PWM_PIN 19
-#define AUGER_IN1_PIN 21
-#define AUGER_IN2_PIN 20
+// #define AUGER_PWM_PIN 19
+// #define AUGER_IN1_PIN 21
+// #define AUGER_IN2_PIN 20
+
+#define R_PWM_PIN 3
+#define L_PWM_PIN 5
+#define R_ENABLE_PIN 2
+#define L_ENABLE_PIN 4
+#define R_DRIVE_PIN 6
+#define L_DRIVE_PIN 7
 
 // Pump 1: <LABEL WITH CHEMICAL>
 #define PUMP1_PWM_PIN 33 
@@ -59,15 +66,16 @@
 
 // --------------- Motor definitions ---------------
 
-StepperMotor augerLinear(  // Stepper1 on the PCB
+LinearStepperMotor augerLinear(  // Stepper1 on the PCB
 	AUGER_LINEAR_DIRECTION_PIN,  
 	AUGER_LINEAR_STEP_PIN,  
 	AUGER_LINEAR_CURRENT1_PIN,  
 	AUGER_LINEAR_CURRENT2_PIN, 
-	AUGER_LINEAR_LIMIT_PIN 
+	AUGER_LINEAR_LIMIT_PIN,
+	32  // TODO
 );
 
-StepperMotor dirtLinear(  // Stepper2 on the PCB
+LinearStepperMotor dirtLinear(  // Stepper2 on the PCB
 	DIRT_LINEAR_DIRECTION_PIN,
 	DIRT_LINEAR_STEP_PIN,
 	DIRT_LINEAR_CURRENT1_PIN,
@@ -76,22 +84,32 @@ StepperMotor dirtLinear(  // Stepper2 on the PCB
 	38  // TODO: 42
 );
 
-StepperMotor scienceLinear(  // Stepper3 on the PCB
+LinearStepperMotor scienceLinear(  // Stepper3 on the PCB
 	SCIENCE_LINEAR_DIRECTION_PIN,
 	SCIENCE_LINEAR_STEP_PIN,
 	SCIENCE_LINEAR_CURRENT1_PIN,
 	SCIENCE_LINEAR_CURRENT2_PIN,
-	SCIENCE_LINEAR_LIMIT_PIN
+	SCIENCE_LINEAR_LIMIT_PIN,
+	32  // TODO
 );
 
-StepperMotor dirtCarousel(  // Stepper4 on the PCB
+RotatingStepperMotor dirtCarousel(  // Stepper4 on the PCB
 	DIRT_CAROUSEL_DIRECTION_PIN, 
 	DIRT_CAROUSEL_STEP_PIN,
 	DIRT_CAROUSEL_CURRENT1_PIN,
 	DIRT_CAROUSEL_CURRENT2_PIN
 );
 
-DCMotor auger(AUGER_PWM_PIN, AUGER_IN1_PIN, AUGER_IN2_PIN);
+Auger auger = Auger(
+	R_PWM_PIN, 
+	L_PWM_PIN, 
+	R_ENABLE_PIN, 
+	L_ENABLE_PIN, 
+	R_DRIVE_PIN, 
+	L_DRIVE_PIN
+);
+
+// DCMotor auger(AUGER_PWM_PIN, AUGER_IN1_PIN, AUGER_IN2_PIN);
 DCMotor pump1(PUMP1_PWM_PIN, PUMP1_IN1_PIN, PUMP1_IN2_PIN);
 DCMotor pump2(PUMP2_PWM_PIN, PUMP2_IN1_PIN, PUMP2_IN2_PIN);
 DCMotor pump3(PUMP3_PWM_PIN, PUMP3_IN1_PIN, PUMP3_IN2_PIN);

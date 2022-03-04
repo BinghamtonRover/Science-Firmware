@@ -1,60 +1,114 @@
 #include "science_motors.h"
 
-// ---------- Stepper Motors ---------- 
+// ---------- Stepper Motor ---------- 
+
+void writeStep(byte stepPin) {
+	digitalWrite(stepPin, HIGH);
+	delayMicroseconds(PWM_DELAY);
+	digitalWrite(stepPin, LOW);
+	delayMicroseconds(PWM_DELAY);
+}
+
+void StepperMotor::writeSteps(int steps) {
+	digitalWrite(directionPin, steps > 0 ? HIGH : LOW);
+	for (int step = 0; step < abs(steps); step++) writeStep(stepPin);
+}
 
 void StepperMotor::setup() {
 	pinMode(stepPin, OUTPUT);
 	pinMode(directionPin, OUTPUT);
-	pinMode(limitPin, INPUT_PULLUP);
-	// 1A configuration: LOW, INPUT
-	pinMode(currentPin1, OUTPUT);
-	pinMode(currentPin2, INPUT);
-	digitalWrite(currentPin1, LOW);
+	// Current configuration, in mA
+	if (current == 0.5) {  // INPUT, INPUT
+		pinMode(currentPin1, INPUT);
+		pinMode(currentPin2, INPUT);
+	} else if (current == 1) {  // LOW, INPUT
+		pinMode(currentPin1, OUTPUT);
+		pinMode(currentPin2, INPUT);
+		digitalWrite(currentPin1, LOW);		
+	} else if (current == 1.5) {  // INPUT, LOW
+		pinMode(currentPin1, INPUT);
+		pinMode(currentPin2, OUTPUT);
+		digitalWrite(currentPin2, LOW);
+	}
 }
 
-int StepperMotor::distanceToSteps(float distance) { return distance / DISTANCE_PER_STEP; }
-int StepperMotor::degreesToSteps(float degrees) { return degrees / DEGREE_PER_STEP; }
+// ---------- LinearStepperMotor ----------
 
-bool StepperMotor::isHittingLimit() { return limitPin != 0 && digitalRead(limitPin) == 1; }
+void LinearStepperMotor::setup() {
+	StepperMotor::setup();
+	pinMode(limitPin, INPUT_PULLUP);
+}
 
-void StepperMotor::writeSteps(int steps) {
+void LinearStepperMotor::writeSteps(int steps) {
 	digitalWrite(directionPin, steps > 0 ? HIGH : LOW);
 	short direction = steps > 0 ? 1 : -1;
-	steps = abs(steps);
-	for (int step = 0; step < steps; step++) {
+	for (int step = 0; step < abs(steps); step++) {
 		if ((isHittingLimit() && direction < 0) || distance >= limit) break;
-		digitalWrite(stepPin, HIGH);
-		delayMicroseconds(pulseWidthDelay);
-		digitalWrite(stepPin, LOW);
-		delayMicroseconds(pulseWidthDelay);
+		writeStep(stepPin);
 		distance += DISTANCE_PER_STEP * direction;
 	}
-	Serial.print("Moved to ");
+}
+
+int LinearStepperMotor::distanceToSteps(float distance) { 
+	return distance / DISTANCE_PER_STEP; 
+}
+
+bool LinearStepperMotor::isHittingLimit() { 
+	return limitPin != 0 && digitalRead(limitPin) == 1; 
+}
+
+void LinearStepperMotor::calibrate() {
+	while (!isHittingLimit()) writeSteps(-10);
+	distance = 0;
+}
+
+void LinearStepperMotor::moveDistance(float distance) {
+	int steps = distanceToSteps(distance);
+	writeSteps(steps);
+	Serial.print("Moved to distance: ");
 	Serial.println(distance);
 }
 
-void StepperMotor::moveDistance(float distance) {
-	int steps = distanceToSteps(distance);
-	Serial.print("  Writing x steps: ");
-	Serial.println(steps);
-	writeSteps(steps);
+void LinearStepperMotor::setPosition(float position) {
+	int stepDifference = distanceToSteps(distance - position);
+	writeSteps(stepDifference);
 }
 
-void StepperMotor::rotate(float degrees) {
-	Serial.print("  Rotating to: ");
-	Serial.println(degrees);
-	int steps = degreesToSteps(degrees);
-	Serial.print("  (That's ");
-	Serial.print(steps);
-	Serial.println(" steps).");
-	writeSteps(steps);
-}
+// ---------- RotatingStepperMotor ----------
 
-void StepperMotor::calibrate() {
-	if (limitPin != 0) {
-		while (!isHittingLimit()) writeSteps(-10);
+void RotatingStepperMotor::writeSteps(int steps) {
+	digitalWrite(directionPin, steps > 0 ? HIGH : LOW);
+	short direction = steps > 0 ? 1 : -1;
+	for (int step = 0; step < abs(steps); step++) {
+		writeStep(stepPin);
+		angle += DEGREE_PER_STEP * direction;
 	}
-	distance = 0;
+}
+
+int RotatingStepperMotor::degreesToSteps(float degrees) { 
+	return degrees / DEGREE_PER_STEP; 
+}
+
+void RotatingStepperMotor::calibrate() {
+	// Assume the user has calibrated the device.
+	// 
+	// (I know, I know, I don't wanna hear it)
+	angle = 0;
+}
+
+void RotatingStepperMotor::rotate(float degrees) {
+	int steps = degreesToSteps(degrees);
+	writeSteps(steps);
+}
+
+void RotatingStepperMotor::nextTube() {
+	/* Each tube is 30 degrees apart from the last. */
+	rotate(30);
+}
+
+void RotatingStepperMotor::nextSection() {
+	/* There are 3 sections, hence each occupies 120 degrees. */
+	rotate(120);
 }
 
 // ---------- DC Motors ----------
@@ -86,4 +140,39 @@ void DCMotor::hardBrake() {
 	digitalWrite(pwmPin, HIGH);
 	digitalWrite(in1Pin, HIGH);
 	digitalWrite(in2Pin, HIGH);
+}
+
+// --------- Auger --------- 
+
+void Auger::setup() {
+	pinMode(rPWMPin, OUTPUT);
+	pinMode(lPWMPin, OUTPUT);
+	pinMode(rEnablePin, OUTPUT);
+	pinMode(lEnablePin, OUTPUT);
+	pinMode(rDrivePin, OUTPUT);
+	pinMode(lDrivePin, OUTPUT);
+	digitalWrite(rEnablePin, HIGH);
+	digitalWrite(lEnablePin, HIGH);
+	digitalWrite(rDrivePin, LOW);
+	digitalWrite(lDrivePin, LOW);
+}
+
+void Auger::setSpeed(int newSpeed) {
+	/* Sets a speed between [-255, 255]. */
+	speed = newSpeed;
+	bool isForward = speed > 0;
+	speed = abs(speed);
+	analogWrite(rPWMPin, isForward ? speed : 0);
+	analogWrite(lPWMPin, isForward ? 0 : speed);
+}
+
+void Auger::softBrake() {
+	// TODO: Find a way to kill power instead
+	for (int newSpeed = speed; newSpeed > 0; newSpeed -= 10) {
+		setSpeed(newSpeed);
+	}
+}
+
+void Auger::hardBrake() {
+	setSpeed(0);
 }
