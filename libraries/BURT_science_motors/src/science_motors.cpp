@@ -2,7 +2,7 @@
 
 // ---------- Stepper Motor ---------- 
 
-void writeStep(byte stepPin) {
+void StepperMotor::writeStep() {
 	digitalWrite(stepPin, HIGH);
 	delayMicroseconds(PWM_DELAY);
 	digitalWrite(stepPin, LOW);
@@ -11,25 +11,26 @@ void writeStep(byte stepPin) {
 
 void StepperMotor::writeSteps(int steps) {
 	digitalWrite(directionPin, steps > 0 ? HIGH : LOW);
-	for (int step = 0; step < abs(steps); step++) writeStep(stepPin);
+	for (int step = 0; step < abs(steps); step++) writeStep();
 }
 
 void StepperMotor::setup() {
 	pinMode(stepPin, OUTPUT);
 	pinMode(directionPin, OUTPUT);
-	// Current configuration, in mA
-	if (current == 0.5) {  // INPUT, INPUT
+	if (current == 0.5) {         // 0.5mA = INPUT, INPUT
 		pinMode(currentPin1, INPUT);
 		pinMode(currentPin2, INPUT);
-	} else if (current == 1) {  // LOW, INPUT
+	} else if (current == 1) {    // 1.0mA = LOW, INPUT
 		pinMode(currentPin1, OUTPUT);
 		pinMode(currentPin2, INPUT);
 		digitalWrite(currentPin1, LOW);		
-	} 
-	else if (current == 1.5) {  // INPUT, LOW
+	} else if (current == 1.5) {  // 1.5mA = INPUT, LOW
 		pinMode(currentPin1, INPUT);
 		pinMode(currentPin2, OUTPUT);
 		digitalWrite(currentPin2, LOW);
+	} else {
+		Serial.print("Unrecognized current level for stepper motor: ");
+		Serial.println(current);
 	}
 }
 
@@ -41,12 +42,14 @@ void LinearStepperMotor::setup() {
 }
 
 void LinearStepperMotor::writeSteps(int steps) {
-	digitalWrite(directionPin, steps > 0 ? HIGH : LOW);
+	/* Will stop the motor from moving too far in one direction. */
+	digitalWrite(directionPin, steps > 0 ? HIGH : LOW); 
 	short direction = steps > 0 ? 1 : -1;
 	for (int step = 0; step < abs(steps); step++) {
-		if ((isHittingLimit() && direction < 0) || distance >= limit) break;
-		writeStep(stepPin);
-		distance += DISTANCE_PER_STEP * direction;
+		if (readLimitSwitch() && direction < 0) continue;  // too close to switch
+		if (distance >= limit && direction > 0) continue;  // too far from switch
+		writeStep();
+		distance += DISTANCE_PER_STEP * direction;  // update position
 	}
 }
 
@@ -54,12 +57,12 @@ int LinearStepperMotor::distanceToSteps(float distance) {
 	return distance / DISTANCE_PER_STEP; 
 }
 
-bool LinearStepperMotor::isHittingLimit() { 
+bool LinearStepperMotor::readLimitSwitch() { 
 	return digitalRead(limitPin) == 1; 
 }
 
 void LinearStepperMotor::calibrate() {
-	while (!isHittingLimit()) writeSteps(-10);
+	while (!readLimitSwitch()) writeSteps(-10);
 	distance = 0;
 }
 
@@ -79,7 +82,7 @@ void RotatingStepperMotor::writeSteps(int steps) {
 	digitalWrite(directionPin, steps > 0 ? HIGH : LOW);
 	short direction = steps > 0 ? 1 : -1;
 	for (int step = 0; step < abs(steps); step++) {
-		writeStep(stepPin);
+		writeStep();
 		angle += DEGREE_PER_STEP * direction;
 	}
 }
@@ -89,15 +92,17 @@ int RotatingStepperMotor::degreesToSteps(float degrees) {
 }
 
 void RotatingStepperMotor::calibrate() {
-	// Assume the user has calibrated the device.
-	// 
-	// (I know, I know, I don't wanna hear it)
 	angle = 0;
 }
 
 void RotatingStepperMotor::rotate(float degrees) {
 	int steps = degreesToSteps(degrees);
 	writeSteps(steps);
+}
+
+void RotatingStepperMotor::setAngle(float newAngle) {
+	int stepDifference = degreesToSteps(newAngle - angle);
+	writeSteps(stepDifference);
 }
 
 void RotatingStepperMotor::nextTube() {
@@ -127,11 +132,10 @@ void DCMotor::setup() {
 	pinMode(in2Pin, OUTPUT);
 }
 
-void DCMotor::setSpeed(byte speed) {
-	/* Maps the input [-100, 100] to [50, 255] with direction. */
+void DCMotor::setSpeed(int speed) {
+	Serial.println(speed);
 	if (speed == 0) return softBrake();
 	bool isForward = speed > 0;
-	speed = map(abs(speed), -100, 100, 50, 255);
 
 	analogWrite(pwmPin, speed);
 	digitalWrite(in1Pin, isForward ? HIGH : LOW);
@@ -150,7 +154,7 @@ void DCMotor::hardBrake() {
 	digitalWrite(in2Pin, HIGH);
 }
 
-// --------- Auger --------- 
+// ---------- Auger ---------- 
 
 void Auger::setup() {
 	pinMode(rPWMPin, OUTPUT);
@@ -170,6 +174,7 @@ void Auger::setSpeed(int newSpeed) {
 	speed = newSpeed;
 	bool isForward = speed > 0;
 	speed = abs(speed);
+
 	analogWrite(rPWMPin, isForward ? speed : 0);
 	analogWrite(lPWMPin, isForward ? 0 : speed);
 }

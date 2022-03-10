@@ -1,0 +1,20 @@
+# Data types (KEYWORD1)
+StepperMotor	KEYWORD1
+LinearStepperMotor	KEYWORD1
+RotatingStepperMotor	KEYWORD1
+DCMotor	KEYWORD1
+Auger	KEYWORD1
+
+# Methods and functions (KEYWORD2)
+setup	KEYWORD2
+calibrate	KEYWORD2
+moveDistance	KEYWORD2
+setPosition	KEYWORD2
+rotate	KEYWORD2
+nextTube	KEYWORD2
+nextSection	KEYWORD2
+setSpeed	KEYWORD2
+softBrake	KEYWORD2
+hardBrake	KEYWORD2
+
+# Constants (LITERAL1)
