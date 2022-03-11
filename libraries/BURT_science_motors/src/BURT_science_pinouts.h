@@ -1,7 +1,7 @@
 #ifndef BURT_science_pinouts_h
 #define BURT_science_pinouts_h
 
-#include <science_motors.h>
+#include "BURT_science_motors.h"
 
 // -------------------- Pinouts --------------------
 

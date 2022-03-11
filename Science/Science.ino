@@ -1,6 +1,6 @@
 // Contains all the StepperMotor and DCMotor objects.
-// Also includes <science_motors.h> 
-#include <science_pinouts.h>
+#include <BURT_science_pinouts.h>
+#include <BURT_science_motors.h>
 
 /* This script controls everything except for the Auger. */
 
