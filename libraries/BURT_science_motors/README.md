@@ -18,6 +18,8 @@ This library is documented using [Doxygen](https://doxygen.nl/)-style comments. 
 - Click `File` > `Open` and select the `Doxyfile` file in this folder
 - Click `Run` > `Run Doxygen`. When finished, click `Show HTML Output`
 
+DO NOT commit these files. They cannot be added to the gitignore either since they are used with GitHub pages. Simply delete them if needed. 
+
 ## Usage
 
 This library needs to be shared across two sketches, so we can’t just include it as part of either sketch. If we did, changes to one would not sync to the other. Instead, you have to make a link from your Arduino installation’s library folder. See the README for the `science` repository for details. 
