@@ -15,7 +15,7 @@ This library is documented using [Doxygen](https://doxygen.nl/)-style comments. 
 
 - [Download](https://doxygen.nl/download.html) and install Doxygen 
 - Open the Doxywizard program
-- Click `File` > `Open` and select `Doxyfile.doxygen` in this folder
+- Click `File` > `Open` and select the `Doxyfile` file in this folder
 - Click `Run` > `Run Doxygen`. When finished, click `Show HTML Output`
 
 ## Usage
