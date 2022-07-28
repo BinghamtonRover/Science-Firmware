@@ -3,6 +3,7 @@
 // ---------- Stepper Motor ---------- 
 
 void StepperMotor::writeStep() {
+	/* A "step" consists of one pulse on the PWM pin. */
 	digitalWrite(stepPin, HIGH);
 	delayMicroseconds(PWM_DELAY);
 	digitalWrite(stepPin, LOW);
@@ -10,6 +11,7 @@ void StepperMotor::writeStep() {
 }
 
 void StepperMotor::writeSteps(int steps) {
+	// For direction: HIGH means clockwise
 	digitalWrite(directionPin, steps > 0 ? HIGH : LOW);
 	for (int step = 0; step < abs(steps); step++) writeStep();
 }
@@ -17,6 +19,7 @@ void StepperMotor::writeSteps(int steps) {
 void StepperMotor::setup() {
 	pinMode(stepPin, OUTPUT);
 	pinMode(directionPin, OUTPUT);
+	// The motors have different current ratings, denoted by currentPin's 1 and 2
 	if (current == 0.5) {         // 0.5mA = INPUT, INPUT
 		pinMode(currentPin1, INPUT);
 		pinMode(currentPin2, INPUT);
@@ -42,7 +45,7 @@ void LinearStepperMotor::setup() {
 }
 
 void LinearStepperMotor::writeSteps(int steps) {
-	/* Will stop the motor from moving too far in one direction. */
+	/* Stops the motor from moving too far by keeping track of the current position. */
 	digitalWrite(directionPin, steps > 0 ? HIGH : LOW); 
 	short direction = steps > 0 ? 1 : -1;
 	for (int step = 0; step < abs(steps); step++) {
@@ -58,7 +61,8 @@ int LinearStepperMotor::distanceToSteps(float distance) {
 }
 
 bool LinearStepperMotor::readLimitSwitch() { 
-	return digitalRead(limitPin) == 1; 
+	// HIGH means the switch is being depressed.
+	return digitalRead(limitPin) == HIGH;
 }
 
 void LinearStepperMotor::calibrate() {
@@ -106,22 +110,11 @@ void RotatingStepperMotor::setAngle(float newAngle) {
 }
 
 void RotatingStepperMotor::nextTube() {
-	/* Each tube is 30 degrees apart from the last. */
-	// okay so the motor isn't working, let's do 15 instead of 30
-	rotate(15);  
+	rotate(30);  
 }
 
 void RotatingStepperMotor::nextSection() {
-	/* There are 3 sections, hence each occupies 120 degrees. */
-	// rotate(120);
-	nextTube();
-	delay(500);
-	nextTube();
-	delay(500);
-	nextTube();
-	delay(500);
-	nextTube();
-	delay(500);	
+	rotate(120);
 }
 
 // ---------- DC Motors ----------
@@ -133,11 +126,14 @@ void DCMotor::setup() {
 }
 
 void DCMotor::setSpeed(int speed) {
-	Serial.println(speed);
+	if (speed > 100 || speed < -100) {
+		Serial.println("ERROR: Speed needs to be between -100 and 100. Got: " + speed);
+		return;
+	}
 	if (speed == 0) return softBrake();
 	bool isForward = speed > 0;
-
-	analogWrite(pwmPin, speed);
+	int voltage = map(speed, -100, 100, -255, 255);
+	analogWrite(pwmPin, voltage);
 	digitalWrite(in1Pin, isForward ? HIGH : LOW);
 	digitalWrite(in2Pin, isForward ? LOW : HIGH);
 }
@@ -169,23 +165,37 @@ void Auger::setup() {
 	digitalWrite(lDrivePin, LOW);
 }
 
-void Auger::setSpeed(int newSpeed) {
-	/* Sets a speed between [-255, 255]. */
-	speed = newSpeed;
-	bool isForward = speed > 0;
-	speed = abs(speed);
+void Auger::setSpeed(int speed) {
+	if (speed > 100 || speed < -100) {
+		Serial.println("Speed must be between -100 and 100. Got: " + speed);
+		return;
+	}
 
+	bool isForward = speed > 0;
+	this.speed = abs(speed);
+	int voltage = map(speed, -100, 100, -255, 255);
 	analogWrite(rPWMPin, isForward ? speed : 0);
 	analogWrite(lPWMPin, isForward ? 0 : speed);
 }
 
 void Auger::softBrake() {
-	// TODO: Find a way to kill power instead
-	for (int newSpeed = speed; newSpeed > 0; newSpeed -= 10) {
-		setSpeed(newSpeed);
+	// TODO: Find a way to kill power instead. 
+	// Workaround: slowly ramp down.
+	if (speed > 0) {  // ramp down
+		for (int newSpeed = speed; newSpeed > 0; newSpeed -= 10) {
+			setSpeed(newSpeed);
+			delay(5);
+		}
+	} else {  // ramp up
+		for (int newSpeed = speed; newSpeed < 0; newSpeed += 10) {
+			setSpeed(newSpeed);
+			delay(5);
+		}
 	}
 }
 
 void Auger::hardBrake() {
+	// TODO: Find a way to hard brake (see DCMotor.hardBrake)
+	// Workaround: immediately set speed to 0.
 	setSpeed(0);
 }

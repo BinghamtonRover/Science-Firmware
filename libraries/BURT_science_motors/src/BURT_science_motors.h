@@ -20,7 +20,10 @@ class StepperMotor {
 		byte currentPin2;  ///< Controls the current intake (see #setup).
 		float current;  ///< The current this motor is operating at, in mA.
 
-		virtual void writeSteps(int steps);  ///< Moves the motor a number of steps.
+		/// Calls #writeStep for each desired step and sets the direction. 
+		/// 
+		/// Override this function to track the motor as it moves. 
+		virtual void writeSteps(int steps);
 
 	public: 
 		StepperMotor(byte directionPin, byte stepPin, byte currentPin1, byte currentPin2, float current) : 
@@ -97,7 +100,7 @@ class RotatingStepperMotor : public StepperMotor {
 		void calibrate();  ///< Resets #angle to 0. 
 		void rotate(float degrees);  ///< Rotates by a number of degrees.
 		void setAngle(float newAngle);  ///< Rotates to the desired angle.
-		void nextTube();  ///< Rotates 30 degrees clockwise, to the next tube.
+		void nextTube();  ///< Rotates 30 degrees clockwise to the next tube.
 		void nextSection();  ///< Rotates 120 degrees clockwise to the next section.
 };
 
@@ -121,7 +124,7 @@ class DCMotor {
 			in2Pin(in2Pin) { }
 
 		void setup();  ///< Initializes the DC motor and its pins.
-		void setSpeed(int speed);  ///< Sets the speed, from -255 to 255 inclusive.
+		void setSpeed(int speed);  ///< Sets the speed, in the interval [-100, 100].
 		void softBrake();  ///< Slowly slows the motor to a stop.
 		void hardBrake();  ///< Immediately stops the motor. 
 };
@@ -139,8 +142,8 @@ class Auger {
 		byte rEnablePin; ///< The right enable pin. 
 		byte lEnablePin; ///< The left enable pin.
 		byte rDrivePin;  ///< The right drive pin. Set to LOW. 
-		byte lDrivePin;  ///< The left drive pin. Set to LOW
-		int speed;  ///< The current speed, between -255 and 255 inclusive. 
+		byte lDrivePin;  ///< The left drive pin. Set to LOW.
+		int speed;  ///< The current speed, between -100 and 100 inclusive. 
 
 	public: 
 		Auger(byte rPWMPin, byte lPWMPin, byte rEnablePin, byte lEnablePin, byte rDrivePin, byte lDrivePin) : 
@@ -151,9 +154,9 @@ class Auger {
 			rDrivePin(rDrivePin),
 			lDrivePin(lDrivePin) { }
 
-		void setup();  ///< Initializes the auger
-		void setSpeed(int speed);  ///< Sets the speed, from -255 to 255 inclusive.
-		void softBrake();  ///< Slowly slows the auger to a stop.
+		void setup();  ///< Initializes the auger.
+		void setSpeed(int speed);  ///< Sets the speed, from -100 to 100 inclusive.
+		void softBrake();  ///< Slowly brings the auger to a stop.
 		void hardBrake();  ///< Immediately stops the auger. 
 };
 
