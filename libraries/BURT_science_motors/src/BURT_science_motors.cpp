@@ -165,17 +165,17 @@ void Auger::setup() {
 	digitalWrite(lDrivePin, LOW);
 }
 
-void Auger::setSpeed(int speed) {
-	if (speed > 100 || speed < -100) {
-		Serial.println("Speed must be between -100 and 100. Got: " + speed);
+void Auger::setSpeed(int newSpeed) {
+	if (newSpeed > 100 || newSpeed < -100) {
+		Serial.println("Speed must be between -100 and 100. Got: " + newSpeed);
 		return;
 	}
 
-	bool isForward = speed > 0;
-	this.speed = abs(speed);
-	int voltage = map(speed, -100, 100, -255, 255);
-	analogWrite(rPWMPin, isForward ? speed : 0);
-	analogWrite(lPWMPin, isForward ? 0 : speed);
+	bool isForward = newSpeed > 0;
+	speed = abs(newSpeed);
+	int voltage = map(newSpeed, -100, 100, -255, 255);
+	analogWrite(rPWMPin, isForward ? voltage : 0);
+	analogWrite(lPWMPin, isForward ? 0 : voltage);
 }
 
 void Auger::softBrake() {
