@@ -5,12 +5,12 @@
 
 // -------------------- Pinouts --------------------
 
-/// Auger Linear Actuator: Stepper1 on the PCB
-#define AUGER_LINEAR_DIRECTION_PIN 39   // DIR
-#define AUGER_LINEAR_STEP_PIN 40  	    // STP
-#define AUGER_LINEAR_CURRENT1_PIN 18    // I1
-#define AUGER_LINEAR_CURRENT2_PIN 41    // I2
-#define AUGER_LINEAR_LIMIT_PIN 24       // Bump1
+/// Auger Linear Actuator: Stepper1 on the PCB 
+#define VACUUM_LINEAR_DIRECTION_PIN 39   // DIR
+#define VACUUM_LINEAR_STEP_PIN 40  	    // STP
+#define VACUUM_LINEAR_CURRENT1_PIN 18    // I1
+#define VACUUM_LINEAR_CURRENT2_PIN 41    // I2
+#define VACUUM_LINEAR_LIMIT_PIN 24       // Bump1
 
 /// Dirt Carousel Linear Actuator: Stepper2 on the PCB
 #define DIRT_LINEAR_DIRECTION_PIN 9     // DIR
@@ -31,14 +31,18 @@
 #define DIRT_CAROUSEL_STEP_PIN 2        // STP
 #define DIRT_CAROUSEL_CURRENT1_PIN 4    // I1
 #define DIRT_CAROUSEL_CURRENT2_PIN 3    // I2
+#define DIRT_CAROUSEL_LIMIT_PIN 0       //Bump4
 
-/// Auger:
+/// Auger: 
 #define AUGER_R_PWM_PIN 3
 #define AUGER_L_PWM_PIN 5
 #define AUGER_R_ENABLE_PIN 2
 #define AUGER_L_ENABLE_PIN 4
 #define AUGER_R_DRIVE_PIN 6
 #define AUGER_L_DRIVE_PIN 7
+
+///Vacuum Servo
+#define VACUUM_SERVO_PIN 13 //DOUBLE CHECK
 
 // Pump 1: <LABEL WITH CHEMICAL>
 #define PUMP1_PWM_PIN 33 
@@ -63,13 +67,13 @@
 // --------------- Motor definitions ---------------
 
 /// Controls the auger linear actuator.
-LinearStepperMotor augerLinear(  // Stepper1 on the PCB
-	AUGER_LINEAR_DIRECTION_PIN,  
-	AUGER_LINEAR_STEP_PIN,  
-	AUGER_LINEAR_CURRENT1_PIN,  
-	AUGER_LINEAR_CURRENT2_PIN, 
-	AUGER_LINEAR_LIMIT_PIN,
-	215
+VacuumLinearStepperMotor vacuumLinear(  // Stepper1 on the PCB
+	VACUUM_LINEAR_DIRECTION_PIN,  
+	VACUUM_LINEAR_STEP_PIN,  
+	VACUUM_LINEAR_CURRENT1_PIN,  
+	VACUUM_LINEAR_CURRENT2_PIN, 
+	VACUUM_LINEAR_LIMIT_PIN,
+	-370 //changed from 215, double check me
 );
 
 /// Controls the dirt linear actuator.
@@ -97,11 +101,15 @@ RotatingStepperMotor dirtCarousel(  // Stepper4 on the PCB
 	DIRT_CAROUSEL_DIRECTION_PIN, 
 	DIRT_CAROUSEL_STEP_PIN,
 	DIRT_CAROUSEL_CURRENT1_PIN,
-	DIRT_CAROUSEL_CURRENT2_PIN
+	DIRT_CAROUSEL_CURRENT2_PIN,
+	DIRT_CAROUSEL_LIMIT_PIN,
+	355 //This is in degrees, check if this is right?
 );
+///Vacuum canister
+vacuum_servo vservo(VACUUM_SERVO_PIN);
 
-/// Controls the auger.
-Auger auger = Auger(
+/// Controls the vacuum. 
+Vacuum vacuum = Vacuum(
 	AUGER_R_PWM_PIN, 
 	AUGER_L_PWM_PIN, 
 	AUGER_R_ENABLE_PIN, 

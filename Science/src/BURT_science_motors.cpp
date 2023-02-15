@@ -80,12 +80,58 @@ void LinearStepperMotor::setPosition(float position) {
 	writeSteps(stepDifference);
 }
 
+//----------VacuumLinearStepperMotor--------
+
+void VacuumLinearStepperMotor::setup() {
+	StepperMotor::setup();
+	pinMode(limitPin, INPUT_PULLUP);
+}
+
+void VacuumLinearStepperMotor::writeSteps(int steps) {
+	/* Stops the motor from moving too far by keeping track of the current position. */
+	digitalWrite(directionPin, steps > 0 ? HIGH : LOW); 
+	short direction = steps > 0 ? 1 : -1;
+	for (int step = 0; step < abs(steps); step++) {
+		if (readLimitSwitch() && direction < 0) continue;  // too close to switch
+		if (distance >= limit && direction > 0) continue;  // too far from switch
+		writeStep();
+		distance += DISTANCE_PER_STEP_GEAR * direction;  // update position
+	}
+}
+
+int VacuumLinearStepperMotor::distanceToSteps(float distance) { 
+	return distance / DISTANCE_PER_STEP_GEAR; 
+}
+
+bool VacuumLinearStepperMotor::readLimitSwitch() { 
+	// HIGH means the switch is being depressed.
+	return digitalRead(limitPin) == HIGH;
+}
+
+void VacuumLinearStepperMotor::calibrate() {
+	while (!readLimitSwitch()) writeSteps(10); //Changed from -10 to account for limit switch at top
+	distance = 0;
+} 
+
+void VacuumLinearStepperMotor::moveDistance(float offset) {
+	int steps = distanceToSteps(offset);
+	writeSteps(steps);
+}
+
+void VacuumLinearStepperMotor::setPosition(float position) {
+	int stepDifference = distanceToSteps(position - distance);
+	writeSteps(stepDifference);
+}
+
+
 // ---------- RotatingStepperMotor ----------
 
 void RotatingStepperMotor::writeSteps(int steps) {
 	digitalWrite(directionPin, steps > 0 ? HIGH : LOW);
 	short direction = steps > 0 ? 1 : -1;
 	for (int step = 0; step < abs(steps); step++) {
+		if (readLimitSwitch() && direction < 0) continue;  // too close to switch
+		if (angle >= limit && direction > 0) continue;  // too far from switch
 		writeStep();
 		angle += DEGREE_PER_STEP * direction;
 	}
@@ -96,6 +142,7 @@ int RotatingStepperMotor::degreesToSteps(float degrees) {
 }
 
 void RotatingStepperMotor::calibrate() {
+	while (!readLimitSwitch()) writeSteps(-10);
 	angle = 0;
 }
 
@@ -116,6 +163,26 @@ void RotatingStepperMotor::nextTube() {
 void RotatingStepperMotor::nextSection() {
 	rotate(120);
 }
+
+bool RotatingStepperMotor::readLimitSwitch() { 
+	// HIGH means the switch is being depressed.
+	return digitalRead(limitPin) == HIGH;
+} 
+
+//----------Vacuum Servo---------//
+void vacuum_servo::open() {
+	for (int pos = 0; pos <= 180; pos += 1) { 
+    myservo.write(pos);              
+    delay(15); 
+	}
+};
+
+void vacuum_servo::close() {
+    for (int pos = 180; pos >= 0; pos -= 1) { 
+    myservo.write(pos);              
+    delay(15); 
+    }
+};
 
 // ---------- DC Motors ----------
 
@@ -150,9 +217,9 @@ void DCMotor::hardBrake() {
 	digitalWrite(in2Pin, HIGH);
 }
 
-// ---------- Auger ---------- 
+// ---------- Vacuum ----------  
 
-void Auger::setup() {
+void Vacuum::setup() {
 	pinMode(rPWMPin, OUTPUT);
 	pinMode(lPWMPin, OUTPUT);
 	pinMode(rEnablePin, OUTPUT);
@@ -165,7 +232,7 @@ void Auger::setup() {
 	digitalWrite(lDrivePin, LOW);
 }
 
-void Auger::setSpeed(int newSpeed) {
+void Vacuum::setSpeed(int newSpeed) {
 	if (newSpeed > 100 || newSpeed < -100) {
 		Serial.println("Speed must be between -100 and 100. Got: " + newSpeed);
 		return;
@@ -178,7 +245,7 @@ void Auger::setSpeed(int newSpeed) {
 	analogWrite(lPWMPin, isForward ? 0 : voltage);
 }
 
-void Auger::softBrake() {
+void Vacuum::softBrake() {
 	// TODO: Find a way to kill power instead. 
 	// Workaround: slowly ramp down.
 	if (speed > 0) {  // ramp down
@@ -194,7 +261,7 @@ void Auger::softBrake() {
 	}
 }
 
-void Auger::hardBrake() {
+void Vacuum::hardBrake() {
 	// TODO: Find a way to hard brake (see DCMotor.hardBrake)
 	// Workaround: immediately set speed to 0.
 	setSpeed(0);

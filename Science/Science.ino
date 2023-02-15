@@ -1,15 +1,21 @@
+
+#include "src/CO2/src/CO2Sensor.h"
+#include "src/Methane/src/MethaneSensor.h"
+#include "src/pH/src/pH.h"
+#include "src/Humidity/src/HumiditySensor.h"
+
 // Contains all the StepperMotor and DCMotor objects.
-#include <BURT_science_pinouts.h>
-#include <BURT_science_motors.h>
+#include "src/BURT_science_pinouts.h"
+#include "src/BURT_science_motors.h"
 
 /* This script controls everything except for the Auger. */
 
-// #define AUGER_FAST_SPEED 50
-// #define AUGER_DROP_SPEED -25
-// #define AUGER_DIG_DELAY 1000 // ms
-// #define AUGER_DROP_DELAY 1000  // ms
+#define VACUUM_FAST_SPEED 50
+//#define AUGER_DROP_SPEED -25 don"t need?
+#define VACUUM_DIG_DELAY 1000 // ms
+#define VACUUM_DROP_DELAY 1000  // ms
 
-#define AUGER_LINEAR_MAX_HEIGHT 215 // 200  // mm
+#define VACUUM_LINEAR_MAX_HEIGHT -370 //Changed from 215 mm, Double check this
 #define DIRT_LINEAR_OUTER_RADIUS 35  // mm
 #define DIRT_LINEAR_INNER_RADIUS 35  // mm
 #define DIRT_LINEAR_TEST_OFFSET 10   // mm
@@ -17,7 +23,7 @@
 
 #define SENSORS_READ_DELAY 1000  // ms
 
-#define PUMP_SPEED 100
+#define PUMP_SPEED -100 //must be negative to pump, positive blows bubbles
 #define PUMP_DELAY 10000  // 2000  // ms
 
 void block() {
@@ -30,14 +36,14 @@ void setup() {
 	// TODO: Add CAN bus initialization here.
 	Serial.println("Interface initialized.");
 
-	augerLinear.setup();
+	vacuumLinear.setup();
 	dirtLinear.setup();
 	scienceLinear.setup();
 	dirtCarousel.setup();
 	calibrate();
 	Serial.println("Stepper motors initialized.");
 
-	// auger.setup();
+	//vacuum.setup(); 
 	pump1.setup();
 	pump2.setup();
 	pump3.setup();
@@ -59,46 +65,46 @@ void calibrate() {
 	dirtCarousel.calibrate();
 	dirtLinear.calibrate();
 	scienceLinear.calibrate();
-	// augerLinear.calibrate();  // WARNING: will go through the table!
+	vacuumLinear.calibrate();  // WARNING: will go through the table!, theoretically this won't happen anymore?-be careful first testing
 }
 
 void dig() {  // all motor movements are blocking
 	// Lower and dig
-	// dirtLinear.setPosition(0);
-	// augerLinear.setPosition(0);
+	dirtLinear.setPosition(0);
+  vacuumLinear.setPosition(0); 
 
-	// auger.setSpeed(AUGER_FAST_SPEED); 
-	// delay(AUGER_DIG_DELAY); 
-	// auger.softBrake();
-	// Serial.println("Press Enter when the digging is finished.");
-	// block();
+	vacuum.setSpeed(VACUUM_FAST_SPEED); 
+	delay(VACUUM_DIG_DELAY); 
+	vacuum.softBrake();
+	Serial.println("Press Enter when the digging is finished.");
+	block();
 
 	// Lift and dump
-	// augerLinear.setPosition(AUGER_LINEAR_MAX_HEIGHT);
+	vacuumLinear.setPosition(VACUUM_LINEAR_MAX_HEIGHT);
 	dirtLinear.setPosition(DIRT_LINEAR_OUTER_RADIUS);
-
-	// Drop in each tube.
+/*
+	// Drop in each tube. NEED TO CHANGE
 	// 
 	// Tube 1
-	// auger.setSpeed(AUGER_DROP_SPEED);
-	// delay(AUGER_DROP_DELAY);
-	// auger.softBrake();
-	Serial.println("Press Enter when the drop is finished.");
-	block();
+	//vservo.open();
+	//delay(VACUUM_DROP_DELAY);
+  //vservo.close();
+	//Serial.println("Press Enter when the drop is finished.");
+	//block();
 
 	// Tube 2
 	dirtCarousel.nextTube();
-	// auger.setSpeed(AUGER_DROP_SPEED);
-	// delay(AUGER_DROP_DELAY);
-	// auger.softBrake();
+	vservo.open();
+	delay(VACUUM_DROP_DELAY);
+	vservo.close();
 	Serial.println("Press Enter when the drop is finished.");
 	block();
 
 	// Inner tube
 	dirtLinear.setPosition(DIRT_LINEAR_INNER_RADIUS);
-	// auger.setSpeed(AUGER_DROP_SPEED);
-	// delay(AUGER_DROP_DELAY);
-	// auger.softBrake();
+	vservo.open();
+	delay(VACUUM_DROP_DELAY);
+	vservo.close();
 	Serial.println("Press Enter when the drop is finished.");
 	block();
 
@@ -106,29 +112,29 @@ void dig() {  // all motor movements are blocking
 	// Tube 3
 	dirtLinear.setPosition(DIRT_LINEAR_OUTER_RADIUS);
 	dirtCarousel.nextTube();
-	// auger.setSpeed(AUGER_DROP_SPEED);
-	// delay(AUGER_DROP_DELAY);
-	// auger.softBrake();
+	vservo.open();
+	delay(VACUUM_DROP_DELAY);
+	versvo.close();
 	Serial.println("Press Enter when the drop is finished.");
 	block();
 
 	// // Tube 4
 	dirtCarousel.nextTube();
-	// auger.setSpeed(AUGER_DROP_SPEED);
-	// delay(AUGER_DROP_DELAY);
-	// auger.softBrake();
+	vservo.open();
+	delay(AUGER_DROP_DELAY);
+	vservo.close();
 	Serial.println("Press Enter when the drop is finished.");
 	block();
 	dirtCarousel.nextSection();
 
 	// // Reset
 	dirtLinear.setPosition(0);	
-	// auger.setSpeed(AUGER_DROP_SPEED);
-	// delay(AUGER_DROP_DELAY);
-	// auger.softBrake();
+	vservo.open();
+	delay(AUGER_DROP_DELAY);
+	vservo.close();
 	Serial.println("Press Enter when the excess is dropped.");
 	block();
-
+*/
 	testSamples();
 }
 
@@ -155,10 +161,10 @@ void testSamples() {
 }
 
 void bubbles() {
-	pump1.setSpeed(PUMP_SPEED);
-	pump2.setSpeed(PUMP_SPEED);
-	pump3.setSpeed(PUMP_SPEED);
-	pump4.setSpeed(PUMP_SPEED);
+	pump1.setSpeed(-PUMP_SPEED);
+	pump2.setSpeed(-PUMP_SPEED);
+	pump3.setSpeed(-PUMP_SPEED);
+	pump4.setSpeed(-PUMP_SPEED);
 	delay(PUMP_DELAY);
 	pump1.hardBrake();
 	pump2.hardBrake();
@@ -186,11 +192,14 @@ void parseSerialCommand(String input) {
 	int speed = part2.toInt();
 
 	// Execute the command
-	if (motor == "auger-linear") augerLinear.moveDistance(distance);
+	if (motor == "vacuum-linear") vacuumLinear.moveDistance(distance);
 	else if (motor == "dirt-linear") dirtLinear.moveDistance(distance);
-	else if (motor == "science-linear") scienceLinear.moveDistance(distance);
+	else if (motor == "science-linear") 
+  {
+    scienceLinear.moveDistance(distance);
+  }
 	else if (motor == "dirt-carousel") dirtCarousel.rotate(distance);
-	// else if (motor == "auger") auger.setSpeed(speed);
+	else if (motor == "vacuum") vacuum.setSpeed(speed);
 	else if (motor == "pump1") {
 		pump1.setSpeed(speed);
 		delay(PUMP_DELAY);
@@ -214,7 +223,7 @@ void parseSerialCommand(String input) {
 		Serial.println("  Commands are of the form: motor-name distance/speed.");
 		Serial.println("  For stepper motors: positive distance is away from the limit switch.");
 		Serial.println("  For DC motors: speed is in the range [-100, 100]. Positive = clockwise.");
-		Serial.println("  For example: auger-linear 20, would move the auger 20mm up.");
+		Serial.println("  For example: vacuum-linear 20, would move the vacuum 20mm up.");
 		Serial.println("  Example 2: auger 100 spins the auger at full speed.");
 		Serial.println("");
 	}

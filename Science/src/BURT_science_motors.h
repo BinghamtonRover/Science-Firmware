@@ -2,9 +2,11 @@
 #define BURT_science_motors_h
 
 #include "Arduino.h"
+#include "Servo.h"
 
 #define DISTANCE_PER_STEP 0.01519  ///< Millimeters per step.
 #define DEGREE_PER_STEP 0.375  ///< Degrees per step.
+#define DISTANCE_PER_STEP_GEAR 0.69115 ///mm per step with gear
 
 #define PWM_DELAY 1000  ///< Delay, in μs, between steps. 
 
@@ -76,7 +78,42 @@ class LinearStepperMotor : public StepperMotor {
 		/// limit in either direction. 
 		void setPosition(float position);
 };
+///Linear stepper motor with gear (for rack and pinion)
+class VacuumLinearStepperMotor : public StepperMotor {
+	private:
+		byte limitPin;  ///< The pin on which to read the limit switch
+		float limit;  ///< The maximum distance, in mm, from the limit switch
+		float distance = 0;  ///< How far the motor is from the limit switch
 
+		void writeSteps(int steps) override;  ///< Moves without passing limits.
+		int distanceToSteps(float distance);  ///< Converts mm to steps.
+		bool readLimitSwitch();  ///< Checks if the limit switch is pressed.
+
+	public: 
+		VacuumLinearStepperMotor(byte directionPin, byte stepPin, byte currentPin1, byte currentPin2, byte limitPin, float limit) : 
+			StepperMotor(directionPin, stepPin, currentPin1, currentPin2, 1.5),
+			limitPin(limitPin), 
+			limit(limit) { }
+
+		void setup() override;  ///< Initializes the motor and limit switch.
+		void calibrate();  ///< Moves to the limit switch and resets #distance.
+
+		/// Moves by the specified distance (in mm).
+		/// 
+		/// The motor will refuse to move past either limit. That is, if the switch 
+		/// is being pressed, the motor will not move toward the limit switch. If 
+		/// the motor has reached its further limit (specified by #limit), it will 
+		/// not move in that direction.
+		void moveDistance(float distance);
+
+		/// Moves to a specified position (in mm) from the limit switch.
+		/// 
+		/// Like #moveDistance, this function will not allow the motor to pass its 
+		/// limit in either direction. 
+		void setPosition(float position);
+};
+
+//NOW DOES HAVE LIMITS
 /// A stepper motor that controls a rotating component. 
 /// 
 /// Like #LinearStepperMotor, this class keeps track of its current state, in
@@ -89,20 +126,38 @@ class LinearStepperMotor : public StepperMotor {
 class RotatingStepperMotor : public StepperMotor {
 	private: 
 		float angle = 0;  ///< the current angle (in degrees) of the motor.
+		byte limitPin;  ///< The pin on which to read the limit switch
+	    float limit;
 
 		int degreesToSteps(float degrees);  ///< Converts degrees to steps.
 		void writeSteps(int steps) override;  ///< Moves while recording rotation.
+		bool readLimitSwitch();  ///< Checks if the limit switch is pressed.
 
 	public: 
-		RotatingStepperMotor(byte directionPin, byte stepPin, byte currentPin1, byte currentPin2) : 
-			StepperMotor(directionPin, stepPin, currentPin1, currentPin2, 0.5) { }
+		RotatingStepperMotor(byte directionPin, byte stepPin, byte currentPin1, byte currentPin2, byte limitPin, float limit) : 
+			StepperMotor(directionPin, stepPin, currentPin1, currentPin2, 0.5),
+			limitPin(limitPin), 
+			limit(limit) { }	
 
 		void calibrate();  ///< Resets #angle to 0. 
 		void rotate(float degrees);  ///< Rotates by a number of degrees.
 		void setAngle(float newAngle);  ///< Rotates to the desired angle.
 		void nextTube();  ///< Rotates 30 degrees clockwise to the next tube.
 		void nextSection();  ///< Rotates 120 degrees clockwise to the next section.
+		
 };
+///Vacuum servo: This controls the valve that drops the dirt into the dirt carousel
+class vacuum_servo {
+	private:
+	int pin;
+	
+	public:
+	vacuum_servo(int PIN) : pin(PIN) {}
+	void open();
+	void close();
+	Servo myservo;
+};
+
 
 /// A DC motor that is controlled by speed and direction, not position. 
 /// 
@@ -135,7 +190,7 @@ class DCMotor {
 /// they are implemented differently, so the classes are kept separate. There 
 /// are also more pins to keep track of. The two classes could be reduced to one
 /// or this be made a subclass of #DCMotor in the future. 
-class Auger {
+class Vacuum {
 	private:
 		byte rPWMPin;  ///< The right PWM pin, analogous to DCMotor::in1Pin.
 		byte lPWMPin; ///< The left PWM pin, analogous to DCMotor::in2Pin.
@@ -146,7 +201,7 @@ class Auger {
 		int speed;  ///< The current speed, between -100 and 100 inclusive. 
 
 	public: 
-		Auger(byte rPWMPin, byte lPWMPin, byte rEnablePin, byte lEnablePin, byte rDrivePin, byte lDrivePin) : 
+		Vacuum(byte rPWMPin, byte lPWMPin, byte rEnablePin, byte lEnablePin, byte rDrivePin, byte lDrivePin) : 
 			rPWMPin(rPWMPin),
 			lPWMPin(lPWMPin),
 			rEnablePin(rEnablePin),
