@@ -1,4 +1,3 @@
-
 #include "src/CO2/src/CO2Sensor.h"
 #include "src/Methane/src/MethaneSensor.h"
 #include "src/pH/src/pH.h"
@@ -8,6 +7,8 @@
 #include "src/BURT_science_pinouts.h"
 #include "src/BURT_science_motors.h"
 
+#include "src/BURT_can.h"
+#include "src/BURT_serial.h"
 /* This script controls everything except for the Auger. */
 
 #define VACUUM_FAST_SPEED 50
@@ -34,6 +35,7 @@ void block() {
 void setup() {
 	Serial.begin(9600);
 	// TODO: Add CAN bus initialization here.
+  BurtCan::setup();
 	Serial.println("Interface initialized.");
 
 	vacuumLinear.setup();
@@ -57,6 +59,9 @@ void loop() {
 	// Temporary Serial Monitor interface for testing
 	String input = Serial.readString();
 	parseSerialCommand(input);
+  BurtCan::update();
+  sendData();
+  // serial.parseSerial();
 	delay(500);
 }
 
@@ -66,6 +71,7 @@ void calibrate() {
 	dirtLinear.calibrate();
 	scienceLinear.calibrate();
 	vacuumLinear.calibrate();  // WARNING: will go through the table!, theoretically this won't happen anymore?-be careful first testing
+
 }
 
 void dig() {  // all motor movements are blocking
@@ -227,4 +233,45 @@ void parseSerialCommand(String input) {
 		Serial.println("  Example 2: auger 100 spins the auger at full speed.");
 		Serial.println("");
 	}
+}
+
+void ScienceCommand_Handler(const uint8_t* data, int length) {
+  ScienceCommand command = BurtProto::decode<ScienceCommand>(data, length, ScienceCommand_fields);
+  Serial.print("Received Command for"); /*
+  if(command.dig)
+    //dig();
+  else if(command.spin_carousel_tube) //Next tube
+    //dirtCarousel.rotate(distance_for_next_tube);
+  else if(command.spin_carousel_section) //Next section
+    //dirtCarousel.nextSection();
+  else if(command.vacuum_suck) //Start sucking
+    //vacuum.setSpeed(speed);
+  else if(command.carousel_angle) //Rotate carousel
+    //dirtCarousel.rotate();
+  else if(command.carousel_linear_position) //Move carousel horizontally
+    //dirtLinear.moveDistance(distance);
+  else if(command.test_linear_position) //Move testing suite
+    //scienceLinear.moveDistance(distance);
+  else if(command.vacuum_linear_position) //Move dirt collection tube vertically
+    //vacuumLinear().moveDistance(distance);
+  else if(command.pump1)
+    //pump1.setSpeed(speed);
+  else if(command.pump2)
+    //pump2.setSpeed(speed);
+  else if(command.pump3)
+    //pump3.setSpeed(speed);
+  else if(command.pump4)
+    //pump4.setSpeed(speed);
+  else
+    Serial.println("Invalid Command"); */
+}
+
+void sendData() {
+	ScienceData data;
+  //MethaneSensor methaneSensor(METHANE_PIN);
+  //CO2Sensor co2Sensor;
+	//data.methane = methaneSensor.read();
+  //data.co2 = co2Sensor.readPPM();
+	// The 2nd parameter is always MessageName_fields
+	BurtCan::send(SCIENCE_DATA_ID, ScienceData_fields, &data);
 }
