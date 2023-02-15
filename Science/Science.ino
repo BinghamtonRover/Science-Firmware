@@ -9,6 +9,7 @@
 
 #include "src/BURT_can.h"
 #include "src/BURT_serial.h"
+#include "src/generated/science.pb.h"
 /* This script controls everything except for the Auger. */
 
 #define VACUUM_FAST_SPEED 50
