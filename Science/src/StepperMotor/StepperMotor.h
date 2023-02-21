@@ -34,7 +34,7 @@ struct MotorConfig {
 class StepperMotor {
 	private: 
 		MotorPins pins;
-		MotorConfig config;
+		MotorConfig* config;
 		float currentPosition = 0;
 
 		void writeStep();
@@ -42,7 +42,7 @@ class StepperMotor {
 		int distanceToSteps(float distance);
 
 	public: 
-		StepperMotor(MotorPins pins, MotorConfig config);
+		StepperMotor(MotorPins pins, MotorConfig* config);
 
 		void setup();
 		void calibrate();
@@ -51,13 +51,7 @@ class StepperMotor {
 		bool readLimitSwitch();
 };
 
-//NOW DOES HAVE LIMITS
 /// A stepper motor that controls a rotating component. 
-/// 
-/// Like #LinearStepperMotor, this class keeps track of its current state, in
-/// terms of its current rotation. Unlike #LinearStepperMotor, this class does 
-/// not have limits to watch for. Rotating stepper motors can rotate by a given 
-/// amount of degrees, or to a known rotation. 
 /// 
 /// Test tubes are located 30 degrees apart. Groups of 4 tubes are referred to 
 /// as sections, and are 120 degrees apart. 

@@ -45,18 +45,18 @@ MotorPins vacuumLinearPins = {
 	step: 40,        // STP 
 	current1: 18,    // I1
 	current2: 41,    // I2
-	limitSwitch: 24,       // Bump1
+	limitSwitch: 24, // Bump1
 };
 
 MotorConfig vacuumLinearConfig = {
 	limit: -370,  // TODO: verify this
 	distancePerStep: 0.69115,  // mm / step. TODO: verify this
-	pwmDelay: 250,
+	pwmDelay: 450,  // or 250
 	current: MotorCurrent::ONE_AND_HALF_AMP,  // TODO: Change to 1500
 };
 
 /// Moves the vacuum vertically
-StepperMotor vacuumLinear(vacuumLinearPins, vacuumLinearConfig);
+StepperMotor vacuumLinear(vacuumLinearPins, &vacuumLinearConfig);
 
 /// Stepper2 on the PCB
 MotorPins dirtLinearPins = {
@@ -64,17 +64,17 @@ MotorPins dirtLinearPins = {
 	step: 10,        // STP
 	current1: 12,    // I1
 	current2: 11,    // I2
-	limitSwitch: 31,       // Bump2
+	limitSwitch: 31, // Bump2
 };
 
 MotorConfig dirtLinearConfig = {
 	limit: 35,  // TODO: verify this
 	distancePerStep: 0.01519,  // mm / step. TODO: verify this
-	pwmDelay: 500,
+	pwmDelay: 450,  // by experiment
 	current: MotorCurrent::ONE_AND_HALF_AMP,
 };
 
-StepperMotor dirtLinear(dirtLinearPins, dirtLinearConfig);
+StepperMotor dirtLinear(dirtLinearPins, &dirtLinearConfig);
 
 /// Stepper3 on the PCB
 MotorPins scienceLinearPins = {
@@ -82,17 +82,17 @@ MotorPins scienceLinearPins = {
 	step: 6,         // STP
 	current1: 8,     // I1
 	current2: 7,     // I2
-	limitSwitch: 32,       // Bump3
+	limitSwitch: 32, // Bump3
 };
 
 MotorConfig scienceLinearConfig = {
 	limit: 35,  // TODO: verify this
 	distancePerStep: 0.01519,  // mm / step. TODO: verify this
-	pwmDelay: 1000,
+	pwmDelay: 450,  // really nice
 	current: MotorCurrent::ONE_AND_HALF_AMP,
 };
 
-StepperMotor scienceLinear(dirtLinearPins, dirtLinearConfig);
+StepperMotor scienceLinear(scienceLinearPins, &scienceLinearConfig);
 
 /// Stepper4 on the PCB
 MotorPins dirtCarouselPins = {	
@@ -100,17 +100,17 @@ MotorPins dirtCarouselPins = {
 	step: 2,         // STP
 	current1: 4,     // I1
 	current2: 3,     // I2
-	limitSwitch: 0,       // Bump4
+	limitSwitch: 0,  // Bump4
 };
 
 MotorConfig dirtCarouselConfig = {
 	limit: 35,  // TODO: verify this
-	distancePerStep: 1.8,  // deg / step
-	pwmDelay: 750,
-	current: MotorCurrent::HALF_AMP,
+	distancePerStep: 120.0/125.0,  // deg / step
+	pwmDelay: 4000,  // not a typo
+	current: MotorCurrent::ONE_AND_HALF_AMP,
 };
 
-DirtCarousel dirtCarousel(dirtCarouselPins, dirtCarouselConfig);
+DirtCarousel dirtCarousel(dirtCarouselPins, &dirtCarouselConfig);
 
 ///Vacuum canister
 VacuumServo vservo(VACUUM_SERVO_PIN);

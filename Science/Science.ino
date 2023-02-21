@@ -1,4 +1,3 @@
-
 #include "src/CO2/src/CO2Sensor.h"
 #include "src/Methane/src/MethaneSensor.h"
 #include "src/pH/src/pH.h"
@@ -32,7 +31,7 @@ void block() {
 
 void setup() {
 	Serial.begin(9600);
-	// TODO: Add CAN bus initialization here.
+// 	// TODO: Add CAN bus initialization here.
 	Serial.println("Interface initialized.");
 
 	vacuumLinear.setup();
@@ -42,24 +41,18 @@ void setup() {
 	// calibrate();
 	Serial.println("Stepper motors initialized.");
 
-	//vacuum.setup(); 
+	// vacuum.setup(); 
 	pump1.setup();
 	pump2.setup();
 	pump3.setup();
 	pump4.setup();
 	Serial.println("DC motors initialized.");
 
-  // dirtCarousel.rotate(-360);
 	Serial.println("Science Subsystem ready.");
-
-  vservo.open();
-  delay(500);
-  vservo.close();
 }
 
 void loop() {
 	// Temporary Serial Monitor interface for testing
-  Serial.println(dirtCarousel.readLimitSwitch());
 	String input = Serial.readString();
 	parseSerialCommand(input);
 	delay(10);
@@ -183,7 +176,6 @@ void parseSerialCommand(String input) {
 	// Accept the command
 	if (input == "calibrate") return calibrate();
 	else if (input  == "dig") return dig();
-	else if (input == "temp") return dirtCarousel.nextSection();
 	else if (input == "test") return testSamples();
 	else if (input == "bubbles") return bubbles();
 
@@ -197,7 +189,14 @@ void parseSerialCommand(String input) {
 	int speed = part2.toInt();
 
 	// Execute the command
-	if (motor == "vacuum-linear") vacuumLinear.moveBy(distance);
+	if (motor == "vacuum-linear") {
+    Serial.println("Moving vacuum linear");
+    vacuumLinear.moveBy(distance);
+  }
+	else if (motor == "temp") {  // changes the PWM delay of the given motor
+		scienceLinearConfig.pwmDelay = speed;
+		Serial.println(scienceLinearConfig.pwmDelay);
+	}
 	else if (motor == "dirt-linear") dirtLinear.moveBy(distance);
 	else if (motor == "science-linear") scienceLinear.moveBy(distance);
 	else if (motor == "dirt-carousel") dirtCarousel.moveBy(distance);
