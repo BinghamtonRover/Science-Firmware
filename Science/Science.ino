@@ -1,16 +1,16 @@
+#include <BURT_can.h>
+#include <BURT_serial.h>
+
+// Hardware code
 #include "src/CO2/src/CO2Sensor.h"
 #include "src/Methane/src/MethaneSensor.h"
 #include "src/pH/src/pH.h"
 #include "src/Humidity/src/HumiditySensor.h"
 
 // Contains all the StepperMotor and DCMotor objects.
-#include "src/BURT_science_pinouts.h"
-#include "src/BURT_science_motors.h"
-
-#include <BURT_can.h>
-#include <BURT_serial.h>
+#include "src/pinouts.h"
+// Contains all the Protobuf data
 #include "src/science.pb.h"
-/* This script controls everything except for the Auger. */
 
 #define VACUUM_FAST_SPEED 50
 //#define AUGER_DROP_SPEED -25 don"t need?
@@ -31,7 +31,7 @@
 #define SCIENCE_COMMAND_ID 0x43
 #define SCIENCE_DATA_ID 0x17
 
-BurtSerial serial(ScienceCommand_Handler);
+BurtSerial serial(scienceHandler);
 
 void block() {
 	while (!Serial.available());
@@ -40,18 +40,18 @@ void block() {
 
 void setup() {
 	Serial.begin(9600);
-	// TODO: Add CAN bus initialization here.
   BurtCan::setup();
+  BurtCan::registerHandler(SCIENCE_COMMAND_ID, scienceHandler);
 	Serial.println("Interface initialized.");
 
 	vacuumLinear.setup();
 	dirtLinear.setup();
 	scienceLinear.setup();
 	dirtCarousel.setup();
-	calibrate();
+	// calibrate();
 	Serial.println("Stepper motors initialized.");
 
-	//vacuum.setup(); 
+	// vacuum.setup(); 
 	pump1.setup();
 	pump2.setup();
 	pump3.setup();
@@ -62,13 +62,15 @@ void setup() {
 }
 
 void loop() {
-	// Temporary Serial Monitor interface for testing
+  /* Real Rover code */
+  // BurtCan::update();
+  // sendData();
+  // serial.parseSerial();
+
+	/* Temporary Serial Monitor interface */
 	String input = Serial.readString();
 	parseSerialCommand(input);
-  BurtCan::update();
-  sendData();
-  // serial.parseSerial();
-	delay(500);
+	delay(10);
 }
 
 void calibrate() {
@@ -77,13 +79,12 @@ void calibrate() {
 	dirtLinear.calibrate();
 	scienceLinear.calibrate();
 	vacuumLinear.calibrate();  // WARNING: will go through the table!, theoretically this won't happen anymore?-be careful first testing
-
 }
 
 void dig() {  // all motor movements are blocking
 	// Lower and dig
-	dirtLinear.setPosition(0);
-  vacuumLinear.setPosition(0); 
+	dirtLinear.moveTo(0);
+  vacuumLinear.moveTo(0); 
 
 	vacuum.setSpeed(VACUUM_FAST_SPEED); 
 	delay(VACUUM_DIG_DELAY); 
@@ -92,8 +93,8 @@ void dig() {  // all motor movements are blocking
 	block();
 
 	// Lift and dump
-	vacuumLinear.setPosition(VACUUM_LINEAR_MAX_HEIGHT);
-	dirtLinear.setPosition(DIRT_LINEAR_OUTER_RADIUS);
+	vacuumLinear.moveTo(VACUUM_LINEAR_MAX_HEIGHT);
+	dirtLinear.moveTo(DIRT_LINEAR_OUTER_RADIUS);
 /*
 	// Drop in each tube. NEED TO CHANGE
 	// 
@@ -113,7 +114,7 @@ void dig() {  // all motor movements are blocking
 	block();
 
 	// Inner tube
-	dirtLinear.setPosition(DIRT_LINEAR_INNER_RADIUS);
+	dirtLinear.moveTo(DIRT_LINEAR_INNER_RADIUS);
 	vservo.open();
 	delay(VACUUM_DROP_DELAY);
 	vservo.close();
@@ -122,7 +123,7 @@ void dig() {  // all motor movements are blocking
 
 
 	// Tube 3
-	dirtLinear.setPosition(DIRT_LINEAR_OUTER_RADIUS);
+	dirtLinear.moveTo(DIRT_LINEAR_OUTER_RADIUS);
 	dirtCarousel.nextTube();
 	vservo.open();
 	delay(VACUUM_DROP_DELAY);
@@ -140,7 +141,7 @@ void dig() {  // all motor movements are blocking
 	dirtCarousel.nextSection();
 
 	// // Reset
-	dirtLinear.setPosition(0);	
+	dirtLinear.moveTo(0);	
 	vservo.open();
 	delay(AUGER_DROP_DELAY);
 	vservo.close();
@@ -152,9 +153,9 @@ void dig() {  // all motor movements are blocking
 
 void testSamples() {
 	Serial.println("Moving dirt linear");
-	dirtLinear.setPosition(DIRT_LINEAR_TEST_OFFSET);
+	dirtLinear.moveTo(DIRT_LINEAR_TEST_OFFSET);
 	Serial.println("Moving science linear");
-	scienceLinear.setPosition(SCIENCE_LINEAR_MAX_HEIGHT);
+	scienceLinear.moveTo(SCIENCE_LINEAR_MAX_HEIGHT);
 
 	Serial.println("Pumping...");
 	pump1.setSpeed(PUMP_SPEED);
@@ -169,7 +170,7 @@ void testSamples() {
 
 	Serial.println("Transmitting data. (not really)..");
 	delay(SENSORS_READ_DELAY);
-	scienceLinear.setPosition(0);
+	scienceLinear.moveTo(0);
 }
 
 void bubbles() {
@@ -190,7 +191,6 @@ void parseSerialCommand(String input) {
 	// Accept the command
 	if (input == "calibrate") return calibrate();
 	else if (input  == "dig") return dig();
-	else if (input == "temp") return dirtCarousel.nextSection();
 	else if (input == "test") return testSamples();
 	else if (input == "bubbles") return bubbles();
 
@@ -204,14 +204,19 @@ void parseSerialCommand(String input) {
 	int speed = part2.toInt();
 
 	// Execute the command
-	if (motor == "vacuum-linear") vacuumLinear.moveDistance(distance);
-	else if (motor == "dirt-linear") dirtLinear.moveDistance(distance);
-	else if (motor == "science-linear") 
-  {
-    scienceLinear.moveDistance(distance);
+	if (motor == "vacuum-linear") {
+    Serial.println("Moving vacuum linear");
+    vacuumLinear.moveBy(distance);
   }
-	else if (motor == "dirt-carousel") dirtCarousel.rotate(distance);
+	else if (motor == "temp") {  // changes the PWM delay of the given motor
+		scienceLinearConfig.pwmDelay = speed;
+		Serial.println(scienceLinearConfig.pwmDelay);
+	}
+	else if (motor == "dirt-linear") dirtLinear.moveBy(distance);
+	else if (motor == "science-linear") scienceLinear.moveBy(distance);
+	else if (motor == "dirt-carousel") dirtCarousel.moveBy(distance);
 	else if (motor == "vacuum") vacuum.setSpeed(speed);
+	else if (motor == "servo") vservo.write(distance);
 	else if (motor == "pump1") {
 		pump1.setSpeed(speed);
 		delay(PUMP_DELAY);
@@ -241,35 +246,20 @@ void parseSerialCommand(String input) {
 	}
 }
 
-void ScienceCommand_Handler(const uint8_t* data, int length) {
+void scienceHandler(const uint8_t* data, int length) {
   ScienceCommand command = BurtProto::decode<ScienceCommand>(data, length, ScienceCommand_fields);
-  Serial.print("Received Command for"); /*
-  if(command.dig)
-    //dig();
-  else if(command.spin_carousel_tube) //Next tube
-    //dirtCarousel.rotate(distance_for_next_tube);
-  else if(command.spin_carousel_section) //Next section
-    //dirtCarousel.nextSection();
-  else if(command.vacuum_suck) //Start sucking
-    //vacuum.setSpeed(speed);
-  else if(command.carousel_angle) //Rotate carousel
-    //dirtCarousel.rotate();
-  else if(command.carousel_linear_position) //Move carousel horizontally
-    //dirtLinear.moveDistance(distance);
-  else if(command.test_linear_position) //Move testing suite
-    //scienceLinear.moveDistance(distance);
-  else if(command.vacuum_linear_position) //Move dirt collection tube vertically
-    //vacuumLinear().moveDistance(distance);
-  else if(command.pump1)
-    //pump1.setSpeed(speed);
-  else if(command.pump2)
-    //pump2.setSpeed(speed);
-  else if(command.pump3)
-    //pump3.setSpeed(speed);
-  else if(command.pump4)
-    //pump4.setSpeed(speed);
-  else
-    Serial.println("Invalid Command"); */
+  if(command.dig) dig();
+  if(command.spin_carousel_tube) dirtCarousel.nextTube();
+  if(command.spin_carousel_section) dirtCarousel.nextSection();
+  if(command.vacuum_suck) vacuum.setSpeed(100);
+  if(command.carousel_angle > 0) dirtCarousel.moveTo(command.carousel_angle);
+  if(command.carousel_linear_position > 0) dirtLinear.moveBy(command.carousel_linear_position);
+  if(command.test_linear_position > 0) scienceLinear.moveBy(command.test_linear_position);
+  if(command.vacuum_linear_position > 0) vacuumLinear.moveBy(command.vacuum_linear_position);
+  if(command.pump1) pump1.setSpeed(100);
+  if(command.pump2) pump2.setSpeed(100);
+  if(command.pump3) pump3.setSpeed(100);
+  if(command.pump4) pump4.setSpeed(100);
 }
 
 void sendData() {
