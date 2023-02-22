@@ -15,14 +15,15 @@ typedef struct _ScienceCommand {
     bool spin_carousel_tube;
     bool spin_carousel_section;
     bool vacuum_suck;
-    float carousel_angle;
-    float carousel_linear_position;
-    float test_linear_position;
-    float vacuum_linear_position;
-    bool pump1;
+    float carousel_angle; /* Rotate carousel */
+    float carousel_linear_position; /* Move carousel horizontally */
+    float test_linear_position; /* Move testing suite */
+    float vacuum_linear_position; /* Move dirt collection tube vertically */
+    bool pump1; /* Start or stop */
     bool pump2;
     bool pump3;
     bool pump4;
+    bool calibrate;
 } ScienceCommand;
 
 typedef struct _ScienceData {
@@ -39,9 +40,9 @@ extern "C" {
 #endif
 
 /* Initializer values for message structs */
-#define ScienceCommand_init_default              {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
+#define ScienceCommand_init_default              {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
 #define ScienceData_init_default                 {0, 0, 0, 0, 0}
-#define ScienceCommand_init_zero                 {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
+#define ScienceCommand_init_zero                 {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
 #define ScienceData_init_zero                    {0, 0, 0, 0, 0}
 
 /* Field tags (for use in manual encoding/decoding) */
@@ -57,6 +58,7 @@ extern "C" {
 #define ScienceCommand_pump2_tag                 10
 #define ScienceCommand_pump3_tag                 11
 #define ScienceCommand_pump4_tag                 12
+#define ScienceCommand_calibrate_tag             13
 #define ScienceData_co2_tag                      1
 #define ScienceData_humidity_tag                 2
 #define ScienceData_methane_tag                  3
@@ -76,7 +78,8 @@ X(a, STATIC,   SINGULAR, FLOAT,    vacuum_linear_position,   8) \
 X(a, STATIC,   SINGULAR, BOOL,     pump1,             9) \
 X(a, STATIC,   SINGULAR, BOOL,     pump2,            10) \
 X(a, STATIC,   SINGULAR, BOOL,     pump3,            11) \
-X(a, STATIC,   SINGULAR, BOOL,     pump4,            12)
+X(a, STATIC,   SINGULAR, BOOL,     pump4,            12) \
+X(a, STATIC,   SINGULAR, BOOL,     calibrate,        13)
 #define ScienceCommand_CALLBACK NULL
 #define ScienceCommand_DEFAULT NULL
 
@@ -97,7 +100,7 @@ extern const pb_msgdesc_t ScienceData_msg;
 #define ScienceData_fields &ScienceData_msg
 
 /* Maximum encoded size of messages (where known) */
-#define ScienceCommand_size                      36
+#define ScienceCommand_size                      38
 #define ScienceData_size                         25
 
 #ifdef __cplusplus

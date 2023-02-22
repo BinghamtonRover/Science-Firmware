@@ -9,7 +9,7 @@
 
 #include <BURT_can.h>
 #include <BURT_serial.h>
-#include "src/generated/science.pb.h"
+#include "src/science.pb.h"
 /* This script controls everything except for the Auger. */
 
 #define VACUUM_FAST_SPEED 50
@@ -28,8 +28,8 @@
 #define PUMP_SPEED -100 //must be negative to pump, positive blows bubbles
 #define PUMP_DELAY 10000  // 2000  // ms
 
-#define SCIENCE_COMMAND_ID 0xC3
-#define SCIENCE_DATA_ID 0x27
+#define SCIENCE_COMMAND_ID 0x43
+#define SCIENCE_DATA_ID 0x17
 
 BurtSerial serial(ScienceCommand_Handler);
 
