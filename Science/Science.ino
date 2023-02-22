@@ -1,12 +1,10 @@
-
 #include "src/CO2/src/CO2Sensor.h"
 #include "src/Methane/src/MethaneSensor.h"
 #include "src/pH/src/pH.h"
 #include "src/Humidity/src/HumiditySensor.h"
 
 // Contains all the StepperMotor and DCMotor objects.
-#include "src/BURT_science_pinouts.h"
-#include "src/BURT_science_motors.h"
+#include "src/pinouts.h"
 
 /* This script controls everything except for the Auger. */
 
@@ -33,17 +31,17 @@ void block() {
 
 void setup() {
 	Serial.begin(9600);
-	// TODO: Add CAN bus initialization here.
+// 	// TODO: Add CAN bus initialization here.
 	Serial.println("Interface initialized.");
 
 	vacuumLinear.setup();
 	dirtLinear.setup();
 	scienceLinear.setup();
 	dirtCarousel.setup();
-	calibrate();
+	// calibrate();
 	Serial.println("Stepper motors initialized.");
 
-	//vacuum.setup(); 
+	// vacuum.setup(); 
 	pump1.setup();
 	pump2.setup();
 	pump3.setup();
@@ -57,7 +55,7 @@ void loop() {
 	// Temporary Serial Monitor interface for testing
 	String input = Serial.readString();
 	parseSerialCommand(input);
-	delay(500);
+	delay(10);
 }
 
 void calibrate() {
@@ -70,8 +68,8 @@ void calibrate() {
 
 void dig() {  // all motor movements are blocking
 	// Lower and dig
-	dirtLinear.setPosition(0);
-  vacuumLinear.setPosition(0); 
+	dirtLinear.moveTo(0);
+  vacuumLinear.moveTo(0); 
 
 	vacuum.setSpeed(VACUUM_FAST_SPEED); 
 	delay(VACUUM_DIG_DELAY); 
@@ -80,8 +78,8 @@ void dig() {  // all motor movements are blocking
 	block();
 
 	// Lift and dump
-	vacuumLinear.setPosition(VACUUM_LINEAR_MAX_HEIGHT);
-	dirtLinear.setPosition(DIRT_LINEAR_OUTER_RADIUS);
+	vacuumLinear.moveTo(VACUUM_LINEAR_MAX_HEIGHT);
+	dirtLinear.moveTo(DIRT_LINEAR_OUTER_RADIUS);
 /*
 	// Drop in each tube. NEED TO CHANGE
 	// 
@@ -101,7 +99,7 @@ void dig() {  // all motor movements are blocking
 	block();
 
 	// Inner tube
-	dirtLinear.setPosition(DIRT_LINEAR_INNER_RADIUS);
+	dirtLinear.moveTo(DIRT_LINEAR_INNER_RADIUS);
 	vservo.open();
 	delay(VACUUM_DROP_DELAY);
 	vservo.close();
@@ -110,7 +108,7 @@ void dig() {  // all motor movements are blocking
 
 
 	// Tube 3
-	dirtLinear.setPosition(DIRT_LINEAR_OUTER_RADIUS);
+	dirtLinear.moveTo(DIRT_LINEAR_OUTER_RADIUS);
 	dirtCarousel.nextTube();
 	vservo.open();
 	delay(VACUUM_DROP_DELAY);
@@ -128,7 +126,7 @@ void dig() {  // all motor movements are blocking
 	dirtCarousel.nextSection();
 
 	// // Reset
-	dirtLinear.setPosition(0);	
+	dirtLinear.moveTo(0);	
 	vservo.open();
 	delay(AUGER_DROP_DELAY);
 	vservo.close();
@@ -140,9 +138,9 @@ void dig() {  // all motor movements are blocking
 
 void testSamples() {
 	Serial.println("Moving dirt linear");
-	dirtLinear.setPosition(DIRT_LINEAR_TEST_OFFSET);
+	dirtLinear.moveTo(DIRT_LINEAR_TEST_OFFSET);
 	Serial.println("Moving science linear");
-	scienceLinear.setPosition(SCIENCE_LINEAR_MAX_HEIGHT);
+	scienceLinear.moveTo(SCIENCE_LINEAR_MAX_HEIGHT);
 
 	Serial.println("Pumping...");
 	pump1.setSpeed(PUMP_SPEED);
@@ -157,7 +155,7 @@ void testSamples() {
 
 	Serial.println("Transmitting data. (not really)..");
 	delay(SENSORS_READ_DELAY);
-	scienceLinear.setPosition(0);
+	scienceLinear.moveTo(0);
 }
 
 void bubbles() {
@@ -178,7 +176,6 @@ void parseSerialCommand(String input) {
 	// Accept the command
 	if (input == "calibrate") return calibrate();
 	else if (input  == "dig") return dig();
-	else if (input == "temp") return dirtCarousel.nextSection();
 	else if (input == "test") return testSamples();
 	else if (input == "bubbles") return bubbles();
 
@@ -192,14 +189,19 @@ void parseSerialCommand(String input) {
 	int speed = part2.toInt();
 
 	// Execute the command
-	if (motor == "vacuum-linear") vacuumLinear.moveDistance(distance);
-	else if (motor == "dirt-linear") dirtLinear.moveDistance(distance);
-	else if (motor == "science-linear") 
-  {
-    scienceLinear.moveDistance(distance);
+	if (motor == "vacuum-linear") {
+    Serial.println("Moving vacuum linear");
+    vacuumLinear.moveBy(distance);
   }
-	else if (motor == "dirt-carousel") dirtCarousel.rotate(distance);
+	else if (motor == "temp") {  // changes the PWM delay of the given motor
+		scienceLinearConfig.pwmDelay = speed;
+		Serial.println(scienceLinearConfig.pwmDelay);
+	}
+	else if (motor == "dirt-linear") dirtLinear.moveBy(distance);
+	else if (motor == "science-linear") scienceLinear.moveBy(distance);
+	else if (motor == "dirt-carousel") dirtCarousel.moveBy(distance);
 	else if (motor == "vacuum") vacuum.setSpeed(speed);
+	else if (motor == "servo") vservo.write(distance);
 	else if (motor == "pump1") {
 		pump1.setSpeed(speed);
 		delay(PUMP_DELAY);
