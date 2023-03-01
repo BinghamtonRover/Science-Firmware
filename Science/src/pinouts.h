@@ -3,6 +3,7 @@
 #include "StepperMotor/StepperMotor.h"
 #include "DcMotor/DcMotor.h"
 #include "VacuumServo/VacuumServo.h"
+#include "Vacuum/Vacuum.h"
 
 // -------------------- Pinouts --------------------
 
@@ -33,7 +34,7 @@
 #define PUMP3_IN2_PIN 30
 
 // Pump 4: <LABEL WITH CHEMICAL>
-#define PUMP4_PWM_PIN 24 
+#define PUMP4_PWM_PIN 28
 #define PUMP4_IN1_PIN 26
 #define PUMP4_IN2_PIN 25
 
@@ -50,7 +51,7 @@ MotorPins vacuumLinearPins = {
 
 MotorConfig vacuumLinearConfig = {
 	limit: -370,  // TODO: verify this
-	distancePerStep: 0.69115,  // mm / step. TODO: verify this
+	distancePerStep: 1,  // mm / step. TODO: verify this
 	pwmDelay: 450,  // or 250
 	current: MotorCurrent::ONE_AND_HALF_AMP,  // TODO: Change to 1500
 };
@@ -69,7 +70,7 @@ MotorPins dirtLinearPins = {
 
 MotorConfig dirtLinearConfig = {
 	limit: 35,  // TODO: verify this
-	distancePerStep: 0.01519,  // mm / step. TODO: verify this
+	distancePerStep: 1,  // mm / step. TODO: verify this
 	pwmDelay: 450,  // by experiment
 	current: MotorCurrent::ONE_AND_HALF_AMP,
 };
@@ -87,7 +88,7 @@ MotorPins scienceLinearPins = {
 
 MotorConfig scienceLinearConfig = {
 	limit: 35,  // TODO: verify this
-	distancePerStep: 0.01519,  // mm / step. TODO: verify this
+	distancePerStep: 1,  // mm / step. TODO: verify this
 	pwmDelay: 450,  // really nice
 	current: MotorCurrent::ONE_AND_HALF_AMP,
 };
@@ -105,7 +106,7 @@ MotorPins dirtCarouselPins = {
 
 MotorConfig dirtCarouselConfig = {
 	limit: 35,  // TODO: verify this
-	distancePerStep: 120.0/125.0,  // deg / step
+	distancePerStep: 1,  // deg / step
 	pwmDelay: 4000,  // not a typo
 	current: MotorCurrent::ONE_AND_HALF_AMP,
 };
@@ -113,17 +114,10 @@ MotorConfig dirtCarouselConfig = {
 DirtCarousel dirtCarousel(dirtCarouselPins, &dirtCarouselConfig);
 
 ///Vacuum canister
-VacuumServo vservo(VACUUM_SERVO_PIN);
+DirtRelease dirtRelease(VACUUM_SERVO_PIN);
 
 /// Controls the vacuum. 
-Vacuum vacuum = Vacuum(
-	VACUUM_R_PWM_PIN, 
-	VACUUM_L_PWM_PIN, 
-	VACUUM_R_ENABLE_PIN, 
-	VACUUM_L_ENABLE_PIN, 
-	VACUUM_R_DRIVE_PIN, 
-	VACUUM_L_DRIVE_PIN
-);
+Vacuum vacuum = Vacuum(19);
 
 DCMotor pump1(PUMP1_PWM_PIN, PUMP1_IN1_PIN, PUMP1_IN2_PIN);  ///< Pump 1
 DCMotor pump2(PUMP2_PWM_PIN, PUMP2_IN1_PIN, PUMP2_IN2_PIN);  ///< Pump 2

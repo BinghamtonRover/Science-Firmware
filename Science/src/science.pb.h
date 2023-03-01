@@ -14,16 +14,16 @@ typedef struct _ScienceCommand {
     bool dig;
     bool spin_carousel_tube;
     bool spin_carousel_section;
-    bool vacuum_suck;
-    float carousel_angle; /* Rotate carousel */
-    float carousel_linear_position; /* Move carousel horizontally */
-    float test_linear_position; /* Move testing suite */
-    float vacuum_linear_position; /* Move dirt collection tube vertically */
-    bool pump1; /* Start or stop */
+    float vacuum_suck;
+    int32_t carousel_angle;
+    int32_t carousel_linear_position;
+    int32_t test_linear_position;
+    int32_t vacuum_linear_position;
+    bool pump1;
     bool pump2;
     bool pump3;
     bool pump4;
-    bool calibrate;
+    int32_t dirtRelease;
 } ScienceCommand;
 
 typedef struct _ScienceData {
@@ -58,7 +58,7 @@ extern "C" {
 #define ScienceCommand_pump2_tag                 10
 #define ScienceCommand_pump3_tag                 11
 #define ScienceCommand_pump4_tag                 12
-#define ScienceCommand_calibrate_tag             13
+#define ScienceCommand_dirtRelease_tag           13
 #define ScienceData_co2_tag                      1
 #define ScienceData_humidity_tag                 2
 #define ScienceData_methane_tag                  3
@@ -70,16 +70,16 @@ extern "C" {
 X(a, STATIC,   SINGULAR, BOOL,     dig,               1) \
 X(a, STATIC,   SINGULAR, BOOL,     spin_carousel_tube,   2) \
 X(a, STATIC,   SINGULAR, BOOL,     spin_carousel_section,   3) \
-X(a, STATIC,   SINGULAR, BOOL,     vacuum_suck,       4) \
-X(a, STATIC,   SINGULAR, FLOAT,    carousel_angle,    5) \
-X(a, STATIC,   SINGULAR, FLOAT,    carousel_linear_position,   6) \
-X(a, STATIC,   SINGULAR, FLOAT,    test_linear_position,   7) \
-X(a, STATIC,   SINGULAR, FLOAT,    vacuum_linear_position,   8) \
+X(a, STATIC,   SINGULAR, FLOAT,    vacuum_suck,       4) \
+X(a, STATIC,   SINGULAR, INT32,    carousel_angle,    5) \
+X(a, STATIC,   SINGULAR, INT32,    carousel_linear_position,   6) \
+X(a, STATIC,   SINGULAR, INT32,    test_linear_position,   7) \
+X(a, STATIC,   SINGULAR, INT32,    vacuum_linear_position,   8) \
 X(a, STATIC,   SINGULAR, BOOL,     pump1,             9) \
 X(a, STATIC,   SINGULAR, BOOL,     pump2,            10) \
 X(a, STATIC,   SINGULAR, BOOL,     pump3,            11) \
 X(a, STATIC,   SINGULAR, BOOL,     pump4,            12) \
-X(a, STATIC,   SINGULAR, BOOL,     calibrate,        13)
+X(a, STATIC,   SINGULAR, INT32,    dirtRelease,      13)
 #define ScienceCommand_CALLBACK NULL
 #define ScienceCommand_DEFAULT NULL
 
@@ -100,7 +100,7 @@ extern const pb_msgdesc_t ScienceData_msg;
 #define ScienceData_fields &ScienceData_msg
 
 /* Maximum encoded size of messages (where known) */
-#define ScienceCommand_size                      38
+#define ScienceCommand_size                      74
 #define ScienceData_size                         25
 
 #ifdef __cplusplus
