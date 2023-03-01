@@ -4,8 +4,6 @@
 
 /// A "step" consists of one pulse on the #stepPin.
 void StepperMotor::writeStep() {
-	Serial.print("Delay: ");
-	Serial.println(config->pwmDelay);
 	digitalWrite(pins.step, HIGH);
 	delayMicroseconds(config->pwmDelay);
 	digitalWrite(pins.step, LOW);
@@ -20,8 +18,8 @@ void StepperMotor::writeSteps(int steps) {
 	digitalWrite(pins.direction, steps > 0 ? HIGH : LOW); 
 	int direction = steps > 0 ? 1 : -1;
 	for (int step = 0; step < abs(steps); step++) {
-		if (readLimitSwitch() && direction < 0) continue;  // too close to switch
-		if (currentPosition >= config->limit && direction > 0) continue;  // too far from switch
+		// if (readLimitSwitch() && direction < 0) continue;  // too close to switch
+		// if (currentPosition >= config->limit && direction > 0) continue;  // too far from switch
 		writeStep();
 		currentPosition += config->distancePerStep * direction;  // update position
 		delayMicroseconds(config->pwmDelay);
