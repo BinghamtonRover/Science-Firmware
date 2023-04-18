@@ -1,4 +1,5 @@
-#include <BURT_utils.h>
+//#include <BURT_utils.h>
+#include "src/utils/BURT_utils.h"
 
 // Hardware code
 #include "src/CO2/src/CO2Sensor.h"
@@ -62,13 +63,13 @@ void setup() {
 void loop() {
   /* Real Rover code */
   can.update();
-  serial.update();
+  //serial.update();
   // sendData();
 
 	/* Temporary Serial Monitor interface */
-	// String input = Serial.readString();
-	// parseSerialCommand(input);
-	// delay(10);
+	String input = Serial.readString();
+	parseSerialCommand(input);
+	 delay(10);
 }
 
 /* Temporary Serial Monitor interface for testing. */
@@ -93,14 +94,14 @@ void parseSerialCommand(String input) {
     vacuumLinear.moveBy(distance);
   }
 	else if (motor == "temp") {  // changes the PWM delay of the given motor
-		scienceLinearConfig.pwmDelay = speed;
-		Serial.println(scienceLinearConfig.pwmDelay);
+		vacuumLinearConfig.pwmDelay = speed;
+		Serial.println(vacuumLinearConfig.pwmDelay);
 	}
 	else if (motor == "dirt-linear") dirtLinear.moveBy(distance);
 	else if (motor == "science-linear") scienceLinear.moveBy(distance);
 	else if (motor == "dirt-carousel") dirtCarousel.moveBy(distance);
 	else if (motor == "vacuum") vacuum.setSpeed(speed);
-	else if (motor == "dirt-release") dirtRelease.moveBy(distance);
+	else if (motor == "dirt-release") dirtRelease.moveBy(distance); //go +49 to uncover hole, -49 to go back
 	else if (motor == "pump1") {
 		pump1.setSpeed(speed);
 		delay(PUMP_DELAY);

@@ -29,7 +29,10 @@ class DirtRelease {
 
 	public: 
 		DirtRelease(int pin) : pin(pin) { }
-		void setup() { servo.attach(pin); }
+		void setup() { 
+			servo.attach(pin); 
+			servo.write(0);
+		}
 		void moveBy(int degrees) { 
 			currentDegrees += degrees;
 			if (currentDegrees >= 90) currentDegrees = 90;
