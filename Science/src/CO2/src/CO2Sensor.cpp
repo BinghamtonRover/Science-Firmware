@@ -2,7 +2,7 @@
 
 CO2Sensor::CO2Sensor(int input){
   CO2Pin = input;
-  ZERO_POINT_VOLTAGE = .220; //Must calibrated
+  ZERO_POINT_VOLTAGE = 0.220; //Must calibrated
   REACTION_VOLTAGE = 0.03; //Must calibrate
 }
 

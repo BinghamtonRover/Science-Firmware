@@ -13,4 +13,5 @@ void setup() {
 
 void loop() {
   Serial.println(co2.readPPM());
+  delay(500);
 }

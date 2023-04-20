@@ -34,6 +34,18 @@
 BurtSerial serial(scienceHandler);
 BurtCan can(SCIENCE_COMMAND_ID, scienceHandler);
 
+#define PH_PIN 14
+#define METHANE_PIN 16
+#define HUM_PIN 15
+#define CO2_PIN 17
+
+#define R_0 945
+
+MethaneSensor methanesensor = MethaneSensor(METHANE_PIN, R_0);
+CO2Sensor co2sensor = CO2Sensor(CO2_PIN);
+pHSensor pH = pHSensor(PH_PIN);
+HumiditySensor humsensor = HumiditySensor(HUM_PIN);
+
 void setup() {
 	Serial.begin(9600);
   Serial.println("Initializing...");
@@ -57,6 +69,8 @@ void setup() {
 	vacuum.setSpeed(0);
 	Serial.println("Vacuum initialized.");
 
+  Serial.println("Sensors initialized.");
+
 	Serial.println("Science Subsystem ready.");
 }
 
@@ -64,6 +78,8 @@ void loop() {
   /* Real Rover code */
   can.update();
   //serial.update();
+  serial.update();
+  pH.sample_pH();
   // sendData();
 
 	/* Temporary Serial Monitor interface */
@@ -158,7 +174,17 @@ void scienceHandler(const uint8_t* data, int length) {
   if (command.pump4) {
   	pump4.setSpeed(-100);
   	delay(1000);
-  	pump4.setSpeed(0);
+  	pump4.setSpeed(0); 
   }
   vacuum.setSpeed(command.vacuum_suck);
+}
+
+void sendData() {
+  ScienceData data;
+  data.methane = methanesensor.getMethanePPM();
+  data.co2 = co2sensor.readPPM();
+  data.pH = pH.returnpH();
+  data.humidity = humsensor.readHumidity();
+  data.temperature = humsensor.readTemperature();
+  can.send(SCIENCE_DATA_ID, &data, ScienceData_fields);
 }
