@@ -1,4 +1,5 @@
-#include <BURT_utils.h>
+//#include <BURT_utils.h>
+#include "src/utils/BURT_utils.h"
 
 // Hardware code
 #include "src/CO2/src/CO2Sensor.h"
@@ -30,8 +31,52 @@
 #define SCIENCE_COMMAND_ID 0x43
 #define SCIENCE_DATA_ID 0x17
 
-BurtSerial serial(scienceHandler);
+void scienceHandler(const uint8_t* data, int length) {
+  ScienceCommand command = BurtProto::decode<ScienceCommand>(data, length, ScienceCommand_fields);
+  if(command.spin_carousel_tube) dirtCarousel.nextTube();
+  if(command.spin_carousel_section) dirtCarousel.nextSection();
+  if(command.carousel_angle != 0) dirtCarousel.moveBy(command.carousel_angle);
+  if(command.carousel_linear_position != 0) dirtLinear.moveBy(command.carousel_linear_position);
+  if(command.test_linear_position != 0) scienceLinear.moveBy(command.test_linear_position);
+  if(command.vacuum_linear_position != 0) vacuumLinear.moveBy(command.vacuum_linear_position);
+  if(command.dirtRelease != 0) dirtRelease.moveBy(command.dirtRelease);
+  if (command.pump1) {
+    pump1.setSpeed(100);
+    delay(1000);
+    pump1.setSpeed(0);
+  }
+  if (command.pump2) {
+    pump2.setSpeed(100);
+    delay(1000);
+    pump2.setSpeed(0);
+  }
+  if (command.pump3) {
+    pump3.setSpeed(-100);
+    delay(1000);
+    pump3.setSpeed(0);
+  }
+  if (command.pump4) {
+    pump4.setSpeed(-100);
+    delay(1000);
+    pump4.setSpeed(0); 
+  }
+  vacuum.setSpeed(command.vacuum_suck);
+}
+
+BurtSerial serial(scienceHandler, Device::Device_SCIENCE);
 BurtCan can(SCIENCE_COMMAND_ID, scienceHandler);
+
+#define PH_PIN 14
+#define METHANE_PIN 16
+#define HUM_PIN 15
+#define CO2_PIN 17
+
+#define R_0 945
+
+MethaneSensor methanesensor = MethaneSensor(METHANE_PIN, R_0);
+CO2Sensor co2sensor = CO2Sensor(CO2_PIN);
+pHSensor pH = pHSensor(PH_PIN);
+HumiditySensor humsensor = HumiditySensor(HUM_PIN);
 
 void setup() {
 	Serial.begin(9600);
@@ -56,19 +101,23 @@ void setup() {
 	vacuum.setSpeed(0);
 	Serial.println("Vacuum initialized.");
 
+  Serial.println("Sensors initialized.");
+
 	Serial.println("Science Subsystem ready.");
 }
 
 void loop() {
   /* Real Rover code */
   can.update();
+  //serial.update();
   serial.update();
+  pH.sample_pH();
   // sendData();
 
 	/* Temporary Serial Monitor interface */
-	// String input = Serial.readString();
-	// parseSerialCommand(input);
-	// delay(10);
+	String input = Serial.readString();
+	parseSerialCommand(input);
+	 delay(10);
 }
 
 /* Temporary Serial Monitor interface for testing. */
@@ -93,14 +142,14 @@ void parseSerialCommand(String input) {
     vacuumLinear.moveBy(distance);
   }
 	else if (motor == "temp") {  // changes the PWM delay of the given motor
-		scienceLinearConfig.pwmDelay = speed;
-		Serial.println(scienceLinearConfig.pwmDelay);
+		vacuumLinearConfig.pwmDelay = speed;
+		Serial.println(vacuumLinearConfig.pwmDelay);
 	}
 	else if (motor == "dirt-linear") dirtLinear.moveBy(distance);
 	else if (motor == "science-linear") scienceLinear.moveBy(distance);
 	else if (motor == "dirt-carousel") dirtCarousel.moveBy(distance);
 	else if (motor == "vacuum") vacuum.setSpeed(speed);
-	else if (motor == "dirt-release") dirtRelease.moveBy(distance);
+	else if (motor == "dirt-release") dirtRelease.moveBy(distance); //go +49 to uncover hole, -49 to go back
 	else if (motor == "pump1") {
 		pump1.setSpeed(speed);
 		delay(PUMP_DELAY);
@@ -130,34 +179,12 @@ void parseSerialCommand(String input) {
 	}
 }
 
-void scienceHandler(const uint8_t* data, int length) {
-  ScienceCommand command = BurtProto::decode<ScienceCommand>(data, length, ScienceCommand_fields);
-  if(command.spin_carousel_tube) dirtCarousel.nextTube();
-  if(command.spin_carousel_section) dirtCarousel.nextSection();
-  if(command.carousel_angle != 0) dirtCarousel.moveBy(command.carousel_angle);
-  if(command.carousel_linear_position != 0) dirtLinear.moveBy(command.carousel_linear_position);
-  if(command.test_linear_position != 0) scienceLinear.moveBy(command.test_linear_position);
-  if(command.vacuum_linear_position != 0) vacuumLinear.moveBy(command.vacuum_linear_position);
-  if(command.dirtRelease != 0) dirtRelease.moveBy(command.dirtRelease);
-  if (command.pump1) {
-  	pump1.setSpeed(100);
-  	delay(1000);
-  	pump1.setSpeed(0);
-  }
-  if (command.pump2) {
-  	pump2.setSpeed(100);
-  	delay(1000);
-  	pump2.setSpeed(0);
-  }
-  if (command.pump3) {
-  	pump3.setSpeed(-100);
-  	delay(1000);
-  	pump3.setSpeed(0);
-  }
-  if (command.pump4) {
-  	pump4.setSpeed(-100);
-  	delay(1000);
-  	pump4.setSpeed(0);
-  }
-  vacuum.setSpeed(command.vacuum_suck);
+void sendData() {
+  ScienceData data;
+  data.methane = methanesensor.getMethanePPM();
+  data.co2 = co2sensor.readPPM();
+  data.pH = pH.returnpH();
+  data.humidity = humsensor.readHumidity();
+  data.temperature = humsensor.readTemperature();
+  can.send(SCIENCE_DATA_ID, &data, ScienceData_fields);
 }

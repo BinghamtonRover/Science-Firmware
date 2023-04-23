@@ -52,7 +52,7 @@ MotorPins vacuumLinearPins = {
 MotorConfig vacuumLinearConfig = {
 	limit: -370,  // TODO: verify this
 	distancePerStep: 1,  // mm / step. TODO: verify this
-	pwmDelay: 450,  // or 250
+	pwmDelay: 1250,  // or 250
 	current: MotorCurrent::ONE_AND_HALF_AMP,  // TODO: Change to 1500
 };
 
