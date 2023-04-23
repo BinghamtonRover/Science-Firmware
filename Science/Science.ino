@@ -31,7 +31,39 @@
 #define SCIENCE_COMMAND_ID 0x43
 #define SCIENCE_DATA_ID 0x17
 
-BurtSerial serial(scienceHandler);
+void scienceHandler(const uint8_t* data, int length) {
+  ScienceCommand command = BurtProto::decode<ScienceCommand>(data, length, ScienceCommand_fields);
+  if(command.spin_carousel_tube) dirtCarousel.nextTube();
+  if(command.spin_carousel_section) dirtCarousel.nextSection();
+  if(command.carousel_angle != 0) dirtCarousel.moveBy(command.carousel_angle);
+  if(command.carousel_linear_position != 0) dirtLinear.moveBy(command.carousel_linear_position);
+  if(command.test_linear_position != 0) scienceLinear.moveBy(command.test_linear_position);
+  if(command.vacuum_linear_position != 0) vacuumLinear.moveBy(command.vacuum_linear_position);
+  if(command.dirtRelease != 0) dirtRelease.moveBy(command.dirtRelease);
+  if (command.pump1) {
+    pump1.setSpeed(100);
+    delay(1000);
+    pump1.setSpeed(0);
+  }
+  if (command.pump2) {
+    pump2.setSpeed(100);
+    delay(1000);
+    pump2.setSpeed(0);
+  }
+  if (command.pump3) {
+    pump3.setSpeed(-100);
+    delay(1000);
+    pump3.setSpeed(0);
+  }
+  if (command.pump4) {
+    pump4.setSpeed(-100);
+    delay(1000);
+    pump4.setSpeed(0); 
+  }
+  vacuum.setSpeed(command.vacuum_suck);
+}
+
+BurtSerial serial(scienceHandler, Device::Device_SCIENCE);
 BurtCan can(SCIENCE_COMMAND_ID, scienceHandler);
 
 #define PH_PIN 14
@@ -145,38 +177,6 @@ void parseSerialCommand(String input) {
 		Serial.println("  Example 2: auger 100 spins the auger at full speed.");
 		Serial.println("");
 	}
-}
-
-void scienceHandler(const uint8_t* data, int length) {
-  ScienceCommand command = BurtProto::decode<ScienceCommand>(data, length, ScienceCommand_fields);
-  if(command.spin_carousel_tube) dirtCarousel.nextTube();
-  if(command.spin_carousel_section) dirtCarousel.nextSection();
-  if(command.carousel_angle != 0) dirtCarousel.moveBy(command.carousel_angle);
-  if(command.carousel_linear_position != 0) dirtLinear.moveBy(command.carousel_linear_position);
-  if(command.test_linear_position != 0) scienceLinear.moveBy(command.test_linear_position);
-  if(command.vacuum_linear_position != 0) vacuumLinear.moveBy(command.vacuum_linear_position);
-  if(command.dirtRelease != 0) dirtRelease.moveBy(command.dirtRelease);
-  if (command.pump1) {
-  	pump1.setSpeed(100);
-  	delay(1000);
-  	pump1.setSpeed(0);
-  }
-  if (command.pump2) {
-  	pump2.setSpeed(100);
-  	delay(1000);
-  	pump2.setSpeed(0);
-  }
-  if (command.pump3) {
-  	pump3.setSpeed(-100);
-  	delay(1000);
-  	pump3.setSpeed(0);
-  }
-  if (command.pump4) {
-  	pump4.setSpeed(-100);
-  	delay(1000);
-  	pump4.setSpeed(0); 
-  }
-  vacuum.setSpeed(command.vacuum_suck);
 }
 
 void sendData() {
