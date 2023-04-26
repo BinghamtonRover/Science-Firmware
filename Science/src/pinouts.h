@@ -1,6 +1,7 @@
 #pragma once
 
 #include "StepperMotor/StepperMotor.h"
+//#include "tmc/BURT_TMC.h"
 #include "DcMotor/DcMotor.h"
 #include "VacuumServo/VacuumServo.h"
 #include "Vacuum/Vacuum.h"
@@ -38,7 +39,98 @@
 #define PUMP4_IN1_PIN 26
 #define PUMP4_IN2_PIN 25
 
+//Stepper Motor Constants (taken from arm code, double check)
+#define ACCEL 0x00030d4d //200013 (unclear what units but this is the decimal version)
+#define SPEED 0x000327e7 //206823 (unclear what units but this is the decimal version)
+
 // --------------- Motor definitions ---------------
+/*
+///Stepper1 on PCB (IC3)
+StepperMotorPins vacuumLinearPins = {
+	chipSelect: 6, 
+	enable: 7, 
+	limitSwitch: 0, //for now 0, later replace with 24 (bump1)
+};
+StepperMotorConfig vacuumLinearConfig = {
+	name: "vacuumLinear", 
+	current: 1500, 
+	limitSwitchPosition: 0, 
+	minLimit: -INFINITY, 
+	maxLimit: INFINITY, 
+	isPositive: true, 
+	gearboxRatio: 1, 
+	motorStepsPerRotation: 200, 
+	speed: SPEED, 
+	accel: ACCEL, 
+};
+
+StepperMotor vacuumLinear(vacuumLinearPins, vacuumLinearConfig);
+
+
+///Stepper2 on PCB (IC5)
+StepperMotorPins dirtLinearPins = {
+	chipSelect: 5, 
+	enable: 10, 
+	limitSwitch: 0, //for now, later replace with 31 (bump2)
+};
+StepperMotorConfig dirtLinearConfig = {
+	name: "dirtLinear", 
+	current: 1500, 
+	limitSwitchPosition: 0, 
+	minLimit: -INFINITY, 
+	maxLimit: INFINITY, 
+	isPositive: true, 
+	gearboxRatio: 1, 
+	motorStepsPerRotation: 200, 
+	speed: SPEED, 
+	accel: ACCEL, 
+};
+
+StepperMotor dirtLinear(dirtLinearPins, dirtLinearConfig);
+
+
+///Stepper3 on PCB (IC4)
+StepperMotorPins scienceLinearPins = {
+	chipSelect: 4, 
+	enable: 9, 
+	limitSwitch: 0, //for now, later replace with 32  (bump3)
+};
+StepperMotorConfig scienceLinearConfig = {
+	name: "scienceLinear", 
+	current: 1500, 
+	limitSwitchPosition: 0,
+	minLimit: -INFINITY, 
+	maxLimit: INFINITY, 
+	isPositive: true, 
+	gearboxRatio: 1, 
+	motorStepsPerRotation: 200, 
+	speed: SPEED, 
+	accel: ACCEL,
+};
+
+StepperMotor scienceLinear(scienceLinearPins, scienceLinearConfig);
+
+///Stepper4 on PCB (IC2)
+StepperMotorPins dirtCarouselPins = {
+	chipSelect: 3, 
+	enable: 8, 
+	limitSwitch: 0, //(bump4) 
+};
+StepperMotorConfig dirtCarouselConfig = {
+	name: "dirtCarousel", 
+	current: 1500, 
+	limitSwitchPosition: 0, 
+	minLimit: -INFINITY, 
+	maxLimit: INFINITY,
+	isPositive: true, 
+	gearboxRatio: 1, 
+	motorStepsPerRotation: 200, 
+	speed: SPEED, 
+	accel: ACCEL, 
+};
+
+StepperMotor dirtCarousel(dirtCarouselPins, dirtCarouselConfig);
+*/
 
 /// Stepper1 on the PCB
 MotorPins vacuumLinearPins = {
@@ -52,7 +144,7 @@ MotorPins vacuumLinearPins = {
 MotorConfig vacuumLinearConfig = {
 	limit: -370,  // TODO: verify this
 	distancePerStep: 1,  // mm / step. TODO: verify this
-	pwmDelay: 1250,  // or 250
+	pwmDelay: 1250,  // works decently well
 	current: MotorCurrent::ONE_AND_HALF_AMP,  // TODO: Change to 1500
 };
 
