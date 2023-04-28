@@ -1,7 +1,6 @@
 #pragma once
 
-#include "StepperMotor/StepperMotor.h"
-//#include "tmc/BURT_TMC.h"
+#include "tmc/BURT_TMC.h"
 #include "DcMotor/DcMotor.h"
 #include "VacuumServo/VacuumServo.h"
 #include "Vacuum/Vacuum.h"
@@ -44,7 +43,7 @@
 #define SPEED 0x000327e7 //206823 (unclear what units but this is the decimal version)
 
 // --------------- Motor definitions ---------------
-/*
+
 ///Stepper1 on PCB (IC3)
 StepperMotorPins vacuumLinearPins = {
 	chipSelect: 6, 
@@ -125,85 +124,11 @@ StepperMotorConfig dirtCarouselConfig = {
 	isPositive: true, 
 	gearboxRatio: 1, 
 	motorStepsPerRotation: 200, 
-	speed: SPEED, 
-	accel: ACCEL, 
+	speed: SPEED/10, 
+	accel: ACCEL/10, 
 };
 
 StepperMotor dirtCarousel(dirtCarouselPins, dirtCarouselConfig);
-*/
-
-/// Stepper1 on the PCB
-MotorPins vacuumLinearPins = {
-	direction: 39,   // DIR
-	step: 40,        // STP 
-	current1: 18,    // I1
-	current2: 41,    // I2
-	limitSwitch: 24, // Bump1
-};
-
-MotorConfig vacuumLinearConfig = {
-	limit: -370,  // TODO: verify this
-	distancePerStep: 1,  // mm / step. TODO: verify this
-	pwmDelay: 1250,  // works decently well
-	current: MotorCurrent::ONE_AND_HALF_AMP,  // TODO: Change to 1500
-};
-
-/// Moves the vacuum vertically
-StepperMotor vacuumLinear(vacuumLinearPins, &vacuumLinearConfig);
-
-/// Stepper2 on the PCB
-MotorPins dirtLinearPins = {
-	direction: 9,    // DIR
-	step: 10,        // STP
-	current1: 12,    // I1
-	current2: 11,    // I2
-	limitSwitch: 31, // Bump2
-};
-
-MotorConfig dirtLinearConfig = {
-	limit: 35,  // TODO: verify this
-	distancePerStep: 1,  // mm / step. TODO: verify this
-	pwmDelay: 450,  // by experiment
-	current: MotorCurrent::ONE_AND_HALF_AMP,
-};
-
-StepperMotor dirtLinear(dirtLinearPins, &dirtLinearConfig);
-
-/// Stepper3 on the PCB
-MotorPins scienceLinearPins = {
-	direction: 5,    // DIR
-	step: 6,         // STP
-	current1: 8,     // I1
-	current2: 7,     // I2
-	limitSwitch: 32, // Bump3
-};
-
-MotorConfig scienceLinearConfig = {
-	limit: 35,  // TODO: verify this
-	distancePerStep: 1,  // mm / step. TODO: verify this
-	pwmDelay: 450,  // really nice
-	current: MotorCurrent::ONE_AND_HALF_AMP,
-};
-
-StepperMotor scienceLinear(scienceLinearPins, &scienceLinearConfig);
-
-/// Stepper4 on the PCB
-MotorPins dirtCarouselPins = {	
-	direction: 1,    // DIR
-	step: 2,         // STP
-	current1: 4,     // I1
-	current2: 3,     // I2
-	limitSwitch: 0,  // Bump4
-};
-
-MotorConfig dirtCarouselConfig = {
-	limit: 35,  // TODO: verify this
-	distancePerStep: 1,  // deg / step
-	pwmDelay: 4000,  // not a typo
-	current: MotorCurrent::ONE_AND_HALF_AMP,
-};
-
-DirtCarousel dirtCarousel(dirtCarouselPins, &dirtCarouselConfig);
 
 ///Vacuum canister
 DirtRelease dirtRelease(VACUUM_SERVO_PIN);
