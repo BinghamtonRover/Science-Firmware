@@ -20,8 +20,9 @@
 #include "DFRobot_PH.h"
 #include <EEPROM.h>
 
-#define EEPROM_write(address, p) {int i = 0; byte *pp = (byte*)&(p);for(; i < sizeof(p); i++) EEPROM.write(address+i, pp[i]);}
-#define EEPROM_read(address, p)  {int i = 0; byte *pp = (byte*)&(p);for(; i < sizeof(p); i++) pp[i]=EEPROM.read(address+i);}
+//note: changed "int i" counter to "unsigned int" 
+#define EEPROM_write(address, p) {unsigned int i = 0; byte *pp = (byte*)&(p);for(; i < sizeof(p); i++) EEPROM.write(address+i, pp[i]);}
+#define EEPROM_read(address, p)  {unsigned int i = 0; byte *pp = (byte*)&(p);for(; i < sizeof(p); i++) pp[i]=EEPROM.read(address+i);}
 
 #define PHVALUEADDR 0x00    //the start address of the pH calibration parameters stored in the EEPROM
 
@@ -140,7 +141,6 @@ byte DFRobot_PH::cmdParse()
 
 void DFRobot_PH::phCalibration(byte mode)
 {
-    char *receivedBufferPtr;
     static boolean phCalibrationFinish  = 0;
     static boolean enterCalibrationFlag = 0;
     switch(mode){
