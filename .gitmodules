@@ -7,3 +7,6 @@
 [submodule "Science/src/tmc"]
 	path = Science/src/tmc
 	url = https://github.com/BinghamtonRover/TMC-Firmware
+[submodule "Science/src/utils"]
+	path = Science/src/utils
+	url = https://github.com/BinghamtonRover/Firmware-Utilities
