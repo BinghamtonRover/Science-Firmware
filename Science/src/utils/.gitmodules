@@ -1,6 +1,0 @@
-[submodule "Protobuf"]
-	path = Protobuf
-	url = https://github.com/BinghamtonRover/Protobuf
-[submodule "examples/Demo/Protobuf"]
-	path = examples/Demo/Protobuf
-	url = https://github.com/BinghamtonRover/Protobuf
