@@ -141,8 +141,6 @@ byte DFRobot_PH::cmdParse()
 
 void DFRobot_PH::phCalibration(byte mode)
 {
-    //commented out to get rid of a warning
-    //char *receivedBufferPtr;
     static boolean phCalibrationFinish  = 0;
     static boolean enterCalibrationFlag = 0;
     switch(mode){
