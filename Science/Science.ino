@@ -48,22 +48,26 @@ CO2Sensor co2sensor = CO2Sensor(CO2_PIN);
 pHSensor pH = pHSensor(PH_PIN);
 HumiditySensor humsensor = HumiditySensor(HUM_PIN);
 
+int canSendInterval = 100;
+unsigned long nextSendTime;
+
 void setup() {
 	Serial.begin(9600);
   Serial.println("Initializing...");
   
   can.setup();
+  nextSendTime = millis() + canSendInterval;
 
   //setting up stepper motors
-  // vacuumLinear.presetup();
-  // dirtLinear.presetup();
-  // scienceLinear.presetup();
-  // dirtCarousel.presetup();
+  vacuumLinear.presetup();
+  dirtLinear.presetup();
+  scienceLinear.presetup();
+  dirtCarousel.presetup();
 
 	// vacuumLinear.setup();
   // dirtLinear.setup();
   // scienceLinear.setup();
-  // dirtCarousel.setup();
+  dirtCarousel.setup();
   // delay(10);
 
   //vacuumLinear.calibrate();
@@ -72,6 +76,7 @@ void setup() {
   //dirtCarousel.calibrate();
 
 	Serial.println("Stepper motors initialized.");
+  co2.calibrate(_V400, _V1000);
 
   // //TODO: Determine which pump is which (labelled D-G on hardware)
 	//  pump1.setup();
@@ -87,7 +92,7 @@ void setup() {
 
   // Serial.println("Sensors initialized.");
 
-	// Serial.println("Science Subsystem ready.");
+	Serial.println("Science Subsystem ready.");
 	
 }
 
@@ -98,13 +103,14 @@ void loop() {
   //  vacuumLinear.update();
   //  dirtLinear.update();
   //  scienceLinear.update();
-  //  dirtCarousel.update();
+   dirtCarousel.update();
   //  delay(10);
 
   can.update();
   serial.update();
   // pH.sample_pH();
   sendData();
+  // delay(10);
 
 	// /* Temporary Serial Monitor interface */
 	// String input = Serial.readString();
@@ -171,48 +177,62 @@ void loop() {
 //Will need to switch to TMC commands once we have tested them
 void scienceHandler(const uint8_t* data, int length) {
   ScienceCommand command = BurtProto::decode<ScienceCommand>(data, length, ScienceCommand_fields);
-  if(command.carousel_angle != 0) dirtCarousel.debugMoveBySteps(command.carousel_angle);
-  if(command.carousel_linear_position != 0) dirtLinear.debugMoveBySteps(command.carousel_linear_position);
-  if(command.test_linear_position != 0) scienceLinear.debugMoveBySteps(command.test_linear_position);
-  if(command.vacuum_linear_position != 0) vacuumLinear.debugMoveBySteps(command.vacuum_linear_position);
-  if(command.dirt_release) dirtRelease.open();
-  else dirtRelease.close();
-  if (command.pump1) { //double check these speeds and which pump is which (D-G on hardware)
-  	pump1.setSpeed(100);
-  	delay(1000); //switch this to pump delay defined at top once verified
-  	pump1.setSpeed(0);
+  if (command.carousel_angle != 0) {
+    Serial.print("Spinning carousel: ");
+    Serial.println(command.carousel_angle);
+    dirtCarousel.debugMoveBySteps(command.carousel_angle);
   }
-  if (command.pump2) {
-  	pump2.setSpeed(100);
-  	delay(1000);
-  	pump2.setSpeed(0);
-  }
-  if (command.pump3) {
-  	pump3.setSpeed(-100);
-  	delay(1000);
-  	pump3.setSpeed(0);
-  }
-  if (command.pump4) {
-  	pump4.setSpeed(-100);
-  	delay(1000);
-  	pump4.setSpeed(0); 
-  }
-  vacuum.setSpeed(command.vacuum_suck);
+  // if(command.carousel_linear_position != 0) dirtLinear.debugMoveBySteps(command.carousel_linear_position);
+  // if(command.test_linear_position != 0) scienceLinear.debugMoveBySteps(command.test_linear_position);
+  // if(command.vacuum_linear_position != 0) vacuumLinear.debugMoveBySteps(command.vacuum_linear_position);
+  // if(command.dirt_release) dirtRelease.open();
+  // else dirtRelease.close();
+  // if (command.pump1) { //double check these speeds and which pump is which (D-G on hardware)
+  // 	pump1.setSpeed(100);
+  // 	delay(1000); //switch this to pump delay defined at top once verified
+  // 	pump1.setSpeed(0);
+  // }
+  // if (command.pump2) {
+  // 	pump2.setSpeed(100);
+  // 	delay(1000);
+  // 	pump2.setSpeed(0);
+  // }
+  // if (command.pump3) {
+  // 	pump3.setSpeed(-100);
+  // 	delay(1000);
+  // 	pump3.setSpeed(0);
+  // }
+  // if (command.pump4) {
+  // 	pump4.setSpeed(-100);
+  // 	delay(1000);
+  // 	pump4.setSpeed(0); 
+  // }
+  // vacuum.setSpeed(command.vacuum_suck);
 }
 
 void sendData() {
-  uint8_t buffer[8] = {1, 2, 3, 4, 5, 6, 7, 8};
-  can.sendRaw(0x17, buffer);
+  if (millis() < nextSendTime) return;
+  ScienceData data = ScienceData_init_zero;
+  data.methane = methanesensor.getMethanePPM();
+  can.send(SCIENCE_DATA_ID, &data, ScienceData_fields);
+
+  data = ScienceData_init_zero;
+  data.co2 = co2sensor.readPPM();
+  Serial.print("CO2: ");
+  Serial.println(data.co2);
+  can.send(SCIENCE_DATA_ID, &data, ScienceData_fields);
+
+  nextSendTime = millis() + canSendInterval;
   return;
-  ScienceData data1, data2, data3, data4, data5;
-  data1.methane = methanesensor.getMethanePPM();
-  data1.methane = 0.25;
-  data2.co2 = co2sensor.readPPM();
-  data3.pH = pH.returnpH();
-  data4.humidity = humsensor.readHumidity();
-  data5.temperature = humsensor.readTemperature();
-  can.send(SCIENCE_DATA_ID, &data1, ScienceData_fields);
-  Serial.println(data1.methane);
+  // ScienceData data1, data2, data3, data4, data5;
+  // data1.methane = methanesensor.getMethanePPM();
+  // data1.methane = 0.25;
+  // data2.co2 = co2sensor.readPPM();
+  // data3.pH = pH.returnpH();
+  // data4.humidity = humsensor.readHumidity();
+  // data5.temperature = humsensor.readTemperature();
+  // can.send(SCIENCE_DATA_ID, &data1, ScienceData_fields);
+  // Serial.println(data1.methane);
   // can.send(SCIENCE_DATA_ID, &data2, ScienceData_fields);
   // can.send(SCIENCE_DATA_ID, &data3, ScienceData_fields);
   // can.send(SCIENCE_DATA_ID, &data4, ScienceData_fields);
