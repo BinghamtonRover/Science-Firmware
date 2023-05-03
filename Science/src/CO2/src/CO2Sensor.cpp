@@ -1,31 +1,28 @@
 #include "CO2Sensor.h"
 
-CO2Sensor::CO2Sensor(int input){
-  CO2Pin = input;
-  ZERO_POINT_VOLTAGE = 0.220; //Must calibrated
-  REACTION_VOLTAGE = 0.03; //Must calibrate
+CO2Sensor::CO2Sensor()
+{
+  pinMode(BOOL_PIN, INPUT);                        //set pin to input
+  digitalWrite(BOOL_PIN, HIGH);
 }
 
-void CO2Sensor::calibrate(float v400, float v1000) {
-  ZERO_POINT_VOLTAGE = v400;
-  REACTION_VOLTAGE = v1000;
-}
-
-float CO2Sensor::readPPM() {
-  float buffer = 0;
-  buffer = (ZERO_POINT_VOLTAGE - REACTION_VOLTAGE)/(log10(400) - log10(1000)); // Delta V
-  buffer = (raw() - ZERO_POINT_VOLTAGE)/buffer;
-  buffer += log10(400);
-  return pow(10, buffer);
-}
-
-float CO2Sensor::raw() {
-  uint8_t i = 0;
-  float buffer = 0;
-  for(i = 0; i < READ_SAMPLE_TIMES ; i++){
-      buffer += analogRead(CO2Pin);
-      delay(20); // 20ms
+float CO2Sensor::MGRead()
+{
+  int i;
+  for (i=0;i<READ_SAMPLE_TIMES;i++) {
+    volts += analogRead(CO2_PIN);
+    delay(READ_SAMPLE_INTERVAL);
   }
-  buffer /= i; // compute the mean
-  return map(buffer, 0, 1023, 0, 5);
+  volts = (volts/READ_SAMPLE_TIMES) *5/1024;
+  return volts;
+}
+
+float CO2Sensor::getPercentage()
+{
+  if ((volts/DC_GAIN )>=ZERO_POINT_VOLTAGE) {
+    return -1;
+  }
+  else {
+    return pow(10, ((volts/DC_GAIN)-CO2Curve[1])/CO2Curve[2]+CO2Curve[0]);
+  }
 }
