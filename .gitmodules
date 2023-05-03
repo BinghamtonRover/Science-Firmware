@@ -1,6 +1,9 @@
-[submodule "libraries/BURT_can"]
-	path = libraries/BURT_can
-	url = https://github.com/BinghamtonRover/burt-can
 [submodule "Protobuf"]
 	path = Protobuf
 	url = https://github.com/BinghamtonRover/Protobuf
+[submodule "Science/src/tmc"]
+	path = Science/src/tmc
+	url = https://github.com/BinghamtonRover/TMC-Firmware
+[submodule "Science/src/utils"]
+	path = Science/src/utils
+	url = https://github.com/BinghamtonRover/Firmware-Utilities

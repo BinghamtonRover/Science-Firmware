@@ -3,7 +3,9 @@
 
 #ifndef PB_SCIENCE_PB_H_INCLUDED
 #define PB_SCIENCE_PB_H_INCLUDED
-#include "Firmware-Utilities-main/pb.h"
+//#include "Firmware-Utilities-main/pb.h"
+#include "utils/pb.h" 
+//temp fix, ask Levi how to get original line to work
 
 #if PB_PROTO_HEADER_VERSION != 40
 #error Regenerate this file with the current version of nanopb generator.

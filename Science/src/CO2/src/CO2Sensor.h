@@ -8,7 +8,6 @@
 class CO2Sensor{
   public:
     CO2Sensor(int input);
-    void setup();
     void calibrate(float v400, float v1000);
     float readPPM();
     float raw();
