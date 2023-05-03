@@ -74,7 +74,7 @@ BurtCan can(SCIENCE_COMMAND_ID, scienceHandler);
 #define R_0 945
 
 MethaneSensor methanesensor = MethaneSensor(METHANE_PIN, R_0);
-CO2Sensor co2sensor = CO2Sensor(CO2_PIN);
+CO2Sensor co2 = CO2Sensor();
 pHSensor pH = pHSensor(PH_PIN);
 HumiditySensor humsensor = HumiditySensor(HUM_PIN);
 
@@ -112,7 +112,8 @@ void loop() {
   //serial.update();
   serial.update();
   pH.sample_pH();
-  // sendData();
+  co2.MGRead();
+  //sendData();
 
 	/* Temporary Serial Monitor interface */
 	String input = Serial.readString();
@@ -182,7 +183,7 @@ void parseSerialCommand(String input) {
 void sendData() {
   ScienceData data;
   data.methane = methanesensor.getMethanePPM();
-  data.co2 = co2sensor.readPPM();
+  data.co2 = co2.getPercentage();
   data.pH = pH.returnpH();
   data.humidity = humsensor.readHumidity();
   data.temperature = humsensor.readTemperature();
