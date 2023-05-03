@@ -3,9 +3,7 @@
 
 #ifndef PB_SCIENCE_PB_H_INCLUDED
 #define PB_SCIENCE_PB_H_INCLUDED
-//#include "Firmware-Utilities-main/pb.h"
-#include "utils/pb.h" 
-//temp fix, ask Levi how to get original line to work
+#include "utils/pb.h"
 
 #if PB_PROTO_HEADER_VERSION != 40
 #error Regenerate this file with the current version of nanopb generator.
@@ -13,19 +11,23 @@
 
 /* Struct definitions */
 typedef struct _ScienceCommand {
+    /* High-level commands that aren't implemented */
     bool dig;
     bool spin_carousel_tube;
     bool spin_carousel_section;
-    float vacuum_suck;
+    float vacuum_suck; /* percentage of power */
+    /* These move the motors by X many steps */
     int32_t carousel_angle;
     int32_t carousel_linear_position;
     int32_t test_linear_position;
     int32_t vacuum_linear_position;
+    /* True means pump for 1 second */
     bool pump1;
     bool pump2;
     bool pump3;
     bool pump4;
-    int32_t dirtRelease;
+    bool calibrate;
+    bool dirt_release;
 } ScienceCommand;
 
 typedef struct _ScienceData {
@@ -42,9 +44,9 @@ extern "C" {
 #endif
 
 /* Initializer values for message structs */
-#define ScienceCommand_init_default              {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
+#define ScienceCommand_init_default              {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
 #define ScienceData_init_default                 {0, 0, 0, 0, 0}
-#define ScienceCommand_init_zero                 {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
+#define ScienceCommand_init_zero                 {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
 #define ScienceData_init_zero                    {0, 0, 0, 0, 0}
 
 /* Field tags (for use in manual encoding/decoding) */
@@ -60,7 +62,8 @@ extern "C" {
 #define ScienceCommand_pump2_tag                 10
 #define ScienceCommand_pump3_tag                 11
 #define ScienceCommand_pump4_tag                 12
-#define ScienceCommand_dirtRelease_tag           13
+#define ScienceCommand_calibrate_tag             13
+#define ScienceCommand_dirt_release_tag          14
 #define ScienceData_co2_tag                      1
 #define ScienceData_humidity_tag                 2
 #define ScienceData_methane_tag                  3
@@ -81,7 +84,8 @@ X(a, STATIC,   SINGULAR, BOOL,     pump1,             9) \
 X(a, STATIC,   SINGULAR, BOOL,     pump2,            10) \
 X(a, STATIC,   SINGULAR, BOOL,     pump3,            11) \
 X(a, STATIC,   SINGULAR, BOOL,     pump4,            12) \
-X(a, STATIC,   SINGULAR, INT32,    dirtRelease,      13)
+X(a, STATIC,   SINGULAR, BOOL,     calibrate,        13) \
+X(a, STATIC,   SINGULAR, BOOL,     dirt_release,     14)
 #define ScienceCommand_CALLBACK NULL
 #define ScienceCommand_DEFAULT NULL
 
@@ -102,7 +106,7 @@ extern const pb_msgdesc_t ScienceData_msg;
 #define ScienceData_fields &ScienceData_msg
 
 /* Maximum encoded size of messages (where known) */
-#define ScienceCommand_size                      74
+#define ScienceCommand_size                      67
 #define ScienceData_size                         25
 
 #ifdef __cplusplus
