@@ -31,38 +31,7 @@
 #define SCIENCE_COMMAND_ID 0x43
 #define SCIENCE_DATA_ID 0x17
 
-void scienceHandler(const uint8_t* data, int length) {
-  ScienceCommand command = BurtProto::decode<ScienceCommand>(data, length, ScienceCommand_fields);
-  if(command.spin_carousel_tube) dirtCarousel.nextTube();
-  if(command.spin_carousel_section) dirtCarousel.nextSection();
-  if(command.carousel_angle != 0) dirtCarousel.moveBy(command.carousel_angle);
-  if(command.carousel_linear_position != 0) dirtLinear.moveBy(command.carousel_linear_position);
-  if(command.test_linear_position != 0) scienceLinear.moveBy(command.test_linear_position);
-  if(command.vacuum_linear_position != 0) vacuumLinear.moveBy(command.vacuum_linear_position);
-  if(command.dirtRelease != 0) dirtRelease.moveBy(command.dirtRelease);
-  if (command.pump1) {
-    pump1.setSpeed(100);
-    delay(1000);
-    pump1.setSpeed(0);
-  }
-  if (command.pump2) {
-    pump2.setSpeed(100);
-    delay(1000);
-    pump2.setSpeed(0);
-  }
-  if (command.pump3) {
-    pump3.setSpeed(-100);
-    delay(1000);
-    pump3.setSpeed(0);
-  }
-  if (command.pump4) {
-    pump4.setSpeed(-100);
-    delay(1000);
-    pump4.setSpeed(0); 
-  }
-  vacuum.setSpeed(command.vacuum_suck);
-}
-
+void scienceHandler(const uint8_t* data, int length);
 BurtSerial serial(scienceHandler, Device::Device_SCIENCE);
 BurtCan can(SCIENCE_COMMAND_ID, scienceHandler);
 
@@ -84,18 +53,31 @@ void setup() {
   
   can.setup();
 
+  //setting up stepper motors
+  vacuumLinear.presetup();
+   dirtLinear.presetup();
+   scienceLinear.presetup();
+   dirtCarousel.presetup();
+
 	vacuumLinear.setup();
-	dirtLinear.setup();
-	scienceLinear.setup();
-	dirtCarousel.setup();
+   dirtLinear.setup();
+   scienceLinear.setup();
+   dirtCarousel.setup();
+  delay(10);
+
+  //vacuumLinear.calibrate();
+  //dirtLinear.calibrate();
+  //scienceLinear.calibrate();
+  //dirtCarousel.calibrate();
+
 	Serial.println("Stepper motors initialized.");
 
-	pump1.setup();
-	pump2.setup();
-	pump3.setup();
-	pump4.setup();
-	Serial.println("DC motors initialized.");
-
+	 pump1.setup();
+	 pump2.setup();
+	 pump3.setup();
+	 pump4.setup();
+	// Serial.println("DC motors initialized.");
+/*
 	vacuum.setup();
 	dirtRelease.setup();
 	vacuum.setSpeed(0);
@@ -103,22 +85,31 @@ void setup() {
 
   Serial.println("Sensors initialized.");
 
+*/
 	Serial.println("Science Subsystem ready.");
+	
 }
 
 void loop() {
   /* Real Rover code */
+  
+  // //needed for stepper motors
+   vacuumLinear.update();
+   dirtLinear.update();
+   scienceLinear.update();
+   dirtCarousel.update();
+   delay(10);
+
   can.update();
-  //serial.update();
   serial.update();
   pH.sample_pH();
   co2.MGRead();
-  //sendData();
+  sendData();
 
 	/* Temporary Serial Monitor interface */
 	String input = Serial.readString();
 	parseSerialCommand(input);
-	 delay(10);
+	delay(10);
 }
 
 /* Temporary Serial Monitor interface for testing. */
@@ -127,7 +118,6 @@ void parseSerialCommand(String input) {
 	// if (input == "calibrate") return calibrate();
 	// else if (input  == "dig") return dig();
 	// else if (input == "test") return testSamples();
-
 	// Parse the command
 	int delimiter = input.indexOf(" ");
 	if (delimiter == -1) return;
@@ -140,15 +130,12 @@ void parseSerialCommand(String input) {
 	// Execute the command
 	if (motor == "vacuum-linear") {
     Serial.println("Moving vacuum linear");
-    vacuumLinear.moveBy(distance);
+    vacuumLinear.debugMoveBySteps(distance);
   }
-	else if (motor == "temp") {  // changes the PWM delay of the given motor
-		vacuumLinearConfig.pwmDelay = speed;
-		Serial.println(vacuumLinearConfig.pwmDelay);
-	}
-	else if (motor == "dirt-linear") dirtLinear.moveBy(distance);
-	else if (motor == "science-linear") scienceLinear.moveBy(distance);
-	else if (motor == "dirt-carousel") dirtCarousel.moveBy(distance);
+  
+	else if (motor == "dirt-linear") dirtLinear.debugMoveBySteps(distance); //dirtLinear.moveBy(distance);  
+	else if (motor == "science-linear") scienceLinear.debugMoveBySteps(distance); //scienceLinear.moveBy(distance);  
+	else if (motor == "dirt-carousel") dirtCarousel.debugMoveBySteps(distance); //dirtCarousel.moveBy(distance);  
 	else if (motor == "vacuum") vacuum.setSpeed(speed);
 	else if (motor == "dirt-release") dirtRelease.moveBy(distance); //go +49 to uncover hole, -49 to go back
 	else if (motor == "pump1") {
@@ -178,6 +165,37 @@ void parseSerialCommand(String input) {
 		Serial.println("  Example 2: auger 100 spins the auger at full speed.");
 		Serial.println("");
 	}
+}
+
+//Will need to switch to TMC commands once we have tested them
+void scienceHandler(const uint8_t* data, int length) {
+  ScienceCommand command = BurtProto::decode<ScienceCommand>(data, length, ScienceCommand_fields);
+  if(command.carousel_angle != 0) dirtCarousel.moveBy(command.carousel_angle);
+  if(command.carousel_linear_position != 0) dirtLinear.moveBy(command.carousel_linear_position);
+  if(command.test_linear_position != 0) scienceLinear.moveBy(command.test_linear_position);
+  if(command.vacuum_linear_position != 0) vacuumLinear.moveBy(command.vacuum_linear_position);
+  if(command.dirtRelease != 0) dirtRelease.moveBy(command.dirtRelease);
+  if (command.pump1) {
+  	pump1.setSpeed(100);
+  	delay(1000);
+  	pump1.setSpeed(0);
+  }
+  if (command.pump2) {
+  	pump2.setSpeed(100);
+  	delay(1000);
+  	pump2.setSpeed(0);
+  }
+  if (command.pump3) {
+  	pump3.setSpeed(-100);
+  	delay(1000);
+  	pump3.setSpeed(0);
+  }
+  if (command.pump4) {
+  	pump4.setSpeed(-100);
+  	delay(1000);
+  	pump4.setSpeed(0); 
+  }
+  vacuum.setSpeed(command.vacuum_suck);
 }
 
 void sendData() {
