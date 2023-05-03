@@ -1,6 +1,5 @@
-//#include "src/Firmware-Utilities-main/BURT_utils.h"
+//#include <BURT_utils.h>
 #include "src/utils/BURT_utils.h"
-//temporary fix, ask Levi how to get original command to work 
 
 // Hardware code
 #include "src/CO2/src/CO2Sensor.h"
@@ -44,7 +43,7 @@ BurtCan can(SCIENCE_COMMAND_ID, scienceHandler);
 #define R_0 945
 
 MethaneSensor methanesensor = MethaneSensor(METHANE_PIN, R_0);
-CO2Sensor co2sensor = CO2Sensor(CO2_PIN);
+CO2Sensor co2 = CO2Sensor();
 pHSensor pH = pHSensor(PH_PIN);
 HumiditySensor humsensor = HumiditySensor(HUM_PIN);
 
@@ -92,87 +91,85 @@ void setup() {
 
   // Serial.println("Sensors initialized.");
 
+  Serial.println("Sensors initialized.");
+
 	Serial.println("Science Subsystem ready.");
-	
 }
 
 void loop() {
   /* Real Rover code */
-  
-  //needed for stepper motors
   //  vacuumLinear.update();
   //  dirtLinear.update();
   //  scienceLinear.update();
-   dirtCarousel.update();
+  dirtCarousel.update();
   //  delay(10);
 
   can.update();
   serial.update();
   // pH.sample_pH();
+  co2.MGRead();
   sendData();
-  // delay(10);
 
-	// /* Temporary Serial Monitor interface */
-	// String input = Serial.readString();
-	// parseSerialCommand(input);
-	// delay(10);
+  /* Temporary Serial Monitor interface */
+  // String input = Serial.readString();
+  // parseSerialCommand(input);
+  // delay(10);
 }
 
-// /* Temporary Serial Monitor interface for testing. */
-// void parseSerialCommand(String input) {
-// 	// Accept the command as-is
-// 	// if (input == "calibrate") return calibrate();
-// 	// else if (input  == "dig") return dig();
-// 	// else if (input == "test") return testSamples();
-// 	// Parse the command
-// 	int delimiter = input.indexOf(" ");
-// 	if (delimiter == -1) return;
-// 	String part1 = input.substring(0, delimiter);
-// 	String part2 = input.substring(delimiter + 1);
-// 	String motor = part1;
-// 	float distance = part2.toFloat();
-// 	int speed = part2.toInt();
+/* Temporary Serial Monitor interface for testing. */
+void parseSerialCommand(String input) {
+  // Accept the command as-is
+  // if (input == "calibrate") return calibrate();
+  // else if (input  == "dig") return dig();
+  // else if (input == "test") return testSamples();
+  // Parse the command
+  int delimiter = input.indexOf(" ");
+  if (delimiter == -1) return;
+  String part1 = input.substring(0, delimiter);
+  String part2 = input.substring(delimiter + 1);
+  String motor = part1;
+  float distance = part2.toFloat();
+  int speed = part2.toInt();
 
-// 	// Execute the command
-// 	if (motor == "vacuum-linear") {
-//     Serial.println("Moving vacuum linear");
-//     vacuumLinear.debugMoveBySteps(distance);
-//   }
+  // Execute the command
+  if (motor == "vacuum-linear") {
+    Serial.println("Moving vacuum linear");
+    vacuumLinear.debugMoveBySteps(distance);
+  }
   
-// 	else if (motor == "dirt-linear") dirtLinear.debugMoveBySteps(distance); //dirtLinear.moveBy(distance);  
-// 	else if (motor == "science-linear") scienceLinear.debugMoveBySteps(distance); //scienceLinear.moveBy(distance);  
-// 	else if (motor == "dirt-carousel") dirtCarousel.debugMoveBySteps(distance); //dirtCarousel.moveBy(distance);  
-// 	else if (motor == "vacuum") vacuum.setSpeed(speed);
-// 	else if (motor == "dirt-release") dirtRelease.moveBy(distance); //go +49 to uncover hole, -49 to go back
-//   else if (motor == "dirt-release-open") dirtRelease.open(); //TEST OPEN AND CLOSE FUNCTIONS
-//   else if (motor == "dirt-release-close") dirtRelease.close(); 
-// 	else if (motor == "pump1") { //NEED TO TEST PUMPS, some speeds may need to change signs in order to actually pump
-// 		pump1.setSpeed(speed);
-// 		delay(PUMP_DELAY);
-// 		pump1.hardBrake();
-// 	} else if (motor == "pump2") {
-// 		pump2.setSpeed(speed);
-// 		delay(PUMP_DELAY);
-// 		pump2.hardBrake();
-// 	} else if (motor == "pump3") {
-// 		pump3.setSpeed(speed);
-// 		delay(PUMP_DELAY);
-// 		pump3.hardBrake();
-// 	} else if (motor == "pump4") {
-// 		pump4.setSpeed(speed);
-// 		delay(PUMP_DELAY);
-// 		pump4.hardBrake();
-// 	}
-// 	else {
-// 		Serial.println("Command not recognized: " + input);
-// 		Serial.println("  Commands are of the form: motor-name distance/speed.");
-// 		Serial.println("  For stepper motors: positive distance is away from the limit switch.");
-// 		Serial.println("  For DC motors: speed is in the range [-100, 100]. Positive = clockwise.");
-// 		Serial.println("  For example: vacuum-linear 20, would move the vacuum 20mm up.");
-// 		Serial.println("  Example 2: auger 100 spins the auger at full speed.");
-// 		Serial.println("");
-// 	}
-// }
+  else if (motor == "dirt-linear") dirtLinear.debugMoveBySteps(distance); //dirtLinear.moveBy(distance);  
+  else if (motor == "science-linear") scienceLinear.debugMoveBySteps(distance); //scienceLinear.moveBy(distance);  
+  else if (motor == "dirt-carousel") dirtCarousel.debugMoveBySteps(distance); //dirtCarousel.moveBy(distance);  
+  else if (motor == "vacuum") vacuum.setSpeed(speed);
+  else if (motor == "dirt-release") dirtRelease.moveBy(distance); //go +49 to uncover hole, -49 to go back
+  else if (motor == "pump1") {
+    pump1.setSpeed(speed);
+    delay(PUMP_DELAY);
+    pump1.hardBrake();
+  } else if (motor == "pump2") {
+    pump2.setSpeed(speed);
+    delay(PUMP_DELAY);
+    pump2.hardBrake();
+  } else if (motor == "pump3") {
+    pump3.setSpeed(speed);
+    delay(PUMP_DELAY);
+    pump3.hardBrake();
+  } else if (motor == "pump4") {
+    Serial.println(speed);
+    pump4.setSpeed(speed);
+    delay(PUMP_DELAY);
+    pump4.hardBrake();
+  }
+  else {
+    Serial.println("Command not recognized: " + input);
+    Serial.println("  Commands are of the form: motor-name distance/speed.");
+    Serial.println("  For stepper motors: positive distance is away from the limit switch.");
+    Serial.println("  For DC motors: speed is in the range [-100, 100]. Positive = clockwise.");
+    Serial.println("  For example: vacuum-linear 20, would move the vacuum 20mm up.");
+    Serial.println("  Example 2: auger 100 spins the auger at full speed.");
+    Serial.println("");
+  }
+}
 
 //Will need to switch to TMC commands once we have tested them
 void scienceHandler(const uint8_t* data, int length) {
