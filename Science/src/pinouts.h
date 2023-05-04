@@ -2,21 +2,15 @@
 
 #include "tmc/BURT_TMC.h"
 #include "DcMotor/DcMotor.h"
-#include "VacuumServo/VacuumServo.h"
 #include "Vacuum/Vacuum.h"
 
 // -------------------- Pinouts --------------------
 
 /// Vacuum 
-#define VACUUM_R_PWM_PIN 3
-#define VACUUM_L_PWM_PIN 5
-#define VACUUM_R_ENABLE_PIN 2
-#define VACUUM_L_ENABLE_PIN 4
-#define VACUUM_R_DRIVE_PIN 6
-#define VACUUM_L_DRIVE_PIN 7
+#define VACUUM_PIN A7
 
 ///Vacuum Servo
-#define VACUUM_SERVO_PIN 13 //DOUBLE CHECK
+#define VACUUM_SERVO_PIN 18
 
 // Pump 1: <LABEL WITH CHEMICAL>
 #define PUMP1_PWM_PIN 33 
@@ -31,7 +25,7 @@
 // Pump 3: <LABEL WITH CHEMICAL>
 #define PUMP3_PWM_PIN 29 
 #define PUMP3_IN1_PIN 27
-#define PUMP3_IN2_PIN 30
+#define PUMP3_IN2_PIN 23
 
 // Pump 4: <LABEL WITH CHEMICAL>
 #define PUMP4_PWM_PIN 28
@@ -113,7 +107,7 @@ StepperMotor scienceLinear(scienceLinearPins, scienceLinearConfig);
 StepperMotorPins dirtCarouselPins = {
 	chipSelect: 3, 
 	enable: 8, 
-	limitSwitch: 0, //(bump4) 
+	limitSwitch: 0, //(bump4) FIND OUT ACTUAL PIN NUMBER
 };
 StepperMotorConfig dirtCarouselConfig = {
 	name: "dirtCarousel", 
@@ -124,7 +118,7 @@ StepperMotorConfig dirtCarouselConfig = {
 	isPositive: true, 
 	gearboxRatio: 1, 
 	motorStepsPerRotation: 200, 
-	speed: SPEED/10, 
+	speed: SPEED/10, //changed values came from testing
 	accel: ACCEL/10, 
 };
 
@@ -134,7 +128,7 @@ StepperMotor dirtCarousel(dirtCarouselPins, dirtCarouselConfig);
 DirtRelease dirtRelease(VACUUM_SERVO_PIN);
 
 /// Controls the vacuum. 
-Vacuum vacuum = Vacuum(19);
+Vacuum vacuum = Vacuum(VACUUM_PIN);
 
 DCMotor pump1(PUMP1_PWM_PIN, PUMP1_IN1_PIN, PUMP1_IN2_PIN);  ///< Pump 1
 DCMotor pump2(PUMP2_PWM_PIN, PUMP2_IN1_PIN, PUMP2_IN2_PIN);  ///< Pump 2
