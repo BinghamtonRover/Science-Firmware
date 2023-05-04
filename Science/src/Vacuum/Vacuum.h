@@ -10,12 +10,8 @@ private:
 
 public: 
 	Vacuum(int pin) : pin(pin) { }
-	void setup() { setSpeed(0); pinMode(pin, OUTPUT); }  // 255=off
+	void setup() { pinMode(pin, OUTPUT); setSpeed(0);  }  // 255=off
 	void setSpeed(float speed) {
-		Serial.print("Setting ");
-		Serial.print(pin); 
-		Serial.print(" to ");
-		Serial.println(speed);
 		int signal = -255*speed + 255;
 		analogWrite(pin, signal);
 	}
