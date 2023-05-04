@@ -47,7 +47,7 @@ CO2Sensor co2 = CO2Sensor();
 pHSensor pH = pHSensor(PH_PIN);
 HumiditySensor humsensor = HumiditySensor(HUM_PIN);
 
-int canSendInterval = 100;
+int canSendInterval = 1000;
 unsigned long nextSendTime;
 
 void setup() {
@@ -63,9 +63,9 @@ void setup() {
   scienceLinear.presetup();
   dirtCarousel.presetup();
 
-	// vacuumLinear.setup();
-  // dirtLinear.setup();
-  // scienceLinear.setup();
+	vacuumLinear.setup();
+  dirtLinear.setup();
+  scienceLinear.setup();
   dirtCarousel.setup();
   // delay(10);
 
@@ -75,7 +75,6 @@ void setup() {
   //dirtCarousel.calibrate();
 
 	Serial.println("Stepper motors initialized.");
-  co2.calibrate(_V400, _V1000);
 
   // //TODO: Determine which pump is which (labelled D-G on hardware)
 	//  pump1.setup();
@@ -84,13 +83,14 @@ void setup() {
 	//  pump4.setup();
 	//  Serial.println("DC motors initialized.");
 
-	// vacuum.setup();
-	// dirtRelease.setup();
-	// vacuum.setSpeed(0);
+	vacuum.setup();
+	dirtRelease.setup();
+	vacuum.setSpeed(0);
 	// Serial.println("Vacuum initialized.");
 
-  // Serial.println("Sensors initialized.");
-
+  humsensor.setup();
+  co2.setup();
+  pH.setup();
   Serial.println("Sensors initialized.");
 
 	Serial.println("Science Subsystem ready.");
@@ -98,16 +98,16 @@ void setup() {
 
 void loop() {
   /* Real Rover code */
-  //  vacuumLinear.update();
-  //  dirtLinear.update();
-  //  scienceLinear.update();
+  vacuumLinear.update();
+  dirtLinear.update();
+  scienceLinear.update();
   dirtCarousel.update();
   //  delay(10);
 
   can.update();
-  serial.update();
+  // serial.update();
   // pH.sample_pH();
-  co2.MGRead();
+  // co2.MGRead();
   sendData();
 
   /* Temporary Serial Monitor interface */
@@ -171,40 +171,56 @@ void parseSerialCommand(String input) {
   }
 }
 
+void updatePump(DCMotor pump, PumpState state) {
+  switch (state) {
+    case PumpState::PumpState_PUMP_STATE_UNDEFINED: return;
+    case PumpState::PumpState_PUMP_ON: pump.setSpeed(100);
+    case PumpState::PumpState_PUMP_OFF: pump.setSpeed(0);
+  }
+}
+
 //Will need to switch to TMC commands once we have tested them
 void scienceHandler(const uint8_t* data, int length) {
   ScienceCommand command = BurtProto::decode<ScienceCommand>(data, length, ScienceCommand_fields);
-  if (command.carousel_angle != 0) {
-    Serial.print("Spinning carousel: ");
-    Serial.println(command.carousel_angle);
-    dirtCarousel.debugMoveBySteps(command.carousel_angle);
+
+  // Individual motor control
+  dirtCarousel.debugMoveBySteps(command.dirt_carousel);
+  dirtLinear.debugMoveBySteps(command.dirt_linear);
+  scienceLinear.debugMoveBySteps(command.science_linear);
+  vacuumLinear.debugMoveBySteps(command.vacuum_linear);
+
+  // We get multiple packets without vacuum data, so [vacuumPower] will be 0. This will happen even
+  // when the user is driving the vacuum, but we don't want to set the vacuum on and off all the 
+  // time. So we'll ignore [vacuumPower] unless [set_vacuum] is true.
+  if (command.set_vacuum) vacuum.setSpeed(command.vacuumPower);
+  if (command.release_dirt) dirtRelease.open();
+  else dirtRelease.close();  // if the user stops holding down the button, close it.
+
+  // Pumps
+  updatePump(pump1, command.pump1);
+  updatePump(pump2, command.pump2);
+  updatePump(pump3, command.pump3);
+  updatePump(pump4, command.pump4);
+
+  // Commands
+  if (command.stop) {
+    dirtCarousel.stop();
+    dirtLinear.stop();
+    scienceLinear.stop();
+    vacuumLinear.stop();
+    vacuum.setSpeed(0);
+    pump1.setSpeed(0);
+    pump2.setSpeed(0);
+    pump3.setSpeed(0);
+    pump4.setSpeed(0);
+  } else if (command.calibrate) {
+    dirtCarousel.calibrate();
+    dirtLinear.calibrate();
+    scienceLinear.calibrate();
+    vacuumLinear.calibrate();
   }
-  // if(command.carousel_linear_position != 0) dirtLinear.debugMoveBySteps(command.carousel_linear_position);
-  // if(command.test_linear_position != 0) scienceLinear.debugMoveBySteps(command.test_linear_position);
-  // if(command.vacuum_linear_position != 0) vacuumLinear.debugMoveBySteps(command.vacuum_linear_position);
-  // if(command.dirt_release) dirtRelease.open();
-  // else dirtRelease.close();
-  // if (command.pump1) { //double check these speeds and which pump is which (D-G on hardware)
-  // 	pump1.setSpeed(100);
-  // 	delay(1000); //switch this to pump delay defined at top once verified
-  // 	pump1.setSpeed(0);
-  // }
-  // if (command.pump2) {
-  // 	pump2.setSpeed(100);
-  // 	delay(1000);
-  // 	pump2.setSpeed(0);
-  // }
-  // if (command.pump3) {
-  // 	pump3.setSpeed(-100);
-  // 	delay(1000);
-  // 	pump3.setSpeed(0);
-  // }
-  // if (command.pump4) {
-  // 	pump4.setSpeed(-100);
-  // 	delay(1000);
-  // 	pump4.setSpeed(0); 
-  // }
-  // vacuum.setSpeed(command.vacuum_suck);
+  if (command.next_tube) dirtCarousel.moveBy(PI / 6); 
+  if (command.next_section) dirtCarousel.moveBy(2 * PI / 3);
 }
 
 void sendData() {
@@ -214,24 +230,17 @@ void sendData() {
   can.send(SCIENCE_DATA_ID, &data, ScienceData_fields);
 
   data = ScienceData_init_zero;
-  data.co2 = co2sensor.readPPM();
-  Serial.print("CO2: ");
-  Serial.println(data.co2);
+  data.co2 = co2.getPercentage();
+  can.send(SCIENCE_DATA_ID, &data, ScienceData_fields);
+
+  data = ScienceData_init_zero;
+  data.humidity = humsensor.readHumidity();
+  can.send(SCIENCE_DATA_ID, &data, ScienceData_fields);
+
+  data = ScienceData_init_zero;
+  data.temperature = humsensor.readTemperature();
   can.send(SCIENCE_DATA_ID, &data, ScienceData_fields);
 
   nextSendTime = millis() + canSendInterval;
   return;
-  // ScienceData data1, data2, data3, data4, data5;
-  // data1.methane = methanesensor.getMethanePPM();
-  // data1.methane = 0.25;
-  // data2.co2 = co2sensor.readPPM();
-  // data3.pH = pH.returnpH();
-  // data4.humidity = humsensor.readHumidity();
-  // data5.temperature = humsensor.readTemperature();
-  // can.send(SCIENCE_DATA_ID, &data1, ScienceData_fields);
-  // Serial.println(data1.methane);
-  // can.send(SCIENCE_DATA_ID, &data2, ScienceData_fields);
-  // can.send(SCIENCE_DATA_ID, &data3, ScienceData_fields);
-  // can.send(SCIENCE_DATA_ID, &data4, ScienceData_fields);
-  // can.send(SCIENCE_DATA_ID, &data5, ScienceData_fields);
 }

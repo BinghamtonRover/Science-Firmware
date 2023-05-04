@@ -7,10 +7,10 @@
 // -------------------- Pinouts --------------------
 
 /// Vacuum 
-#define VACUUM_PIN 21
+#define VACUUM_PIN A7
 
 ///Vacuum Servo
-#define VACUUM_SERVO_PIN 13 
+#define VACUUM_SERVO_PIN 18
 
 // Pump 1: <LABEL WITH CHEMICAL>
 #define PUMP1_PWM_PIN 33 
