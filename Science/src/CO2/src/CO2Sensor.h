@@ -21,20 +21,20 @@
 
 class CO2Sensor{
   public:
-    CO2Sensor();
     float MGRead();
     float getPercentage();
+    void setup();
+
   private:
     int percentage;
     float volts;
+
+    /// Two points are taken from the curve to form a line that is approximately equivalent to the 
+    /// original curve.
+    /// 
+    /// Format: { x, y, slope}; point1: (lg400, 0.324), point2: (lg4000, 0.280)
+    /// slope = ( reaction voltage ) / (log400 –log1000)
     float CO2Curve[3]  =  {2.602,ZERO_POINT_VOLTAGE,(REACTION_VOLTAGE/(2.602-3))};
-      //two points are taken from the curve.
-                                                     //with these two points, a line is formed which is
-                                                     //"approximately equivalent" to the original curve.
-                                                     //data format:{ x, y, slope}; point1: (lg400, 0.324), point2: (lg4000, 0.280)
-                                                     //slope = ( reaction voltage ) / (log400 –log1000)
-
 };
-
 
 #endif
