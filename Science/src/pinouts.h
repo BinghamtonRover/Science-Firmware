@@ -7,7 +7,7 @@
 // -------------------- Pinouts --------------------
 
 /// Vacuum 
-#define VACUUM_PIN A7
+#define VACUUM_PIN 21
 
 ///Vacuum Servo
 #define VACUUM_SERVO_PIN 18
@@ -42,7 +42,7 @@
 StepperMotorPins vacuumLinearPins = {
 	chipSelect: 6, 
 	enable: 7, 
-	limitSwitch: 0, //for now 0, later replace with 24 (bump1)
+	limitSwitch: 24, //for now 0, later replace with 24 (bump1)
 };
 StepperMotorConfig vacuumLinearConfig = {
 	name: "vacuumLinear", 
@@ -64,7 +64,7 @@ StepperMotor vacuumLinear(vacuumLinearPins, vacuumLinearConfig);
 StepperMotorPins dirtLinearPins = {
 	chipSelect: 5, 
 	enable: 10, 
-	limitSwitch: 0, //for now, later replace with 31 (bump2)
+	limitSwitch: 2, //for now, later replace with 2 (bump2)
 };
 StepperMotorConfig dirtLinearConfig = {
 	name: "dirtLinear", 
@@ -86,7 +86,7 @@ StepperMotor dirtLinear(dirtLinearPins, dirtLinearConfig);
 StepperMotorPins scienceLinearPins = {
 	chipSelect: 4, 
 	enable: 9, 
-	limitSwitch: 0, //for now, later replace with 32  (bump3)
+	limitSwitch: 32, //for now, later replace with 32  (bump3)
 };
 StepperMotorConfig scienceLinearConfig = {
 	name: "scienceLinear", 
@@ -94,7 +94,7 @@ StepperMotorConfig scienceLinearConfig = {
 	limitSwitchPosition: 0,
 	minLimit: -INFINITY, 
 	maxLimit: INFINITY, 
-	isPositive: true, 
+	isPositive: false, 
 	gearboxRatio: 1, 
 	motorStepsPerRotation: 200, 
 	speed: SPEED, 
