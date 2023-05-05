@@ -24,13 +24,5 @@ void loop() {
     Serial.print( "ppm" );
     Serial.print("\n");
 
-    if (digitalRead(BOOL_PIN) ){
-        Serial.print( "=====BOOL is HIGH======" );
-    } else {
-        Serial.print( "=====BOOL is LOW======" );
-    }
-
-    Serial.print("\n");
-
     delay(500);
 }

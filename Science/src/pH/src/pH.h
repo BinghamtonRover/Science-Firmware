@@ -11,8 +11,7 @@ class pHSensor {
 public:
   pHSensor(int PIN);
   void setup();
-  void sample_pH();
-  float returnpH();
+  float sample_pH();
 private:
   int pHPIN;
   DFRobot_PH pH;

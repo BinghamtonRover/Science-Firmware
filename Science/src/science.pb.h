@@ -16,6 +16,12 @@ typedef enum _PumpState {
     PumpState_PUMP_OFF = 2
 } PumpState;
 
+typedef enum _DirtReleaseState {
+    DirtReleaseState_DIRT_RELEASE_STATE_UNDEFINED = 0,
+    DirtReleaseState_OPEN_DIRT = 1,
+    DirtReleaseState_CLOSE_DIRT = 2
+} DirtReleaseState;
+
 /* Struct definitions */
 typedef struct _ScienceCommand {
     /* Individual control over each motor. Indicates steps to move */
@@ -24,9 +30,8 @@ typedef struct _ScienceCommand {
     float science_linear;
     float vacuum_linear;
     /* Vacuum */
-    float vacuumPower; /* percentage, from 0-1 */
-    bool set_vacuum;
-    bool release_dirt;
+    PumpState vacuum; /* percentage, from 0-1 */
+    DirtReleaseState dirtRelease;
     /* Pumps */
     PumpState pump1;
     PumpState pump2;
@@ -57,6 +62,12 @@ extern "C" {
 #define _PumpState_MAX PumpState_PUMP_OFF
 #define _PumpState_ARRAYSIZE ((PumpState)(PumpState_PUMP_OFF+1))
 
+#define _DirtReleaseState_MIN DirtReleaseState_DIRT_RELEASE_STATE_UNDEFINED
+#define _DirtReleaseState_MAX DirtReleaseState_CLOSE_DIRT
+#define _DirtReleaseState_ARRAYSIZE ((DirtReleaseState)(DirtReleaseState_CLOSE_DIRT+1))
+
+#define ScienceCommand_vacuum_ENUMTYPE PumpState
+#define ScienceCommand_dirtRelease_ENUMTYPE DirtReleaseState
 #define ScienceCommand_pump1_ENUMTYPE PumpState
 #define ScienceCommand_pump2_ENUMTYPE PumpState
 #define ScienceCommand_pump3_ENUMTYPE PumpState
@@ -65,9 +76,9 @@ extern "C" {
 
 
 /* Initializer values for message structs */
-#define ScienceCommand_init_default              {0, 0, 0, 0, 0, 0, 0, _PumpState_MIN, _PumpState_MIN, _PumpState_MIN, _PumpState_MIN, 0, 0, 0, 0}
+#define ScienceCommand_init_default              {0, 0, 0, 0, _PumpState_MIN, _DirtReleaseState_MIN, _PumpState_MIN, _PumpState_MIN, _PumpState_MIN, _PumpState_MIN, 0, 0, 0, 0}
 #define ScienceData_init_default                 {0, 0, 0, 0, 0}
-#define ScienceCommand_init_zero                 {0, 0, 0, 0, 0, 0, 0, _PumpState_MIN, _PumpState_MIN, _PumpState_MIN, _PumpState_MIN, 0, 0, 0, 0}
+#define ScienceCommand_init_zero                 {0, 0, 0, 0, _PumpState_MIN, _DirtReleaseState_MIN, _PumpState_MIN, _PumpState_MIN, _PumpState_MIN, _PumpState_MIN, 0, 0, 0, 0}
 #define ScienceData_init_zero                    {0, 0, 0, 0, 0}
 
 /* Field tags (for use in manual encoding/decoding) */
@@ -75,9 +86,8 @@ extern "C" {
 #define ScienceCommand_dirt_linear_tag           2
 #define ScienceCommand_science_linear_tag        3
 #define ScienceCommand_vacuum_linear_tag         4
-#define ScienceCommand_vacuumPower_tag           5
-#define ScienceCommand_set_vacuum_tag            6
-#define ScienceCommand_release_dirt_tag          7
+#define ScienceCommand_vacuum_tag                5
+#define ScienceCommand_dirtRelease_tag           7
 #define ScienceCommand_pump1_tag                 8
 #define ScienceCommand_pump2_tag                 9
 #define ScienceCommand_pump3_tag                 10
@@ -98,9 +108,8 @@ X(a, STATIC,   SINGULAR, FLOAT,    dirt_carousel,     1) \
 X(a, STATIC,   SINGULAR, FLOAT,    dirt_linear,       2) \
 X(a, STATIC,   SINGULAR, FLOAT,    science_linear,    3) \
 X(a, STATIC,   SINGULAR, FLOAT,    vacuum_linear,     4) \
-X(a, STATIC,   SINGULAR, FLOAT,    vacuumPower,       5) \
-X(a, STATIC,   SINGULAR, BOOL,     set_vacuum,        6) \
-X(a, STATIC,   SINGULAR, BOOL,     release_dirt,      7) \
+X(a, STATIC,   SINGULAR, UENUM,    vacuum,            5) \
+X(a, STATIC,   SINGULAR, UENUM,    dirtRelease,       7) \
 X(a, STATIC,   SINGULAR, UENUM,    pump1,             8) \
 X(a, STATIC,   SINGULAR, UENUM,    pump2,             9) \
 X(a, STATIC,   SINGULAR, UENUM,    pump3,            10) \
@@ -129,7 +138,7 @@ extern const pb_msgdesc_t ScienceData_msg;
 #define ScienceData_fields &ScienceData_msg
 
 /* Maximum encoded size of messages (where known) */
-#define ScienceCommand_size                      45
+#define ScienceCommand_size                      40
 #define ScienceData_size                         25
 
 #ifdef __cplusplus
