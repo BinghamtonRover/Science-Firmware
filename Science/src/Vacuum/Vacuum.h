@@ -10,10 +10,12 @@ private:
 
 public: 
 	Vacuum(int pin) : pin(pin) { }
-	void setup() { pinMode(pin, OUTPUT); setSpeed(0);  }  // 255=off
-	void setSpeed(float speed) {
-		int signal = -255*speed + 255;
-		analogWrite(pin, signal);
+	void setup() { pinMode(pin, OUTPUT); disable();  }  // 255=off
+	void enable() {
+			digitalWrite(pin, LOW);
+	}
+	void disable() {
+		digitalWrite(pin, HIGH);
 	}
 };
 
