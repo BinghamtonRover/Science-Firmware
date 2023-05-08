@@ -45,7 +45,7 @@ BurtCan can(SCIENCE_COMMAND_ID, scienceHandler);
 MethaneSensor methanesensor = MethaneSensor(METHANE_PIN, R_0);
 HumiditySensor humsensor = HumiditySensor(HUM_PIN);
 CO2Sensor co2 = CO2Sensor();
-pHSensor pH = pHSensor(PH_PIN, humsensor);
+pHSensor pH = pHSensor(PH_PIN);
 
 int canSendInterval = 200;
 unsigned long nextSendTime;
@@ -221,6 +221,7 @@ void scienceHandler(const uint8_t* data, int length) {
 }
 
 void sendData() {
+  float temperature = humsensor.readTemperature();
   if (millis() < nextSendTime) return;
   ScienceData data = ScienceData_init_zero;
   data.methane = methanesensor.getMethanePPM();
@@ -235,11 +236,11 @@ void sendData() {
   can.send(SCIENCE_DATA_ID, &data, ScienceData_fields);
 
   data = ScienceData_init_zero;
-  data.temperature = humsensor.readTemperature();
+  data.temperature = temperature;
   can.send(SCIENCE_DATA_ID, &data, ScienceData_fields);
 
   data = ScienceData_init_zero;
-  data.pH = pH.sample_pH();
+  data.pH = pH.read(temperature);
   can.send(SCIENCE_DATA_ID, &data, ScienceData_fields);
 
   nextSendTime = millis() + canSendInterval;
