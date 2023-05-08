@@ -224,7 +224,7 @@ void sendData() {
   float temperature = humsensor.readTemperature();
   if (millis() < nextSendTime) return;
   ScienceData data = ScienceData_init_zero;
-  data.methane = methanesensor.getMethanePPM();
+  data.methane = methanesensor.read();
   can.send(SCIENCE_DATA_ID, &data, ScienceData_fields);
 
   data = ScienceData_init_zero;

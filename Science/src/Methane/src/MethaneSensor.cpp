@@ -1,14 +1,14 @@
 #include "MethaneSensor.h"
 
-MethaneSensor:: MethaneSensor(int PIN, int R0) {
-  MethanePIN = PIN;
-  R_0 = R0;
+MethaneSensor::MethaneSensor(int pin, int calibrationValue) : pin(pin), calibrationValue(calibrationValue) { }
+
+void MethaneSensor::setup() {
+  pinMode(pin, INPUT);
 }
 
-float MethaneSensor::getMethanePPM() {
-  float a0 = analogRead(MethanePIN); // get raw reading from sensor
-  float v_o = a0 * 5 / 1023; // convert reading to volts
-  float R_S = (5-v_o) * 1000 / v_o; // apply formula for getting RS
-  float PPM = pow(R_S/R_0,-2.95) * 1000; //apply formula for getting PPM
-  return PPM;
+float MethaneSensor::read() {
+  float analog = analogRead(pin);
+  float voltage = analog * 5 / 1023;
+  float reading = (5 - voltage) * 1000 / voltage;  // <-- Document this
+  return pow(reading / calibrationValue, -2.95) * 1000;
 }

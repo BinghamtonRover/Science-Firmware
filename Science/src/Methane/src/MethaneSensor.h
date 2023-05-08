@@ -4,15 +4,14 @@
 #include <Arduino.h>
 
 class MethaneSensor {
-  public:
-    MethaneSensor(int PIN, int R0);
-    void calibrate();
-    float getMethanePPM();
+	private:
+		int pin;
+		int calibrationValue;
 	
-
-  private:
-    int MethanePIN;
-    int R_0;
+	public:
+		MethaneSensor(int pin, int calibrationValue);
+		void setup();
+		float read();
 };
 
 #endif
