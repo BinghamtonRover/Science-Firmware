@@ -3,13 +3,14 @@
 
 #include <Arduino.h>
 
+#define METHANE_CALIBRATION_VALUE 945
+
 class MethaneSensor {
 	private:
 		int pin;
-		int calibrationValue;
 	
 	public:
-		MethaneSensor(int pin, int calibrationValue);
+		MethaneSensor(int pin);
 		void setup();
 		float read();
 };
