@@ -9,6 +9,8 @@
 #define SCIENCE_COMMAND_ID 0x43
 #define SCIENCE_DATA_ID 0x17
 
+#define USE_SERIAL_MONITOR false
+
 void scienceHandler(const uint8_t* data, int length);
 BurtSerial serial(scienceHandler, Device::Device_SCIENCE);
 BurtCan can(SCIENCE_COMMAND_ID, scienceHandler);
@@ -168,7 +170,7 @@ void sendData() {
   float temperature = humiditySensor.readTemperature();
   if (millis() < nextSendTime) return;
   ScienceData data = ScienceData_init_zero;
-  data.methane = methanesensor.read();
+  data.methane = methaneSensor.read();
   can.send(SCIENCE_DATA_ID, &data, ScienceData_fields);
 
   data = ScienceData_init_zero;
@@ -184,7 +186,7 @@ void sendData() {
   can.send(SCIENCE_DATA_ID, &data, ScienceData_fields);
 
   data = ScienceData_init_zero;
-  data.pH = pH.read(temperature);
+  data.pH = pHSensor.read(temperature);
   can.send(SCIENCE_DATA_ID, &data, ScienceData_fields);
 
   nextSendTime = millis() + CAN_SEND_INTERVAL;

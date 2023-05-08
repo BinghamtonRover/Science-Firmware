@@ -141,7 +141,7 @@ DcMotor pump3(PUMP3_PWM_PIN, PUMP3_IN1_PIN, PUMP3_IN2_PIN);  ///< Pump 3
 DcMotor pump4(PUMP4_PWM_PIN, PUMP4_IN1_PIN, PUMP4_IN2_PIN);  ///< Pump 4
 
 // ==================== Sensors ====================
-MethaneSensor methanesensor(METHANE_SENSOR_PIN);
+MethaneSensor methaneSensor(METHANE_SENSOR_PIN);
 HumiditySensor humiditySensor(HUMIDITY_SENSOR_PIN);
 CO2Sensor co2Sensor(CO2_SENSOR_PIN);
 pHSensor pHSensor(PH_SENSOR_PIN);
