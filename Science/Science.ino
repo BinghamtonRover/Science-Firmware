@@ -56,7 +56,7 @@ void setup() {
 
   vacuum.setup();
   dirtRelease.setup();
-  
+
   can.setup();
   nextSendTime = millis() + canSendInterval;
 
@@ -70,7 +70,6 @@ void setup() {
   dirtLinear.setup();
   scienceLinear.setup();
   dirtCarousel.setup();
-  // delay(10);
 
   //vacuumLinear.calibrate();
   //dirtLinear.calibrate();
@@ -80,11 +79,11 @@ void setup() {
 	Serial.println("Stepper motors initialized.");
 
   // //TODO: Determine which pump is which (labelled D-G on hardware)
-	//  pump1.setup();
-	//  pump2.setup();
-	//  pump3.setup();
-	//  pump4.setup();
-	//  Serial.println("DC motors initialized.");
+	 pump1.setup();
+	 pump2.setup();
+	 pump3.setup();
+	 pump4.setup();
+	 Serial.println("DC motors initialized.");
 
 	// Serial.println("Vacuum initialized.");
 
@@ -102,10 +101,9 @@ void loop() {
   dirtLinear.update();
   scienceLinear.update();
   dirtCarousel.update();
-  //  delay(10);
 
   can.update();
-  // serial.update();
+  serial.update();
   sendData();
 
   /* Temporary Serial Monitor interface */
@@ -182,11 +180,7 @@ void updatePump(DCMotor pump, PumpState state) {
 void scienceHandler(const uint8_t* data, int length) {
   ScienceCommand command = BurtProto::decode<ScienceCommand>(data, length, ScienceCommand_fields);
   // Individual motor control
-  if (command.dirt_carousel != 0) {
-
-    Serial.println(command.dirt_carousel);
-    dirtCarousel.debugMoveBySteps(command.dirt_carousel);
-  }
+  dirtCarousel.debugMoveBySteps(command.dirt_carousel);
   dirtLinear.debugMoveBySteps(command.dirt_linear);
   scienceLinear.debugMoveBySteps(command.science_linear);
   vacuumLinear.debugMoveBySteps(command.vacuum_linear);
@@ -234,8 +228,6 @@ void sendData() {
 
   data = ScienceData_init_zero;
   data.co2 = co2.getPercentage();
-  Serial.print("Co2: ");
-  Serial.println(data.co2);
   can.send(SCIENCE_DATA_ID, &data, ScienceData_fields);
 
   data = ScienceData_init_zero;
@@ -251,5 +243,4 @@ void sendData() {
   can.send(SCIENCE_DATA_ID, &data, ScienceData_fields);
 
   nextSendTime = millis() + canSendInterval;
-  return;
 }
