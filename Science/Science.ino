@@ -44,7 +44,7 @@ BurtCan can(SCIENCE_COMMAND_ID, scienceHandler);
 
 MethaneSensor methanesensor = MethaneSensor(METHANE_PIN, R_0);
 HumiditySensor humsensor = HumiditySensor(HUM_PIN);
-CO2Sensor co2 = CO2Sensor();
+CO2Sensor co2 = CO2Sensor(CO2_PIN);
 pHSensor pH = pHSensor(PH_PIN);
 
 int canSendInterval = 200;
@@ -228,7 +228,7 @@ void sendData() {
   can.send(SCIENCE_DATA_ID, &data, ScienceData_fields);
 
   data = ScienceData_init_zero;
-  data.co2 = co2.getPercentage();
+  data.co2 = co2.read();
   can.send(SCIENCE_DATA_ID, &data, ScienceData_fields);
 
   data = ScienceData_init_zero;

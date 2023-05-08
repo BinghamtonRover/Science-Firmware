@@ -1,11 +1,16 @@
 #include "CO2Sensor.h"
 
+CO2Sensor::CO2Sensor(int pin) : pin(pin) { }
+
 void CO2Sensor::setup() {
-  pinMode(CO2_PIN, INPUT);
+  pinMode(pin, INPUT);
 }
 
-float CO2Sensor::getPercentage() {
-  float volts = (float) analogRead(CO2_PIN) * 5 / 1024;
-  if ((volts / DC_GAIN) >= ZERO_POINT_VOLTAGE) return -1;
-  return pow(10, (((volts / DC_GAIN) - CO2Curve[1]) / CO2Curve[2] + CO2Curve[0]));
+float CO2Sensor::read() {
+  float voltage = (float) analogRead(pin) * 5 / 1024 / CO2_GAIN;
+  if (voltage >= CO2_VOLTAGE_400) return -1;
+  // Old logic:
+  return pow(10, ((voltage - CO2_OLD_1) / CO2_OLD_2 + CO2_OLD_0));
+  // New logic: 
+  return (voltage - 400) * CO2_SLOPE + CO2_VOLTAGE_400; 
 }
