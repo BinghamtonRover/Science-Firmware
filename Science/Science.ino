@@ -43,9 +43,9 @@ BurtCan can(SCIENCE_COMMAND_ID, scienceHandler);
 #define R_0 945
 
 MethaneSensor methanesensor = MethaneSensor(METHANE_PIN, R_0);
-CO2Sensor co2 = CO2Sensor();
-pHSensor pH = pHSensor(PH_PIN);
 HumiditySensor humsensor = HumiditySensor(HUM_PIN);
+CO2Sensor co2 = CO2Sensor();
+pHSensor pH = pHSensor(PH_PIN, humsensor);
 
 int canSendInterval = 200;
 unsigned long nextSendTime;

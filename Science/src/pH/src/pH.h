@@ -9,14 +9,14 @@
 
 class pHSensor {
 public:
-  pHSensor(int PIN);
+  pHSensor(int pin, HumiditySensor humidity);
   void setup();
   float sample_pH();
 private:
-  int pHPIN;
+  int pin;
   DFRobot_PH pH;
   float pHvalue;
-  HumiditySensor humsensor = HumiditySensor(15);
+  HumiditySensor humidity;
 };
 
 #endif
