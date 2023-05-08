@@ -9,20 +9,17 @@
 /// 
 /// - softBrake(): cuts off power to the motor, allowing it to slow to a stop
 /// - hardBrake(): powers the motor to run in-place, causing it to suddenly stop
-class DCMotor { 
+class DcMotor { 
 	private: 
-		byte pwmPin;  ///< Set this pin to an analog value representing speed.
-		byte in1Pin;  ///< Set this pin to HIGH to indicate clockwise motion.
-		byte in2Pin;  ///< Set this pin to LOW to indicate clockwise motion.
+		int pwmPin;  ///< Set this pin to an analog value representing speed.
+		int in1Pin;  ///< Set this pin to HIGH to indicate clockwise motion.
+		int in2Pin;  ///< Set this pin to LOW to indicate clockwise motion.
 
 	public: 
-		DCMotor(byte pwmPin, byte in1Pin, byte in2Pin) : 
-			pwmPin(pwmPin),
-			in1Pin(in1Pin),
-			in2Pin(in2Pin) { }
+		DcMotor(int pwmPin, int in1Pin, int in2Pin);
 
 		void setup();  ///< Initializes the DC motor and its pins.
-		void setSpeed(int speed);  ///< Sets the speed, in the interval [-100, 100].
+		void setSpeed(float speed);  ///< Sets the speed, as a percentage (0.0-1.0)
 		void softBrake();  ///< Slowly slows the motor to a stop.
 		void hardBrake();  ///< Immediately stops the motor. 
 };

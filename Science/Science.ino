@@ -8,7 +8,7 @@
 #include "src/Humidity/src/HumiditySensor.h"
 #include "src/Vacuum/Vacuum.h"
 
-// Contains all the StepperMotor and DCMotor objects.
+// Contains all the StepperMotor and DcMotor objects.
 #include "src/pinouts.h"
 // Contains all the Protobuf data
 #include "src/science.pb.h"
@@ -168,7 +168,7 @@ void parseSerialCommand(String input) {
   }
 }
 
-void updatePump(DCMotor pump, PumpState state) {
+void updatePump(DcMotor pump, PumpState state) {
   switch (state) {
     case PumpState::PumpState_PUMP_STATE_UNDEFINED: return;
     case PumpState::PumpState_PUMP_ON: pump.setSpeed(-100); break;
