@@ -31,6 +31,6 @@ class CO2Sensor {
 // The old constants. TODO: Remove these in favor of above.
 #define CO2_OLD_0 2.602
 #define CO2_OLD_1 0.435
-#define CO2_OLD_2 0.050 
+#define CO2_OLD_2 -0.1256
 
 #endif
