@@ -3,20 +3,18 @@
 
 #include <Arduino.h>
 
-// Can we redo this logic with more documentation? I understood the curve parts but it didn't 
-// explain all the constants or why we needed a curve. Let's redo this in terms of two points
+/* See the logic at https://www.digikey.com/htmldatasheets/production/2066424/0/0/1/sen0159.pdf 
 
-///< The DC of the amplifier
-#define CO2_GAIN 8.5
-
-///< The voltage at 400 ppm
-#define CO2_VOLTAGE_400 0.435
-
-///< The voltage at 1,000 ppm
-#define CO2_VOLTAGE_1000 0.430  // <-- Is this correct?
-
-///< The slope of the curve of the voltage of the CO2 sensor
-#define CO2_SLOPE ( (CO2_VOLTAGE_1000 - CO2_VOLTAGE_400) / (1000 - 400) )
+  They use a linear approximation, but the true graph is a logarithmic curve, so we take the extra
+  steps to compute that here. See the math in #CO2Sensor::read. The linear approximation method
+  is good, but leads to an error of +/- 50ppm. See the link below for the sensor's sensitivity:
+  https://image.dfrobot.com/image/data/SEN0159/CO2b%20MG811%20datasheet.pdf
+*/
+#define CO2_GAIN          8.5     // The DC gain of the sensor
+#define CO2_LOWER_PPM     400     // The sensoe has a lower bound of 400ppm
+#define CO2_UPPER_PPM     1000    // The sensor has an upper bound of 1,000 ppm
+#define CO2_LOWER_VOLTAGE 3.6975  // voltage reading at STANDARD_PPM
+#define CO2_VOLTAGE_DROP  0.05    // The voltage drop from LOWER_PPM to UPPER_PPM
 
 class CO2Sensor {
   private: 
@@ -32,5 +30,6 @@ class CO2Sensor {
 #define CO2_OLD_0 2.602
 #define CO2_OLD_1 0.435
 #define CO2_OLD_2 -0.1256
+#define CO2_OLD_VOLTAGE_400 0.435
 
 #endif
