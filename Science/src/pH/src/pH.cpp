@@ -1,14 +1,12 @@
 #include "pH.h"
 
-pHSensor::pHSensor(int pin, HumiditySensor humidity) : pin(pin), humidity(humidity) { }
+pHSensor::pHSensor(int pin) : pin(pin) { }
 
 void pHSensor::setup() {
-  pH.begin();
+	sensor.begin();
 }
 
-float pHSensor::sample_pH(){
-  float temperature = humidity.readTemperature();           // read your temperature sensor to execute temperature compensation
-  float voltage = analogRead(pin) / 1024.0 * 5000;   // read the voltage
-  float pHvalue = pH.readPH(voltage,temperature);  // convert voltage to pH with temperature compensation
-  return pHvalue;
+float pHSensor::read(float temperature) {
+	float voltage = analogRead(pin) / 1024.0 * 5000;  // read the voltage
+	return sensor.readPH(voltage, temperature);  // convert voltage to pH with temperature compensation
 }
