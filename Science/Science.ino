@@ -6,6 +6,8 @@
 #define DIRT_LINEAR_INNER_RADIUS 35  // mm
 #define DIRT_LINEAR_TEST_OFFSET 10   // mm
 
+#define PUMP_SPEED 100 //verify sign of this
+
 #define SCIENCE_COMMAND_ID 0x43
 #define SCIENCE_DATA_ID 0x17
 
@@ -191,3 +193,25 @@ void sendData() {
 
   nextSendTime = millis() + CAN_SEND_INTERVAL;
 }
+/*
+void test_samples()
+{
+  dirtLinear.debugMoveBySteps(XX); //move dirt carousel into position under pumps
+  dirtCarousel.debugMoveBySteps(XX); //align dirt-filled tubes with tests
+  //maybe we could use moveBy(PI); instead since it will need to spin 180 degrees to align properly
+
+  scienceLinear.debugMoveBySteps(XX); //move science-linear down into position
+  delay(500); 
+  pump1.setSpeed(PUMP_SPEED); //need to verify the sign of the speed for each pump
+  pump2.setSpeed(PUMP_SPEED);
+  pump3.setSpeed(PUMP_SPEED);
+  pump4.setSpeed(PUMP_SPEED);
+  delay(1000); //can change to adjust how much liquid needs to be pumped
+  pump1.hardBrake();
+  pump2.hardBrake();
+  pump3.hardBrake();
+  pump4.hardBrake();
+  delay(1000); //to ensure all pumping has stopped
+  scienceLinear.debugMoveBySteps(XX); //move science-linear back up 
+}
+*/

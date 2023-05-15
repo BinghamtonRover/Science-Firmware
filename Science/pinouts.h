@@ -50,7 +50,7 @@
 StepperMotorPins vacuumLinearPins = {
 	chipSelect: 6, 
 	enable: 7, 
-	limitSwitch: 24, //for now 0, later replace with 24 (bump1)
+	limitSwitch: 24, //(bump1)
 };
 StepperMotorConfig vacuumLinearConfig = {
 	name: "vacuumLinear", 
@@ -71,7 +71,7 @@ StepperMotor vacuumLinear(vacuumLinearPins, vacuumLinearConfig);
 StepperMotorPins dirtLinearPins = {
 	chipSelect: 5, 
 	enable: 10, 
-	limitSwitch: 2, //for now, later replace with 2 (bump2)
+	limitSwitch: 2, //(bump2)
 };
 StepperMotorConfig dirtLinearConfig = {
 	name: "dirtLinear", 
@@ -92,7 +92,7 @@ StepperMotor dirtLinear(dirtLinearPins, dirtLinearConfig);
 StepperMotorPins scienceLinearPins = {
 	chipSelect: 4, 
 	enable: 9, 
-	limitSwitch: 32, //for now, later replace with 32  (bump3)
+	limitSwitch: 32, //(bump3)
 };
 StepperMotorConfig scienceLinearConfig = {
 	name: "scienceLinear", 
@@ -113,7 +113,7 @@ StepperMotor scienceLinear(scienceLinearPins, scienceLinearConfig);
 StepperMotorPins dirtCarouselPins = {
 	chipSelect: 3, 
 	enable: 8, 
-	limitSwitch: 0, //(bump4) FIND OUT ACTUAL PIN NUMBER
+	limitSwitch: 0, //(bump4)
 };
 StepperMotorConfig dirtCarouselConfig = {
 	name: "dirtCarousel", 
