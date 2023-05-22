@@ -1,16 +1,28 @@
 #include "src/CO2Sensor.h"
 
-#define CO2PIN 17
-#define _V400 .5 //Change these values
-#define _V1000 1
-
-CO2Sensor co2 = CO2Sensor(CO2PIN);
+CO2Sensor co2 = CO2Sensor();
 
 void setup() {
   Serial.begin(9600);
-  co2.calibrate(_V400, _V1000);
 }
 
 void loop() {
-  Serial.println(co2.readPPM());
+  int percentage;
+  float volts = co2.MGRead();
+  Serial.print( "SEN0159:" );
+    Serial.print(volts);
+    Serial.print( "V           " );
+
+    percentage = co2.getPercentage();
+    Serial.print("CO2:");
+    if (percentage == -1) {
+        Serial.print( "<400" );
+    } else {
+        Serial.print(percentage);
+    }
+
+    Serial.print( "ppm" );
+    Serial.print("\n");
+
+    delay(500);
 }

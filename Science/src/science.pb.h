@@ -3,27 +3,45 @@
 
 #ifndef PB_SCIENCE_PB_H_INCLUDED
 #define PB_SCIENCE_PB_H_INCLUDED
-#include "Firmware-Utilities-main/pb.h"
+#include "utils/pb.h"
 
 #if PB_PROTO_HEADER_VERSION != 40
 #error Regenerate this file with the current version of nanopb generator.
 #endif
 
+/* Enum definitions */
+typedef enum _PumpState {
+    PumpState_PUMP_STATE_UNDEFINED = 0,
+    PumpState_PUMP_ON = 1,
+    PumpState_PUMP_OFF = 2
+} PumpState;
+
+typedef enum _DirtReleaseState {
+    DirtReleaseState_DIRT_RELEASE_STATE_UNDEFINED = 0,
+    DirtReleaseState_OPEN_DIRT = 1,
+    DirtReleaseState_CLOSE_DIRT = 2
+} DirtReleaseState;
+
 /* Struct definitions */
 typedef struct _ScienceCommand {
-    bool dig;
-    bool spin_carousel_tube;
-    bool spin_carousel_section;
-    float vacuum_suck;
-    int32_t carousel_angle;
-    int32_t carousel_linear_position;
-    int32_t test_linear_position;
-    int32_t vacuum_linear_position;
-    bool pump1;
-    bool pump2;
-    bool pump3;
-    bool pump4;
-    int32_t dirtRelease;
+    /* Individual control over each motor. Indicates steps to move */
+    float dirt_carousel;
+    float dirt_linear;
+    float science_linear;
+    float vacuum_linear;
+    /* Vacuum */
+    PumpState vacuum; /* percentage, from 0-1 */
+    DirtReleaseState dirtRelease;
+    /* Pumps */
+    PumpState pump1;
+    PumpState pump2;
+    PumpState pump3;
+    PumpState pump4;
+    /* High level commands */
+    bool calibrate;
+    bool stop;
+    bool next_tube;
+    bool next_section;
 } ScienceCommand;
 
 typedef struct _ScienceData {
@@ -39,26 +57,45 @@ typedef struct _ScienceData {
 extern "C" {
 #endif
 
+/* Helper constants for enums */
+#define _PumpState_MIN PumpState_PUMP_STATE_UNDEFINED
+#define _PumpState_MAX PumpState_PUMP_OFF
+#define _PumpState_ARRAYSIZE ((PumpState)(PumpState_PUMP_OFF+1))
+
+#define _DirtReleaseState_MIN DirtReleaseState_DIRT_RELEASE_STATE_UNDEFINED
+#define _DirtReleaseState_MAX DirtReleaseState_CLOSE_DIRT
+#define _DirtReleaseState_ARRAYSIZE ((DirtReleaseState)(DirtReleaseState_CLOSE_DIRT+1))
+
+#define ScienceCommand_vacuum_ENUMTYPE PumpState
+#define ScienceCommand_dirtRelease_ENUMTYPE DirtReleaseState
+#define ScienceCommand_pump1_ENUMTYPE PumpState
+#define ScienceCommand_pump2_ENUMTYPE PumpState
+#define ScienceCommand_pump3_ENUMTYPE PumpState
+#define ScienceCommand_pump4_ENUMTYPE PumpState
+
+
+
 /* Initializer values for message structs */
-#define ScienceCommand_init_default              {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
+#define ScienceCommand_init_default              {0, 0, 0, 0, _PumpState_MIN, _DirtReleaseState_MIN, _PumpState_MIN, _PumpState_MIN, _PumpState_MIN, _PumpState_MIN, 0, 0, 0, 0}
 #define ScienceData_init_default                 {0, 0, 0, 0, 0}
-#define ScienceCommand_init_zero                 {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
+#define ScienceCommand_init_zero                 {0, 0, 0, 0, _PumpState_MIN, _DirtReleaseState_MIN, _PumpState_MIN, _PumpState_MIN, _PumpState_MIN, _PumpState_MIN, 0, 0, 0, 0}
 #define ScienceData_init_zero                    {0, 0, 0, 0, 0}
 
 /* Field tags (for use in manual encoding/decoding) */
-#define ScienceCommand_dig_tag                   1
-#define ScienceCommand_spin_carousel_tube_tag    2
-#define ScienceCommand_spin_carousel_section_tag 3
-#define ScienceCommand_vacuum_suck_tag           4
-#define ScienceCommand_carousel_angle_tag        5
-#define ScienceCommand_carousel_linear_position_tag 6
-#define ScienceCommand_test_linear_position_tag  7
-#define ScienceCommand_vacuum_linear_position_tag 8
-#define ScienceCommand_pump1_tag                 9
-#define ScienceCommand_pump2_tag                 10
-#define ScienceCommand_pump3_tag                 11
-#define ScienceCommand_pump4_tag                 12
-#define ScienceCommand_dirtRelease_tag           13
+#define ScienceCommand_dirt_carousel_tag         1
+#define ScienceCommand_dirt_linear_tag           2
+#define ScienceCommand_science_linear_tag        3
+#define ScienceCommand_vacuum_linear_tag         4
+#define ScienceCommand_vacuum_tag                5
+#define ScienceCommand_dirtRelease_tag           7
+#define ScienceCommand_pump1_tag                 8
+#define ScienceCommand_pump2_tag                 9
+#define ScienceCommand_pump3_tag                 10
+#define ScienceCommand_pump4_tag                 11
+#define ScienceCommand_calibrate_tag             12
+#define ScienceCommand_stop_tag                  13
+#define ScienceCommand_next_tube_tag             14
+#define ScienceCommand_next_section_tag          15
 #define ScienceData_co2_tag                      1
 #define ScienceData_humidity_tag                 2
 #define ScienceData_methane_tag                  3
@@ -67,19 +104,20 @@ extern "C" {
 
 /* Struct field encoding specification for nanopb */
 #define ScienceCommand_FIELDLIST(X, a) \
-X(a, STATIC,   SINGULAR, BOOL,     dig,               1) \
-X(a, STATIC,   SINGULAR, BOOL,     spin_carousel_tube,   2) \
-X(a, STATIC,   SINGULAR, BOOL,     spin_carousel_section,   3) \
-X(a, STATIC,   SINGULAR, FLOAT,    vacuum_suck,       4) \
-X(a, STATIC,   SINGULAR, INT32,    carousel_angle,    5) \
-X(a, STATIC,   SINGULAR, INT32,    carousel_linear_position,   6) \
-X(a, STATIC,   SINGULAR, INT32,    test_linear_position,   7) \
-X(a, STATIC,   SINGULAR, INT32,    vacuum_linear_position,   8) \
-X(a, STATIC,   SINGULAR, BOOL,     pump1,             9) \
-X(a, STATIC,   SINGULAR, BOOL,     pump2,            10) \
-X(a, STATIC,   SINGULAR, BOOL,     pump3,            11) \
-X(a, STATIC,   SINGULAR, BOOL,     pump4,            12) \
-X(a, STATIC,   SINGULAR, INT32,    dirtRelease,      13)
+X(a, STATIC,   SINGULAR, FLOAT,    dirt_carousel,     1) \
+X(a, STATIC,   SINGULAR, FLOAT,    dirt_linear,       2) \
+X(a, STATIC,   SINGULAR, FLOAT,    science_linear,    3) \
+X(a, STATIC,   SINGULAR, FLOAT,    vacuum_linear,     4) \
+X(a, STATIC,   SINGULAR, UENUM,    vacuum,            5) \
+X(a, STATIC,   SINGULAR, UENUM,    dirtRelease,       7) \
+X(a, STATIC,   SINGULAR, UENUM,    pump1,             8) \
+X(a, STATIC,   SINGULAR, UENUM,    pump2,             9) \
+X(a, STATIC,   SINGULAR, UENUM,    pump3,            10) \
+X(a, STATIC,   SINGULAR, UENUM,    pump4,            11) \
+X(a, STATIC,   SINGULAR, BOOL,     calibrate,        12) \
+X(a, STATIC,   SINGULAR, BOOL,     stop,             13) \
+X(a, STATIC,   SINGULAR, BOOL,     next_tube,        14) \
+X(a, STATIC,   SINGULAR, BOOL,     next_section,     15)
 #define ScienceCommand_CALLBACK NULL
 #define ScienceCommand_DEFAULT NULL
 
@@ -100,7 +138,7 @@ extern const pb_msgdesc_t ScienceData_msg;
 #define ScienceData_fields &ScienceData_msg
 
 /* Maximum encoded size of messages (where known) */
-#define ScienceCommand_size                      74
+#define ScienceCommand_size                      40
 #define ScienceData_size                         25
 
 #ifdef __cplusplus
