@@ -145,6 +145,7 @@ void parseSerialCommand() {
   else if (motor == "vacuum_off") vacuum.disable();
   else if (motor == "dirt-release") dirtRelease.moveBy(distance); //go +49 to uncover hole, -49 to go back
   else if (motor == "science-test") test_sample(distance);
+  else if (motor == "pour-dirt") pourDirt(distance);
   else if (motor == "pump1") {
     pump1.setSpeed(speed);
     delay(PUMP_DELAY);
@@ -261,6 +262,12 @@ void block() {
   while (scienceLinear.isMoving()) delay(BLOCK_DELAY);
   while (dirtLinear.isMoving()) delay(BLOCK_DELAY);
   while (dirtCarousel.isMoving()) delay(BLOCK_DELAY);
+}
+
+void pourDirt(int ms) {
+  dirtRelease.open();
+  delay(ms);
+  dirtRelease.close();
 }
 
 /// The vacuum should be lowered manually. This function sucks dirt to fill the canister, then
