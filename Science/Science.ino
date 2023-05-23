@@ -163,7 +163,6 @@ void parseSerialCommand() {
   else if (motor == "vacuum_on") vacuum.enable();
   else if (motor == "vacuum_off") vacuum.disable();
   else if (motor == "temp") dirtRelease.moveBy(distance); //go +49 to uncover hole, -49 to go back
-  else if (motor == "dirt-release") test_sample_one();
   else if (motor == "science-test") test_sample(distance);
   else if (motor == "pump1") {
     pump1.setSpeed(speed);
