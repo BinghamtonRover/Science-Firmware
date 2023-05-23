@@ -194,16 +194,10 @@ void scienceHandler(const uint8_t* data, int length) {
   else if (command.calibrate) calibrateEverything();
   if (command.next_tube) dirtCarousel.moveBy(PI / 6); 
   if (command.next_section) dirtCarousel.moveBy(2 * PI / 3);
-
-  if (command.sample != 0)
-  {
-      sample_number = (command.sample - 1);
-  }
-
-  if (command.state == ScienceState_COLLECT_DATA)
-  {
+  if (command.sample != 0) sample_number = command.sample - 1;
+  if (command.state == ScienceState_COLLECT_DATA) {
+    if (state == ScienceState_STOP_COLLECTING) test_sample(sample_number);
     state = command.state;
-    test_sample(sample_number);
   }
 }
 
@@ -227,8 +221,8 @@ void stopEverything() {
 }
 
 void sendData() {
+  // Send generic data
   if (millis() < nextSendTime) return;
-
   ScienceData data = ScienceData_init_zero;
   data.sample = sample_number;
   can.send(SCIENCE_DATA_ID, &data, ScienceData_fields);
@@ -237,8 +231,8 @@ void sendData() {
   data.state = state;
   can.send(SCIENCE_DATA_ID, &data, ScienceData_fields);
 
+  // Send sensor data
   if (state != ScienceState_COLLECT_DATA) return;
-  
   data = ScienceData_init_zero;
   data.methane = methanesensor.getMethanePPM();
   can.send(SCIENCE_DATA_ID, &data, ScienceData_fields);
@@ -310,7 +304,9 @@ void test_sample(int sample) {
     block();
   }
   scienceLinear.moveTo(SCIENCE_LINEAR_INSERT_TESTS); block();
-/*
+  // TODO: Re-enable the below
+  
+  /*
   // Pour the test fluids into the tubes
   pump1.setSpeed(PUMP_START);
   pump1.setSpeed(PUMP_START);
@@ -321,8 +317,7 @@ void test_sample(int sample) {
   pump1.hardBrake();
   pump1.hardBrake();
   pump1.hardBrake();
-*/
-  //need to add delay to allow reading of sensors (will be long)
+  */
 
   // Move the dirt carousel to its picture position:
   // - dirt linear as far back as possible
@@ -332,5 +327,4 @@ void test_sample(int sample) {
   dirtCarousel.moveBy(-DIRT_CAROUSEL_NEXT_TUBE); block();
   dirtLinear.moveTo(DIRT_LINEAR_PICTURE); block();
   */
-  //commented out temporarily
 }
