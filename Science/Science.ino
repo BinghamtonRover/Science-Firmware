@@ -43,7 +43,7 @@
 #define SCIENCE_COMMAND_ID 0x43
 #define SCIENCE_DATA_ID 0x17
 
-#define USE_SERIAL_MONITOR false
+#define USE_SERIAL_MONITOR true
 
 void scienceHandler(const uint8_t* data, int length);
 BurtSerial serial(scienceHandler, Device::Device_SCIENCE);
@@ -53,6 +53,25 @@ BurtCan can(SCIENCE_COMMAND_ID, scienceHandler);
 #define METHANE_PIN 16
 #define HUM_PIN 15
 #define CO2_PIN 17
+
+#define DIRT_CAROUSEL_INSERT_TESTS -32000
+#define DIRT_CAROUSEL_POUR 0
+#define DIRT_CAROUSEL_NEXT_SECTION -17000
+#define DIRT_CAROUSEL_NEXT_TUBE -4300
+#define DIRT_CAROUSEL_PICTURE 0
+
+#define DIRT_LINEAR_POUR_OUTER_HOLES -650000
+#define DIRT_LINEAR_POUR_INNER_HOLE -650000
+#define DIRT_LINEAR_INSERT_TESTS -175000
+#define DIRT_LINEAR_PICTURE -650000
+
+#define SCIENCE_LINEAR_INSERT_TESTS 500000
+
+#define PUMP_START -100
+
+#define DIRT_RELEASE_DELAY 100
+#define BLOCK_DELAY 10
+#define PUMP_DELAY 1000
 
 #define R_0 945
 
@@ -136,6 +155,8 @@ void parseSerialCommand() {
 
   // Execute the command
   if (motor == "vacuum-linear") vacuumLinear.moveTo(distance);  
+  else if (motor == "stop") stopEverything();
+  else if (motor == "calibrate") calibrateEverything();
   else if (motor == "dirt-linear") dirtLinear.moveTo(distance); //dirtLinear.moveBy(distance);  
   else if (motor == "science-linear") scienceLinear.moveTo(distance); //scienceLinear.moveBy(distance);  
   else if (motor == "dirt-carousel") dirtCarousel.moveTo(distance); //dirtCarousel.moveBy(distance);  
@@ -143,6 +164,7 @@ void parseSerialCommand() {
   else if (motor == "vacuum_off") vacuum.disable();
   else if (motor == "temp") dirtRelease.moveBy(distance); //go +49 to uncover hole, -49 to go back
   else if (motor == "dirt-release") test_sample_one();
+  else if (motor == "science-test") test_sample(distance);
   else if (motor == "pump1") {
     pump1.setSpeed(speed);
     delay(PUMP_DELAY);
@@ -189,24 +211,29 @@ void scienceHandler(const uint8_t* data, int length) {
   dirtRelease.handleCommand(command.dirtRelease);
 
   // Commands
-  if (command.stop) {
-    dirtCarousel.stop();
-    dirtLinear.stop();
-    scienceLinear.stop();
-    vacuumLinear.stop();
-    vacuum.disable();
-    pump1.setSpeed(0);
-    pump2.setSpeed(0);
-    pump3.setSpeed(0);
-    pump4.setSpeed(0);
-  } else if (command.calibrate) {
-    dirtCarousel.calibrate();
-    dirtLinear.calibrate();
-    scienceLinear.calibrate();
-    vacuumLinear.calibrate();
-  }
+  if (command.stop) stopEverything();
+  else if (command.calibrate) calibrateEverything();
   if (command.next_tube) dirtCarousel.moveBy(PI / 6); 
   if (command.next_section) dirtCarousel.moveBy(2 * PI / 3);
+}
+
+void calibrateEverything() {
+  dirtLinear.calibrate(); block();
+  dirtCarousel.calibrate(); block();
+  scienceLinear.calibrate(); block();
+  vacuumLinear.calibrate(); block();
+}
+
+void stopEverything() {
+  dirtCarousel.stop();
+  dirtLinear.stop();
+  scienceLinear.stop();
+  vacuumLinear.stop();
+  vacuum.disable();
+  pump1.setSpeed(0);
+  pump2.setSpeed(0);
+  pump3.setSpeed(0);
+  pump4.setSpeed(0);
 }
 
 void sendData() {
@@ -234,177 +261,62 @@ void sendData() {
   nextSendTime = millis() + canSendInterval;
 }
 
-void test_sample_one() {
-  dirtLinear.debugMoveBySteps(dirt_drop_position_one); //move dirt carousel to fill tubes with dirt
-  delay(5000);
-  dirtRelease.open(); //release dirt tube 1
-  delay(500);
-  dirtRelease.close();
-  delay(500);
-
-  dirtCarousel.debugMoveBySteps(next_tube_position); //release dirt tube 2
-  delay(5000);
-  dirtRelease.open();
-  delay(500);
-  dirtRelease.close();
-  delay(500);
-
-  dirtCarousel.debugMoveBySteps(next_tube_position); //release dirt tube 3
-  delay(5000);
-  dirtRelease.open();
-  delay(500);
-  dirtRelease.close();
-  delay(500);
-
-  dirtLinear.debugMoveBySteps(inner_tube); //release dirt tube 4
-  delay(5000);
-  dirtRelease.open();
-  delay(500);
-  dirtRelease.close();
-  delay(500);
-  dirtLinear.debugMoveBySteps(-inner_tube);
-
-  dirtCarousel.debugMoveBySteps(next_tube_position); //release dirt tube 5
-  delay(5000);
-  dirtRelease.open();
-  delay(500);
-  dirtRelease.close();
-  delay(500);
-
-  dirtLinear.debugMoveBySteps(test_position_linear); //move into testing position
-  dirtCarousel.debugMoveBySteps(test_position_rotation);
-  scienceLinear.debugMoveBySteps(test_position_science);
-  /*
-  pump1.setSpeed(speed); //pump testing liquids
-  pump2.setSpeed(speed);
-  pump3.setSpeed(speed);
-  pump4.setSpeed(speed);
-  delay(PUMP_DELAY);
-  pump1.hardBrake();
-  pump2.hardBrake();
-  pump3.hardBrake();
-  pump4.hardBrake();
-*/
-  delay(3000); //delay to read results (should be longer than 3 sec)
-
-  scienceLinear.debugMoveBySteps(-test_position_science); //move science linear up
-
-  dirtCarousel.debugMoveBySteps(picture_position); //get into position to take picture
-  dirtLinear.debugMoveBySteps(picture_position_linear);
-  delay(2000); //delay to allow us to take picture
-
-  dirtCarousel.debugMoveBySteps(next_section_position); //align next section for dirt collection
-}
-/*
-//same as first section without movement from callibration -> dirt collection position
-void test_sample_two() {
-  dirtRelease.open();
-  delay(500);
-  dirtRelease.close();
-  delay(500);
-
-  dirtCarousel.debugMoveBySteps(next_tube);
-  dirtRelease.open();
-  delay(500);
-  dirtRelease.close();
-  delay(500);
-
-  dirtCarousel.debugMoveBySteps(next_tube);
-  dirtRelease.open();
-  delay(500);
-  dirtRelease.close();
-  delay(500);
-
-  dirtLinear.debugMoveBySteps(inner_tube);
-  dirtRelease.open();
-  delay(500);
-  dirtRelease.close();
-  delay(500);
-  dirtLinear.debugMoveBySteps(-inner_tube);
-
-  dirtCarousel.debugMoveBySteps(next_tube);
-  dirtRelease.open();
-  delay(500);
-  dirtRelease.close();
-  delay(500);
-
-  dirtLinear.debugMoveBySteps(test_position_linear);
-  dirtCarousel.debugMoveBySteps(test_position_rotation);
-  scienceLinear.debugMoveBySteps(test_position_science);
-  
-  pump1.setSpeed(speed);
-  pump2.setSpeed(speed);
-  pump3.setSpeed(speed);
-  pump4.setSpeed(speed);
-  delay(PUMP_DELAY);
-  pump1.hardBrake();
-  pump2.hardBrake();
-  pump3.hardBrake();
-  pump4.hardBrake();
-
-  delay(3000);
-
-  scienceLinear_debugMoveBySteps(-test_position_science);
-
-  dirtCarousel_debugMoveBySteps(picture_position);
-  dirtLinear_debugMoveBySteps(picture_position_linear);
-  delay(20000);
-
-  dirtCarousel_debugMoveBySteps(next_section);
+void block() {
+  while (vacuumLinear.isMoving()) delay(BLOCK_DELAY);
+  while (scienceLinear.isMoving()) delay(BLOCK_DELAY);
+  while (dirtLinear.isMoving()) delay(BLOCK_DELAY);
+  while (dirtCarousel.isMoving()) delay(BLOCK_DELAY);
 }
 
-//same as second section except different rotation to testing position
-void test_sample_three() {
-  dirtRelease.open();
-  delay(500);
-  dirtRelease.close();
-  delay(500);
+/// The vacuum should be lowered manually. This function sucks dirt to fill the canister, then
+/// pours it into each hole of the dirt carousel, being careful to spill only a bit in each tube.
+/// Then, drops the science tests into the tubes.
+void test_sample(int sample) {
+  // Move everything to the zero position
+  calibrateEverything();
 
-  dirtCarousel.debugMoveBySteps(next_tube);
-  dirtRelease.open();
-  delay(500);
-  dirtRelease.close();
-  delay(500);
+  // Align the dirt carousel for pouring into the first hole
+  dirtCarousel.moveTo(DIRT_CAROUSEL_POUR); block();  
+  for (int i = 0; i < sample; i++) {
+    dirtCarousel.moveBy(DIRT_CAROUSEL_NEXT_SECTION); block();
+  }
+  dirtLinear.moveTo(DIRT_LINEAR_POUR_OUTER_HOLES); block();
 
-  dirtCarousel.debugMoveBySteps(next_tube);
-  dirtRelease.open();
-  delay(500);
-  dirtRelease.close();
-  delay(500);
+  // Pour into each outer hole
+  for (int outerHole = 0; outerHole < 4; outerHole++) {
+    if (outerHole > 0) dirtCarousel.moveBy(DIRT_CAROUSEL_NEXT_TUBE); block();
+    dirtRelease.open();
+    delay(DIRT_RELEASE_DELAY);
+    dirtRelease.close();
+  }
 
-  dirtLinear.debugMoveBySteps(inner_tube);
+  // Pour into the middle hole (aligned with the third hole)
+  dirtCarousel.moveBy(-DIRT_CAROUSEL_NEXT_TUBE); block();
+  dirtLinear.moveTo(DIRT_LINEAR_POUR_INNER_HOLE); block();
   dirtRelease.open();
-  delay(500);
+  delay(DIRT_RELEASE_DELAY);
   dirtRelease.close();
-  delay(500);
-  dirtLinear.debugMoveBySteps(-inner_tube);
 
-  dirtCarousel.debugMoveBySteps(next_tube);
-  dirtRelease.open();
-  delay(500);
-  dirtRelease.close();
-  delay(500);
+  // Drop the science tests into the tubes
+  dirtLinear.moveTo(DIRT_LINEAR_INSERT_TESTS); block();
+  dirtCarousel.moveTo(DIRT_CAROUSEL_INSERT_TESTS); block();
+  for (int i = sample; i > 0; i--) dirtCarousel.moveBy(-DIRT_CAROUSEL_NEXT_SECTION); block();
+  scienceLinear.moveTo(SCIENCE_LINEAR_INSERT_TESTS); block();
 
-  dirtLinear.debugMoveBySteps(test_position_linear);
-  dirtCarousel.debugMoveBySteps(test_position_rotation3); //needs opposite direction than other two
-  scienceLinear.debugMoveBySteps(test_position_science);
-  
-  pump1.setSpeed(speed);
-  pump2.setSpeed(speed);
-  pump3.setSpeed(speed);
-  pump4.setSpeed(speed);
+  // Pour the test fluids into the tubes
+  pump1.setSpeed(PUMP_START);
+  pump1.setSpeed(PUMP_START);
+  pump1.setSpeed(PUMP_START);
+  pump1.setSpeed(PUMP_START);
   delay(PUMP_DELAY);
   pump1.hardBrake();
-  pump2.hardBrake();
-  pump3.hardBrake();
-  pump4.hardBrake();
+  pump1.hardBrake();
+  pump1.hardBrake();
+  pump1.hardBrake();
 
-  delay(3000);
-
-  scienceLinear_debugMoveBySteps(-test_position_science);
-
-  dirtCarousel_debugMoveBySteps(picture_position);
-  dirtLinear_debugMoveBySteps(picture_position_linear);
-  delay(20000);
+  // Move the dirt carousel to its picture position:
+  // - dirt linear as far back as possible
+  // - dirt carousel so that the clear tube is in front of camera
+  dirtCarousel.moveBy(-DIRT_CAROUSEL_NEXT_TUBE); block();
+  dirtLinear.moveTo(DIRT_LINEAR_PICTURE); block();
 }
-*/
