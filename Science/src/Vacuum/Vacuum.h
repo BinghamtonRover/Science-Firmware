@@ -3,6 +3,8 @@
 #include <Arduino.h>
 #include <Servo.h>
 
+#include "../science.pb.h"
+
 //for dirt collection/vacuum control
 class Vacuum {
 private:
@@ -16,6 +18,11 @@ public:
 	}
 	void disable() {
 		digitalWrite(pin, HIGH);
+	}
+
+	void handleCommand(PumpState state) {
+		if (state == PumpState_PUMP_ON) enable();
+		else if (state == PumpState_PUMP_OFF) disable();
 	}
 };
 
@@ -43,5 +50,10 @@ class DirtRelease {
 		}
 		void close() {
 			servo.write(-49); //-49 comes from testing
+		}
+
+		void handleCommand(DirtReleaseState state) {
+			if (state == DirtReleaseState_OPEN_DIRT) open();
+			else if (state == DirtReleaseState_CLOSE_DIRT) close();
 		}
 };

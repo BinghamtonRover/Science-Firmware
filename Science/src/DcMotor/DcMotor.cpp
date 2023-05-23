@@ -30,3 +30,12 @@ void DCMotor::hardBrake() {
 	digitalWrite(in1Pin, HIGH);
 	digitalWrite(in2Pin, HIGH);
 }
+
+void DCMotor::handleCommand(PumpState state) {
+	switch (state) {
+	  case PumpState::PumpState_PUMP_STATE_UNDEFINED: return;
+	  case PumpState::PumpState_PUMP_ON: setSpeed(-100); break;
+	  case PumpState::PumpState_PUMP_OFF: setSpeed(0); break;
+	}
+}
+

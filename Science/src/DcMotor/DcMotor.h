@@ -2,6 +2,8 @@
 
 #include <Arduino.h>
 
+#include "../science.pb.h"
+
 /// A DC motor that is controlled by speed and direction, not position. 
 /// 
 /// A positive velocity indicates clockwise motion, while negative indicates
@@ -25,4 +27,5 @@ class DCMotor {
 		void setSpeed(int speed);  ///< Sets the speed, in the interval [-100, 100].
 		void softBrake();  ///< Slowly slows the motor to a stop.
 		void hardBrake();  ///< Immediately stops the motor. 
+		void handleCommand(PumpState state);
 };
