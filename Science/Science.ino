@@ -13,33 +13,6 @@
 // Contains all the Protobuf data
 #include "src/science.pb.h"
 
-#define VACUUM_FAST_SPEED 50
-#define VACUUM_DIG_DELAY 1000 // ms
-#define VACUUM_DROP_DELAY 1000  // ms
-
-#define VACUUM_LINEAR_MAX_HEIGHT -370 //Changed from 215 mm, Double check this
-#define DIRT_LINEAR_OUTER_RADIUS 35  // mm
-#define DIRT_LINEAR_INNER_RADIUS 35  // mm
-#define DIRT_LINEAR_TEST_OFFSET 10   // mm
-#define SCIENCE_LINEAR_MAX_HEIGHT 35  // mm
-
-#define SENSORS_READ_DELAY 1000  // ms
-
-#define PUMP_SPEED -100 //must be negative to pump, positive blows bubbles
-#define PUMP_DELAY 1000  // 2000  // ms DETERMINE ACTUAL DESIRED VALUE
-
-//DETERMINE ACTUAL VALUES
-#define dirt_drop_position_one -500000 //to go from limit switch to first section aligned for dirt collection (linear)
-#define next_tube_position -4300 //move over one tube (rotation)
-#define inner_tube 10000 //move to inner diameter tube (linear)
-#define test_position_linear 300000 //move dirt carousel (linear) to align with tests
-#define test_position_rotation -15000 //rotate section to align with tests
-#define test_position_science 500000 //move tests down
-#define picture_position 4300 //move dirt carousel to have test tube aligned with camera (rotation)
-#define picture_position_linear -300000 //move dirt carousel to have test tube aligned with camera (linear)
-#define next_section_position -4300 //move to next section (rotation)
-//#define test_position_rotation3 //move dirt carousel to align with tests (for third section only) (rotation)
-
 #define SCIENCE_COMMAND_ID 0x43
 #define SCIENCE_DATA_ID 0x17
 
@@ -54,6 +27,7 @@ BurtCan can(SCIENCE_COMMAND_ID, scienceHandler);
 #define HUM_PIN 15
 #define CO2_PIN 17
 
+//measurements in steps, used for testing sequence
 #define DIRT_CAROUSEL_INSERT_TESTS -32000
 #define DIRT_CAROUSEL_POUR 0
 #define DIRT_CAROUSEL_NEXT_SECTION -17000
@@ -67,8 +41,10 @@ BurtCan can(SCIENCE_COMMAND_ID, scienceHandler);
 
 #define SCIENCE_LINEAR_INSERT_TESTS 500000
 
+//pump speed
 #define PUMP_START -100
 
+//delays in ms
 #define DIRT_RELEASE_DELAY 100
 #define BLOCK_DELAY 10
 #define PUMP_DELAY 1000
@@ -84,6 +60,8 @@ ScienceState state = ScienceState_STOP_COLLECTING;
 
 int canSendInterval = 200;
 unsigned long nextSendTime;
+
+int sample_number = 0;
 
 void setup() {
 	Serial.begin(9600);
@@ -136,7 +114,7 @@ void loop() {
   dirtCarousel.update();
 
   can.update();
-  sendData();
+  // sendData();
 
   if (USE_SERIAL_MONITOR) parseSerialCommand();
   else serial.update();
@@ -154,15 +132,18 @@ void parseSerialCommand() {
   int speed = part2.toInt();
 
   // Execute the command
-  if (motor == "vacuum-linear") vacuumLinear.moveTo(distance);  
+  if (motor == "vacuum-linear"){ 
+    Serial.println("moving vacuum linear");
+    vacuumLinear.moveBy(distance);  
+  }
   else if (motor == "stop") stopEverything();
   else if (motor == "calibrate") calibrateEverything();
-  else if (motor == "dirt-linear") dirtLinear.moveTo(distance); //dirtLinear.moveBy(distance);  
-  else if (motor == "science-linear") scienceLinear.moveTo(distance); //scienceLinear.moveBy(distance);  
-  else if (motor == "dirt-carousel") dirtCarousel.moveTo(distance); //dirtCarousel.moveBy(distance);  
+  else if (motor == "dirt-linear") dirtLinear.moveBy(distance); //dirtLinear.moveBy(distance);  
+  else if (motor == "science-linear") scienceLinear.moveBy(distance); //scienceLinear.moveBy(distance);  
+  else if (motor == "dirt-carousel") dirtCarousel.moveBy(distance); //dirtCarousel.moveBy(distance);  
   else if (motor == "vacuum_on") vacuum.enable();
   else if (motor == "vacuum_off") vacuum.disable();
-  else if (motor == "temp") dirtRelease.moveBy(distance); //go +49 to uncover hole, -49 to go back
+  else if (motor == "dirt-release") dirtRelease.moveBy(distance); //go +49 to uncover hole, -49 to go back
   else if (motor == "science-test") test_sample(distance);
   else if (motor == "pump1") {
     pump1.setSpeed(speed);
@@ -192,14 +173,13 @@ void parseSerialCommand() {
   }
 }
 
-//Will need to switch to TMC commands once we have tested them
 void scienceHandler(const uint8_t* data, int length) {
   ScienceCommand command = BurtProto::decode<ScienceCommand>(data, length, ScienceCommand_fields);
   // Individual motor control
-  dirtCarousel.moveBySteps(command.dirt_carousel);
-  dirtLinear.moveBySteps(command.dirt_linear);
-  scienceLinear.moveBySteps(command.science_linear);
-  vacuumLinear.moveBySteps(command.vacuum_linear);
+  dirtCarousel.moveBy(command.dirt_carousel);
+  dirtLinear.moveBy(command.dirt_linear);
+  scienceLinear.moveBy(command.science_linear);
+  vacuumLinear.moveBy(command.vacuum_linear);
 
   // Pumps
   pump1.handleCommand(command.pump1);
@@ -214,12 +194,23 @@ void scienceHandler(const uint8_t* data, int length) {
   else if (command.calibrate) calibrateEverything();
   if (command.next_tube) dirtCarousel.moveBy(PI / 6); 
   if (command.next_section) dirtCarousel.moveBy(2 * PI / 3);
+
+  if (command.sample != 0)
+  {
+      sample_number = (command.sample - 1);
+  }
+
+  if (command.state == ScienceState_COLLECT_DATA)
+  {
+    state = command.state;
+    test_sample(sample_number);
+  }
 }
 
 void calibrateEverything() {
+  scienceLinear.calibrate(); block();
   dirtLinear.calibrate(); block();
   dirtCarousel.calibrate(); block();
-  scienceLinear.calibrate(); block();
   vacuumLinear.calibrate(); block();
 }
 
@@ -236,8 +227,19 @@ void stopEverything() {
 }
 
 void sendData() {
-  if (state != ScienceState_COLLECT_DATA || millis() < nextSendTime) return;
+  if (millis() < nextSendTime) return;
+
   ScienceData data = ScienceData_init_zero;
+  data.sample = sample_number;
+  can.send(SCIENCE_DATA_ID, &data, ScienceData_fields);
+
+  data = ScienceData_init_zero;
+  data.state = state;
+  can.send(SCIENCE_DATA_ID, &data, ScienceData_fields);
+
+  if (state != ScienceState_COLLECT_DATA) return;
+  
+  data = ScienceData_init_zero;
   data.methane = methanesensor.getMethanePPM();
   can.send(SCIENCE_DATA_ID, &data, ScienceData_fields);
 
@@ -299,9 +301,16 @@ void test_sample(int sample) {
   // Drop the science tests into the tubes
   dirtLinear.moveTo(DIRT_LINEAR_INSERT_TESTS); block();
   dirtCarousel.moveTo(DIRT_CAROUSEL_INSERT_TESTS); block();
-  for (int i = sample; i > 0; i--) dirtCarousel.moveBy(-DIRT_CAROUSEL_NEXT_SECTION); block();
+  if (sample == 1)
+  { dirtCarousel.moveBy(DIRT_CAROUSEL_NEXT_SECTION); 
+    block();
+  }
+  else if (sample == 2) 
+  { dirtCarousel.moveBy(-DIRT_CAROUSEL_NEXT_SECTION); 
+    block();
+  }
   scienceLinear.moveTo(SCIENCE_LINEAR_INSERT_TESTS); block();
-
+/*
   // Pour the test fluids into the tubes
   pump1.setSpeed(PUMP_START);
   pump1.setSpeed(PUMP_START);
@@ -312,10 +321,16 @@ void test_sample(int sample) {
   pump1.hardBrake();
   pump1.hardBrake();
   pump1.hardBrake();
+*/
+  //need to add delay to allow reading of sensors (will be long)
 
   // Move the dirt carousel to its picture position:
   // - dirt linear as far back as possible
   // - dirt carousel so that the clear tube is in front of camera
+  /*
+  scienceLinear.moveTo(0); block();
   dirtCarousel.moveBy(-DIRT_CAROUSEL_NEXT_TUBE); block();
   dirtLinear.moveTo(DIRT_LINEAR_PICTURE); block();
+  */
+  //commented out temporarily
 }
