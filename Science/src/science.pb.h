@@ -22,6 +22,12 @@ typedef enum _DirtReleaseState {
     DirtReleaseState_CLOSE_DIRT = 2
 } DirtReleaseState;
 
+typedef enum _ScienceState {
+    ScienceState_SCIENCE_STATE_UNDEFINED = 0,
+    ScienceState_COLLECT_DATA = 1,
+    ScienceState_STOP_COLLECTING = 2
+} ScienceState;
+
 /* Struct definitions */
 typedef struct _ScienceCommand {
     /* Individual control over each motor. Indicates steps to move */
@@ -42,6 +48,8 @@ typedef struct _ScienceCommand {
     bool stop;
     bool next_tube;
     bool next_section;
+    int32_t sample;
+    ScienceState state;
 } ScienceCommand;
 
 typedef struct _ScienceData {
@@ -50,6 +58,8 @@ typedef struct _ScienceData {
     float methane;
     float pH;
     float temperature;
+    int32_t sample;
+    ScienceState state;
 } ScienceData;
 
 
@@ -66,20 +76,26 @@ extern "C" {
 #define _DirtReleaseState_MAX DirtReleaseState_CLOSE_DIRT
 #define _DirtReleaseState_ARRAYSIZE ((DirtReleaseState)(DirtReleaseState_CLOSE_DIRT+1))
 
+#define _ScienceState_MIN ScienceState_SCIENCE_STATE_UNDEFINED
+#define _ScienceState_MAX ScienceState_STOP_COLLECTING
+#define _ScienceState_ARRAYSIZE ((ScienceState)(ScienceState_STOP_COLLECTING+1))
+
 #define ScienceCommand_vacuum_ENUMTYPE PumpState
 #define ScienceCommand_dirtRelease_ENUMTYPE DirtReleaseState
 #define ScienceCommand_pump1_ENUMTYPE PumpState
 #define ScienceCommand_pump2_ENUMTYPE PumpState
 #define ScienceCommand_pump3_ENUMTYPE PumpState
 #define ScienceCommand_pump4_ENUMTYPE PumpState
+#define ScienceCommand_state_ENUMTYPE ScienceState
 
+#define ScienceData_state_ENUMTYPE ScienceState
 
 
 /* Initializer values for message structs */
-#define ScienceCommand_init_default              {0, 0, 0, 0, _PumpState_MIN, _DirtReleaseState_MIN, _PumpState_MIN, _PumpState_MIN, _PumpState_MIN, _PumpState_MIN, 0, 0, 0, 0}
-#define ScienceData_init_default                 {0, 0, 0, 0, 0}
-#define ScienceCommand_init_zero                 {0, 0, 0, 0, _PumpState_MIN, _DirtReleaseState_MIN, _PumpState_MIN, _PumpState_MIN, _PumpState_MIN, _PumpState_MIN, 0, 0, 0, 0}
-#define ScienceData_init_zero                    {0, 0, 0, 0, 0}
+#define ScienceCommand_init_default              {0, 0, 0, 0, _PumpState_MIN, _DirtReleaseState_MIN, _PumpState_MIN, _PumpState_MIN, _PumpState_MIN, _PumpState_MIN, 0, 0, 0, 0, 0, _ScienceState_MIN}
+#define ScienceData_init_default                 {0, 0, 0, 0, 0, 0, _ScienceState_MIN}
+#define ScienceCommand_init_zero                 {0, 0, 0, 0, _PumpState_MIN, _DirtReleaseState_MIN, _PumpState_MIN, _PumpState_MIN, _PumpState_MIN, _PumpState_MIN, 0, 0, 0, 0, 0, _ScienceState_MIN}
+#define ScienceData_init_zero                    {0, 0, 0, 0, 0, 0, _ScienceState_MIN}
 
 /* Field tags (for use in manual encoding/decoding) */
 #define ScienceCommand_dirt_carousel_tag         1
@@ -96,11 +112,15 @@ extern "C" {
 #define ScienceCommand_stop_tag                  13
 #define ScienceCommand_next_tube_tag             14
 #define ScienceCommand_next_section_tag          15
+#define ScienceCommand_sample_tag                16
+#define ScienceCommand_state_tag                 17
 #define ScienceData_co2_tag                      1
 #define ScienceData_humidity_tag                 2
 #define ScienceData_methane_tag                  3
 #define ScienceData_pH_tag                       4
 #define ScienceData_temperature_tag              5
+#define ScienceData_sample_tag                   6
+#define ScienceData_state_tag                    7
 
 /* Struct field encoding specification for nanopb */
 #define ScienceCommand_FIELDLIST(X, a) \
@@ -117,7 +137,9 @@ X(a, STATIC,   SINGULAR, UENUM,    pump4,            11) \
 X(a, STATIC,   SINGULAR, BOOL,     calibrate,        12) \
 X(a, STATIC,   SINGULAR, BOOL,     stop,             13) \
 X(a, STATIC,   SINGULAR, BOOL,     next_tube,        14) \
-X(a, STATIC,   SINGULAR, BOOL,     next_section,     15)
+X(a, STATIC,   SINGULAR, BOOL,     next_section,     15) \
+X(a, STATIC,   SINGULAR, INT32,    sample,           16) \
+X(a, STATIC,   SINGULAR, UENUM,    state,            17)
 #define ScienceCommand_CALLBACK NULL
 #define ScienceCommand_DEFAULT NULL
 
@@ -126,7 +148,9 @@ X(a, STATIC,   SINGULAR, FLOAT,    co2,               1) \
 X(a, STATIC,   SINGULAR, FLOAT,    humidity,          2) \
 X(a, STATIC,   SINGULAR, FLOAT,    methane,           3) \
 X(a, STATIC,   SINGULAR, FLOAT,    pH,                4) \
-X(a, STATIC,   SINGULAR, FLOAT,    temperature,       5)
+X(a, STATIC,   SINGULAR, FLOAT,    temperature,       5) \
+X(a, STATIC,   SINGULAR, INT32,    sample,            6) \
+X(a, STATIC,   SINGULAR, UENUM,    state,             7)
 #define ScienceData_CALLBACK NULL
 #define ScienceData_DEFAULT NULL
 
@@ -138,8 +162,8 @@ extern const pb_msgdesc_t ScienceData_msg;
 #define ScienceData_fields &ScienceData_msg
 
 /* Maximum encoded size of messages (where known) */
-#define ScienceCommand_size                      40
-#define ScienceData_size                         25
+#define ScienceCommand_size                      55
+#define ScienceData_size                         38
 
 #ifdef __cplusplus
 } /* extern "C" */
