@@ -76,7 +76,7 @@ StepperMotorConfig dirtLinearConfig = {
 	current: 1500, 
 	speed: SPEED / 2, 
 	accel: ACCEL, 
-	minLimit: -700000, 
+	minLimit: -800000, 
 	maxLimit: 0, 
 	isPositive: true, 
 	toUnits: 1.0,
@@ -106,7 +106,7 @@ StepperMotorConfig scienceLinearConfig = {
 	accel: ACCEL,
 	minLimit: 0, 
 	maxLimit: 500000, 
-	isPositive: false, 
+	isPositive: true, 
 	toUnits: 1.0,
 	toSteps: 1.0,
 };
@@ -131,8 +131,8 @@ StepperMotorConfig dirtCarouselConfig = {
 	current: 1500, 
 	speed: SPEED / 20, //changed values came from testing
 	accel: ACCEL, 
-	minLimit: 0, 
-	maxLimit: 50000,
+	minLimit: -50000,
+	maxLimit: 0, 
 	isPositive: true, 
 	toUnits: 1.0,
 	toSteps: 1.0,
