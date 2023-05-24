@@ -16,7 +16,7 @@
 #define SCIENCE_COMMAND_ID 0x43
 #define SCIENCE_DATA_ID 0x17
 
-#define USE_SERIAL_MONITOR true
+#define USE_SERIAL_MONITOR false
 
 void scienceHandler(const uint8_t* data, int length);
 BurtSerial serial(scienceHandler, Device::Device_SCIENCE);
@@ -34,8 +34,8 @@ BurtCan can(SCIENCE_COMMAND_ID, scienceHandler);
 #define DIRT_CAROUSEL_NEXT_TUBE -4300
 #define DIRT_CAROUSEL_PICTURE 0
 
-#define DIRT_LINEAR_POUR_OUTER_HOLES -650000
-#define DIRT_LINEAR_POUR_INNER_HOLE -650000
+#define DIRT_LINEAR_POUR_OUTER_HOLES -550000
+#define DIRT_LINEAR_POUR_INNER_HOLE -700000
 #define DIRT_LINEAR_INSERT_TESTS -175000
 #define DIRT_LINEAR_PICTURE -650000
 
@@ -45,7 +45,7 @@ BurtCan can(SCIENCE_COMMAND_ID, scienceHandler);
 #define PUMP_START -100
 
 //delays in ms
-#define DIRT_RELEASE_DELAY 100
+#define DIRT_RELEASE_DELAY 200
 #define BLOCK_DELAY 10
 #define PUMP_DELAY 1000
 
@@ -58,7 +58,7 @@ pHSensor pH = pHSensor(PH_PIN, humsensor);
 
 ScienceState state = ScienceState_STOP_COLLECTING;
 
-int canSendInterval = 200;
+int canSendInterval = 3000;
 unsigned long nextSendTime;
 
 int sample_number = 0;
@@ -114,7 +114,7 @@ void loop() {
   dirtCarousel.update();
 
   can.update();
-  // sendData();
+  sendData();
 
   if (USE_SERIAL_MONITOR) parseSerialCommand();
   else serial.update();
@@ -177,10 +177,10 @@ void parseSerialCommand() {
 void scienceHandler(const uint8_t* data, int length) {
   ScienceCommand command = BurtProto::decode<ScienceCommand>(data, length, ScienceCommand_fields);
   // Individual motor control
-  dirtCarousel.moveBy(command.dirt_carousel);
-  dirtLinear.moveBy(command.dirt_linear);
-  scienceLinear.moveBy(command.science_linear);
-  vacuumLinear.moveBy(command.vacuum_linear);
+  if (command.dirt_carousel != 0) dirtCarousel.moveBy(command.dirt_carousel);
+  if (command.dirt_linear != 0) dirtLinear.moveBy(command.dirt_linear);
+  if (command.science_linear != 0) scienceLinear.moveBy(command.science_linear);
+  if (command.vacuum_linear != 0) vacuumLinear.moveBy(command.vacuum_linear);
 
   // Pumps
   pump1.handleCommand(command.pump1);
