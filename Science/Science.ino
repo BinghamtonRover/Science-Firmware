@@ -98,6 +98,8 @@ void setup() {
   pump3.setup();
   pump4.setup();
 
+  scooper.setup();
+
   Serial.println("Initializing sensors...");
   humsensor.setup();
   co2.setup();
@@ -265,9 +267,9 @@ void block() {
 }
 
 void pourDirt(int ms) {
-  dirtRelease.open();
+  scooper.open();
   delay(ms);
-  dirtRelease.close();
+  scooper.close();
 }
 
 /// The vacuum should be lowered manually. This function sucks dirt to fill the canister, then
@@ -287,17 +289,13 @@ void test_sample(int sample) {
   // Pour into each outer hole
   for (int outerHole = 0; outerHole < 4; outerHole++) {
     if (outerHole > 0) dirtCarousel.moveBy(DIRT_CAROUSEL_NEXT_TUBE); block();
-    dirtRelease.open();
-    delay(DIRT_RELEASE_DELAY);
-    dirtRelease.close();
+    pourDirt(DIRT_RELEASE_DELAY);
   }
 
   // Pour into the middle hole (aligned with the third hole)
   dirtCarousel.moveBy(-DIRT_CAROUSEL_NEXT_TUBE); block();
   dirtLinear.moveTo(DIRT_LINEAR_POUR_INNER_HOLE); block();
-  dirtRelease.open();
-  delay(DIRT_RELEASE_DELAY);
-  dirtRelease.close();
+  pourDirt(DIRT_RELEASE_DELAY);
 
   // Drop the science tests into the tubes
   dirtLinear.moveTo(DIRT_LINEAR_INSERT_TESTS); block();

@@ -3,6 +3,7 @@
 #include "tmc/BURT_TMC.h"
 #include "DcMotor/DcMotor.h"
 #include "Vacuum/Vacuum.h"
+#include "Scooper/Scooper.h"
 
 // -------------------- Pinouts --------------------
 
@@ -11,6 +12,7 @@
 
 ///Vacuum Servo
 #define VACUUM_SERVO_PIN 18
+#define SCOOPER_SERVO_PIN 18
 
 // Pump 1: <LABEL WITH CHEMICAL>
 #define PUMP1_PWM_PIN 33 
@@ -152,6 +154,8 @@ DirtRelease dirtRelease(VACUUM_SERVO_PIN);
 
 /// Controls the vacuum. 
 Vacuum vacuum = Vacuum(VACUUM_PIN);
+
+Scooper scooper = Scooper(vacuumLinear, SCOOPER_SERVO_PIN);
 
 DCMotor pump1(PUMP1_PWM_PIN, PUMP1_IN1_PIN, PUMP1_IN2_PIN);  ///< Pump 1
 DCMotor pump2(PUMP2_PWM_PIN, PUMP2_IN1_PIN, PUMP2_IN2_PIN);  ///< Pump 2
