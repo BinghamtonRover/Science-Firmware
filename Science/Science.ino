@@ -53,7 +53,7 @@ BurtCan can(SCIENCE_COMMAND_ID, scienceHandler);
 
 MethaneSensor methanesensor = MethaneSensor(METHANE_PIN, R_0);
 HumiditySensor humsensor = HumiditySensor(HUM_PIN);
-CO2Sensor co2 = CO2Sensor();
+CO2Sensor co2 = CO2Sensor(17);
 pHSensor pH = pHSensor(PH_PIN, humsensor);
 
 ScienceState state = ScienceState_STOP_COLLECTING;
@@ -74,7 +74,7 @@ void setup() {
   Serial.println("Initializing communications...");
   can.setup();
   nextSendTime = millis() + canSendInterval;
-
+/* 
   Serial.println("Initializing stepper motors...");
   vacuumLinear.presetup();
   dirtLinear.presetup();
@@ -91,6 +91,7 @@ void setup() {
   scienceLinear.calibrate();
   dirtLinear.calibrate();
   dirtCarousel.calibrate();
+*/
 
   Serial.println("Initializing pumps...");
   pump1.setup();
@@ -108,10 +109,14 @@ void setup() {
 
 void loop() {
   /* Real Rover code */
+  /*
   vacuumLinear.update();
   dirtLinear.update();
   scienceLinear.update();
   dirtCarousel.update();
+*/
+  Serial.print("CO2: ");
+  Serial.println(co2.read());
 
   can.update();
   sendData();
@@ -239,7 +244,7 @@ void sendData() {
   can.send(SCIENCE_DATA_ID, &data, ScienceData_fields);
 
   data = ScienceData_init_zero;
-  data.co2 = co2.getPercentage();
+  data.co2 = co2.read();
   can.send(SCIENCE_DATA_ID, &data, ScienceData_fields);
 
   data = ScienceData_init_zero;
