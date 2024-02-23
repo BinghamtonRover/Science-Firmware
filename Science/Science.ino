@@ -19,8 +19,9 @@
 #define USE_SERIAL_MONITOR false
 
 void scienceHandler(const uint8_t* data, int length);
-BurtSerial serial(scienceHandler, Device::Device_SCIENCE);
-BurtCan can(SCIENCE_COMMAND_ID, scienceHandler);
+void shutdown() { }
+BurtSerial serial(Device::Device_SCIENCE, scienceHandler, shutdown);
+BurtCan<Can3> can(SCIENCE_COMMAND_ID, Device::Device_SCIENCE, scienceHandler, shutdown);
 
 #define PH_PIN 14
 #define METHANE_PIN 16
@@ -31,7 +32,7 @@ BurtCan can(SCIENCE_COMMAND_ID, scienceHandler);
 #define DIRT_CAROUSEL_INSERT_TESTS -31000
 #define DIRT_CAROUSEL_POUR 0
 #define DIRT_CAROUSEL_NEXT_SECTION -17000
-#define DIRT_CAROUSEL_NEXT_TUBE -4300
+#define DIRT_CAROUSEL_NEXT_TUBE 4600
 #define DIRT_CAROUSEL_PICTURE 0
 
 #define DIRT_LINEAR_POUR_OUTER_HOLES -500000
@@ -51,10 +52,10 @@ BurtCan can(SCIENCE_COMMAND_ID, scienceHandler);
 
 #define R_0 945
 
-MethaneSensor methanesensor = MethaneSensor(METHANE_PIN, R_0);
-HumiditySensor humsensor = HumiditySensor(HUM_PIN);
+// MethaneSensor methanesensor = MethaneSensor(METHANE_PIN, R_0);
+// HumiditySensor humsensor = HumiditySensor(HUM_PIN);
 CO2Sensor co2 = CO2Sensor(17);
-pHSensor pH = pHSensor(PH_PIN, humsensor);
+// pHSensor pH = pHSensor(PH_PIN, humsensor);
 
 ScienceState state = ScienceState_STOP_COLLECTING;
 
@@ -63,18 +64,36 @@ unsigned long nextSendTime;
 
 int sample_number = 0;
 
+Servo servo1, servo2;
+void block();
+void stopEverything();
+void test_sample();
+void calibrateEverything();
+
 void setup() {
 	Serial.begin(9600);
   Serial.println("Initializing...");
 
-  Serial.println("Initializing vacuum...");
-  vacuum.setup();
-  dirtRelease.setup();
+  Serial.println("Initializing pumps...");
+  pinMode(PUMP1, OUTPUT);
+  pinMode(PUMP2, OUTPUT);
+  pinMode(PUMP3, OUTPUT);
+  pinMode(PUMP4, OUTPUT);
+  pinMode(PUMP5, OUTPUT);
+  pinMode(PUMP6, OUTPUT);
+  pinMode(PUMP7, OUTPUT);
+  digitalWrite(PUMP1, HIGH);
+  digitalWrite(PUMP2, HIGH);
+  digitalWrite(PUMP3, HIGH);
+  digitalWrite(PUMP4, HIGH);
+  digitalWrite(PUMP5, HIGH);
+  digitalWrite(PUMP6, HIGH);
+  digitalWrite(PUMP7, HIGH);
 
-  Serial.println("Initializing communications...");
-  can.setup();
-  nextSendTime = millis() + canSendInterval;
-/* 
+  // Serial.println("Initializing communications...");
+  // can.setup();
+  // nextSendTime = millis() + canSendInterval;
+
   Serial.println("Initializing stepper motors...");
   vacuumLinear.presetup();
   dirtLinear.presetup();
@@ -86,43 +105,47 @@ void setup() {
   scienceLinear.setup();
   dirtCarousel.setup();
 
-  Serial.println("Calibrating motors...");
-  vacuumLinear.calibrate();
-  scienceLinear.calibrate();
-  dirtLinear.calibrate();
-  dirtCarousel.calibrate();
-*/
+  // Serial.println("Calibrating motors...");
+  // vacuumLinear.calibrate();
+  // scienceLinear.calibrate();
+  // dirtLinear.calibrate();
+  // dirtCarousel.calibrate();
 
-  Serial.println("Initializing pumps...");
-  pump1.setup();
-  pump2.setup();
-  pump3.setup();
-  pump4.setup();
+  Serial.println("Initializing servos...");
+  servo1.attach(SERVO1);
+  servo2.attach(SERVO2);
+  servo2.write(70);
+  servo1.write(180);
+  // delay(1000);
+  // servo2.write(180);
 
   Serial.println("Initializing sensors...");
-  humsensor.setup();
   co2.setup();
-  pH.setup();
 
 	Serial.println("Science Subsystem ready.");
 }
 
 void loop() {
   /* Real Rover code */
-  /*
+
   vacuumLinear.update();
   dirtLinear.update();
   scienceLinear.update();
   dirtCarousel.update();
-*/
-  Serial.print("CO2: ");
-  Serial.println(co2.read());
 
   can.update();
   sendData();
 
   if (USE_SERIAL_MONITOR) parseSerialCommand();
   else serial.update();
+}
+
+float read_temperature() {
+  return 0;
+}
+
+float read_humidity() {
+  return 0;
 }
 
 /* Temporary Serial Monitor interface for testing. */
@@ -134,40 +157,39 @@ void parseSerialCommand() {
   String part2 = input.substring(delimiter + 1);
   String motor = part1;
   float distance = part2.toFloat();
-  int speed = part2.toInt();
+  // int speed = part2.toInt();
 
   // Execute the command
   if (motor == "vacuum-linear"){ 
     Serial.println("moving vacuum linear");
-    vacuumLinear.moveBy(distance);  
+    vacuumLinear.moveBy(distance); 
   }
   else if (motor == "stop") stopEverything();
-  else if (motor == "calibrate") calibrateEverything();
+  // else if (motor == "calibrate") calibrateEverything();
   else if (motor == "dirt-linear") dirtLinear.moveBy(distance); //dirtLinear.moveBy(distance);  
   else if (motor == "science-linear") scienceLinear.moveBy(distance); //scienceLinear.moveBy(distance);  
   else if (motor == "dirt-carousel") dirtCarousel.moveBy(distance); //dirtCarousel.moveBy(distance);  
-  else if (motor == "vacuum_on") vacuum.enable();
-  else if (motor == "vacuum_off") vacuum.disable();
-  else if (motor == "dirt-release") dirtRelease.moveBy(distance); //go +49 to uncover hole, -49 to go back
-  else if (motor == "science-test") test_sample(distance);
-  else if (motor == "pour-dirt") pourDirt(distance);
-  else if (motor == "pump1") {
-    pump1.setSpeed(speed);
+  // else if (motor == "dirt-release") dirtRelease.moveBy(distance); //go +49 to uncover hole, -49 to go back
+  // else if (motor == "science-test") test_sample(distance);
+  // else if (motor == "pour-dirt") pourDirt(distance);
+  else if (motor == "dirt-release") servo2.write(distance);
+  else if (motor == "pinch") servo1.write(distance);
+  else if (motor == "pump") {
+    digitalWrite(PUMP1, HIGH);
+    digitalWrite(PUMP2, HIGH);
+    digitalWrite(PUMP3, HIGH);
+    digitalWrite(PUMP4, HIGH);
+    digitalWrite(PUMP5, HIGH);
+    digitalWrite(PUMP6, HIGH);
+    digitalWrite(PUMP7, HIGH);
     delay(PUMP_DELAY);
-    pump1.hardBrake();
-  } else if (motor == "pump2") {
-    pump2.setSpeed(speed);
-    delay(PUMP_DELAY);
-    pump2.hardBrake();
-  } else if (motor == "pump3") {
-    pump3.setSpeed(speed);
-    delay(PUMP_DELAY);
-    pump3.hardBrake();
-  } else if (motor == "pump4") {
-    Serial.println(speed);
-    pump4.setSpeed(speed);
-    delay(PUMP_DELAY);
-    pump4.hardBrake();
+    digitalWrite(PUMP1, LOW);
+    digitalWrite(PUMP2, LOW);
+    digitalWrite(PUMP3, LOW);
+    digitalWrite(PUMP4, LOW);
+    digitalWrite(PUMP5, LOW);
+    digitalWrite(PUMP6, LOW);
+    digitalWrite(PUMP7, LOW);
   } else {
     Serial.println("Command not recognized: " + input);
     Serial.println("  Commands are of the form: motor-name distance/speed.");
@@ -179,32 +201,55 @@ void parseSerialCommand() {
   }
 }
 
+void handlePumpCommand(int pin, PumpState state) {
+  if (state == PumpState::PumpState_PUMP_ON) {
+    digitalWrite(pin, LOW);
+  } else if (state == PumpState::PumpState_PUMP_OFF) {
+    digitalWrite(pin, HIGH);
+  }
+}
+
 void scienceHandler(const uint8_t* data, int length) {
+  Serial.println("Got data");
   ScienceCommand command = BurtProto::decode<ScienceCommand>(data, length, ScienceCommand_fields);
   // Individual motor control
   if (command.dirt_carousel != 0) dirtCarousel.moveBy(command.dirt_carousel);
-  if (command.dirt_linear != 0) dirtLinear.moveBy(command.dirt_linear);
   if (command.science_linear != 0) scienceLinear.moveBy(command.science_linear);
-  if (command.vacuum_linear != 0) vacuumLinear.moveBy(command.vacuum_linear);
+  // if (command.dirt_linear != 0) dirtLinear.moveBy(command.dirt_linear);
+  // if (command.vacuum_linear != 0) vacuumLinear.moveBy(command.vacuum_linear);
 
   // Pumps
-  pump1.handleCommand(command.pump1);
-  pump2.handleCommand(command.pump2);
-  pump3.handleCommand(command.pump3);
-  pump4.handleCommand(command.pump4);
-  vacuum.handleCommand(command.vacuum);
-  dirtRelease.handleCommand(command.dirtRelease);
+  handlePumpCommand(PUMP1, command.pump1);
+  handlePumpCommand(PUMP2, command.pump1);
+  handlePumpCommand(PUMP3, command.pump1);
+  handlePumpCommand(PUMP4, command.pump1);
+  handlePumpCommand(PUMP5, command.pump1);
+  handlePumpCommand(PUMP6, command.pump1);
+  handlePumpCommand(PUMP7, command.pump1);
+
+  // Dirt release
+  if (command.dirtRelease == DirtReleaseState::DirtReleaseState_OPEN_DIRT) {
+    servo1.write(30);
+  } else if (command.dirtRelease == DirtReleaseState::DirtReleaseState_CLOSE_DIRT) {
+    servo1.write(180);
+  }
+  // Scooper
+  if (command.pump2 == PumpState::PumpState_PUMP_ON) {
+    servo2.write(0);
+  } else if (command.pump2 == PumpState::PumpState_PUMP_OFF) {
+    servo2.write(70);
+  }
 
   // Commands
   if (command.stop) stopEverything();
-  else if (command.calibrate) calibrateEverything();
-  if (command.next_tube) dirtCarousel.moveBy(PI / 6); 
-  if (command.next_section) dirtCarousel.moveBy(2 * PI / 3);
-  if (command.sample != 0) sample_number = command.sample - 1;
-  if (command.state == ScienceState_COLLECT_DATA) {
-    if (state == ScienceState_STOP_COLLECTING) test_sample(sample_number);
-    state = command.state;
-  }
+  // else if (command.calibrate) calibrateEverything();
+  // if (command.next_tube) dirtCarousel.moveBy(PI / 6); 
+  // if (command.next_section) dirtCarousel.moveBy(2 * PI / 3);
+  // if (command.sample != 0) sample_number = command.sample - 1;
+  // if (command.state == ScienceState_COLLECT_DATA) {
+    // if (state == ScienceState_STOP_COLLECTING) test_sample(sample_number);
+    // state = command.state;
+  // }
 }
 
 void calibrateEverything() {
@@ -219,45 +264,46 @@ void stopEverything() {
   dirtLinear.stop();
   scienceLinear.stop();
   vacuumLinear.stop();
-  vacuum.disable();
-  pump1.setSpeed(0);
-  pump2.setSpeed(0);
-  pump3.setSpeed(0);
-  pump4.setSpeed(0);
+  // vacuum.disable();
+  // pump1.setSpeed(0);
+  // pump2.setSpeed(0);
+  // pump3.setSpeed(0);
+  // pump4.setSpeed(0);
 }
 
 void sendData() {
   // Send generic data
-  if (millis() < nextSendTime) return;
-  ScienceData data = ScienceData_init_zero;
-  data.sample = sample_number;
-  can.send(SCIENCE_DATA_ID, &data, ScienceData_fields);
+  // if (millis() < nextSendTime) return;
+  ScienceData data;
+  // ScienceData data = ScienceData_init_zero;
+  // data.sample = sample_number;
+  // can.send(SCIENCE_DATA_ID, &data, ScienceData_fields);
 
-  data = ScienceData_init_zero;
-  data.state = state;
-  can.send(SCIENCE_DATA_ID, &data, ScienceData_fields);
+  // data = ScienceData_init_zero;
+  // data.state = state;
+  // can.send(SCIENCE_DATA_ID, &data, ScienceData_fields);
 
-  // Send sensor data
-  if (state != ScienceState_COLLECT_DATA) return;
-  data = ScienceData_init_zero;
-  data.methane = methanesensor.getMethanePPM();
-  can.send(SCIENCE_DATA_ID, &data, ScienceData_fields);
+  // // Send sensor data
+  // if (state != ScienceState_COLLECT_DATA) return;
+  // data = ScienceData_init_zero;
+  // data.methane = methanesensor.getMethanePPM();
+  // can.send(SCIENCE_DATA_ID, &data, ScienceData_fields);
 
   data = ScienceData_init_zero;
   data.co2 = co2.read();
   can.send(SCIENCE_DATA_ID, &data, ScienceData_fields);
 
   data = ScienceData_init_zero;
-  data.humidity = humsensor.readHumidity();
+  data.humidity = read_humidity();
   can.send(SCIENCE_DATA_ID, &data, ScienceData_fields);
 
   data = ScienceData_init_zero;
-  data.temperature = humsensor.readTemperature();
+  data.temperature = read_temperature();
   can.send(SCIENCE_DATA_ID, &data, ScienceData_fields);
 
-  data = ScienceData_init_zero;
-  data.pH = pH.sample_pH();
-  can.send(SCIENCE_DATA_ID, &data, ScienceData_fields);
+  // data = ScienceData_init_zero;
+  // data.pH = pH.sample_pH();
+  // can.send(SCIENCE_DATA_ID, &data, ScienceData_fields);
 
   nextSendTime = millis() + canSendInterval;
 }
@@ -269,11 +315,11 @@ void block() {
   while (dirtCarousel.isMoving()) delay(BLOCK_DELAY);
 }
 
-void pourDirt(int ms) {
-  dirtRelease.open();
-  delay(ms);
-  dirtRelease.close();
-}
+// void pourDirt(int ms) {
+//   dirtRelease.open();
+//   delay(ms);
+//   dirtRelease.close();
+// }
 
 /// The vacuum should be lowered manually. This function sucks dirt to fill the canister, then
 /// pours it into each hole of the dirt carousel, being careful to spill only a bit in each tube.
@@ -290,19 +336,19 @@ void test_sample(int sample) {
   dirtLinear.moveTo(DIRT_LINEAR_POUR_OUTER_HOLES); block();
 
   // Pour into each outer hole
-  for (int outerHole = 0; outerHole < 4; outerHole++) {
-    if (outerHole > 0) dirtCarousel.moveBy(DIRT_CAROUSEL_NEXT_TUBE); block();
-    dirtRelease.open();
-    delay(DIRT_RELEASE_DELAY);
-    dirtRelease.close();
-  }
+  // for (int outerHole = 0; outerHole < 4; outerHole++) {
+  //   if (outerHole > 0) dirtCarousel.moveBy(DIRT_CAROUSEL_NEXT_TUBE); block();
+  //   // dirtRelease.open();
+  //   delay(DIRT_RELEASE_DELAY);
+  //   // dirtRelease.close();
+  // }
 
   // Pour into the middle hole (aligned with the third hole)
   dirtCarousel.moveBy(-DIRT_CAROUSEL_NEXT_TUBE); block();
   dirtLinear.moveTo(DIRT_LINEAR_POUR_INNER_HOLE); block();
-  dirtRelease.open();
+  // dirtRelease.open();
   delay(DIRT_RELEASE_DELAY);
-  dirtRelease.close();
+  // dirtRelease.close();
 
   // Drop the science tests into the tubes
   dirtLinear.moveTo(DIRT_LINEAR_INSERT_TESTS); block();
