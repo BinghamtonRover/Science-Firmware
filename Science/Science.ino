@@ -1,3 +1,6 @@
+#include <DFRobot_SHT3x.h>
+
+
 //#include <BURT_utils.h>
 #include "src/utils/BURT_utils.h"
 
@@ -16,12 +19,15 @@
 #define SCIENCE_COMMAND_ID 0x43
 #define SCIENCE_DATA_ID 0x17
 
-#define USE_SERIAL_MONITOR false
+#define USE_SERIAL_MONITOR true
 
 void scienceHandler(const uint8_t* data, int length);
 void shutdown() { }
 BurtSerial serial(Device::Device_SCIENCE, scienceHandler, shutdown);
 BurtCan<Can3> can(SCIENCE_COMMAND_ID, Device::Device_SCIENCE, scienceHandler, shutdown);
+
+DFRobot_SHT3x sht3x(&Wire,/*address=*/0x44,/*RST=*/4);
+
 
 #define PH_PIN 14
 #define METHANE_PIN 16
@@ -70,6 +76,19 @@ void stopEverything();
 void test_sample();
 void calibrateEverything();
 
+void setupDF() {
+  while (sht3x.begin() != 0) {
+    Serial.println("Failed to Initialize the chip, please confirm the wire connection");
+    delay(1000);
+  }
+  Serial.print("Chip serial number");
+  Serial.println(sht3x.readSerialNumber());
+  if(!sht3x.softReset()){
+    Serial.println("Failed to Initialize the chip....");
+  }
+  Serial.println("Set Temp/Humidity");
+}
+
 void setup() {
 	Serial.begin(9600);
   Serial.println("Initializing...");
@@ -115,12 +134,13 @@ void setup() {
   servo1.attach(SERVO1);
   servo2.attach(SERVO2);
   servo2.write(70);
-  servo1.write(180);
+  servo1.write(30);
   // delay(1000);
   // servo2.write(180);
 
   Serial.println("Initializing sensors...");
-  co2.setup();
+  // co2.setup();
+  // setupDF();
 
 	Serial.println("Science Subsystem ready.");
 }
@@ -141,11 +161,11 @@ void loop() {
 }
 
 float read_temperature() {
-  return 0;
+  return sht3x.getTemperatureC();
 }
 
 float read_humidity() {
-  return 0;
+  return sht3x.getHumidityRH();
 }
 
 /* Temporary Serial Monitor interface for testing. */
@@ -175,14 +195,6 @@ void parseSerialCommand() {
   else if (motor == "dirt-release") servo2.write(distance);
   else if (motor == "pinch") servo1.write(distance);
   else if (motor == "pump") {
-    digitalWrite(PUMP1, HIGH);
-    digitalWrite(PUMP2, HIGH);
-    digitalWrite(PUMP3, HIGH);
-    digitalWrite(PUMP4, HIGH);
-    digitalWrite(PUMP5, HIGH);
-    digitalWrite(PUMP6, HIGH);
-    digitalWrite(PUMP7, HIGH);
-    delay(PUMP_DELAY);
     digitalWrite(PUMP1, LOW);
     digitalWrite(PUMP2, LOW);
     digitalWrite(PUMP3, LOW);
@@ -190,6 +202,14 @@ void parseSerialCommand() {
     digitalWrite(PUMP5, LOW);
     digitalWrite(PUMP6, LOW);
     digitalWrite(PUMP7, LOW);
+    delay(PUMP_DELAY);
+    digitalWrite(PUMP1, HIGH);
+    digitalWrite(PUMP2, HIGH);
+    digitalWrite(PUMP3, HIGH);
+    digitalWrite(PUMP4, HIGH);
+    digitalWrite(PUMP5, HIGH);
+    digitalWrite(PUMP6, HIGH);
+    digitalWrite(PUMP7, HIGH);
   } else {
     Serial.println("Command not recognized: " + input);
     Serial.println("  Commands are of the form: motor-name distance/speed.");
@@ -292,14 +312,21 @@ void sendData() {
   data = ScienceData_init_zero;
   data.co2 = co2.read();
   can.send(SCIENCE_DATA_ID, &data, ScienceData_fields);
+  // serial.send(ScienceData_fields, &data, 8);
+  // Serial.print("CO2: ");
+  // Serial.println(data.humidity);
 
   data = ScienceData_init_zero;
   data.humidity = read_humidity();
   can.send(SCIENCE_DATA_ID, &data, ScienceData_fields);
+  // serial.send(ScienceData_fields, &data, 8);
+  // Serial.print("Humidity: ");
+  // Serial.println(data.humidity);
 
   data = ScienceData_init_zero;
   data.temperature = read_temperature();
   can.send(SCIENCE_DATA_ID, &data, ScienceData_fields);
+  // serial.send(ScienceData_fields, &data, 8);
 
   // data = ScienceData_init_zero;
   // data.pH = pH.sample_pH();

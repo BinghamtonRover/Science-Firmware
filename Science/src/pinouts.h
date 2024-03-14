@@ -44,7 +44,7 @@ StepperMotorPins vacuumLinearPins = {
 StepperMotorConfig vacuumLinearConfig = {
 	name: "vacuumLinear", 
 	unitName: "Steps",
-	current: 500, 
+	current: 250, 
 	speed: SPEED / 25,
 	accel: ACCEL, 
 	isPositive: true, 
@@ -69,7 +69,7 @@ StepperMotorPins dirtLinearPins = {
 StepperMotorConfig dirtLinearConfig = {
 	name: "dirtLinear", 
 	unitName: "Steps",
-	current: 500, 
+	current: 250, 
 	speed: SPEED / 2, 
 	accel: ACCEL, 
 	isPositive: true, 
@@ -94,7 +94,7 @@ StepperMotorPins scienceLinearPins = {
 StepperMotorConfig scienceLinearConfig = {
 	name: "scienceLinear", 
 	unitName: "Steps",
-	current: 500,
+	current: 400,
 	speed: SPEED / 5, 
 	accel: ACCEL,
 	isPositive: true, 
@@ -119,7 +119,7 @@ StepperMotorPins dirtCarouselPins = {
 StepperMotorConfig dirtCarouselConfig = {
 	name: "dirtCarousel", 
 	unitName: "Steps",
-	current: 750, 
+	current: 250, 
 	speed: SPEED / 20, //changed values came from testing
 	accel: ACCEL, 
 	isPositive: true, 

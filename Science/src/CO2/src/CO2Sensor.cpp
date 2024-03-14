@@ -17,5 +17,5 @@ float CO2Sensor::read() {
   // float exponent = (voltage - CO2_LOWER_VOLTAGE) * log10(CO2_LOWER_PPM / CO2_UPPER_PPM) / CO2_VOLTAGE_DROP / CO2_GAIN;
   // float newValue = CO2_LOWER_PPM * pow(10, exponent);
 
-  return oldValue / 10;
+  return oldValue / 10 * 3.14;
 }
