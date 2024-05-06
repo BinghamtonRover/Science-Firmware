@@ -32,11 +32,10 @@ void setup() {
 
   Serial.println("Initializing hardware...");
   motors.setup();
+  motors.calibrate();
   scooper.setup();
   pumps.setup();
   carousel.setup();
-
-  motors.calibrate();
 
   Serial.println("Initializing sensors...");
   co2.setup();
@@ -61,7 +60,6 @@ void parseSerialCommand() {
   String part2 = input.substring(delimiter + 1);
   String motor = part1;
   float distance = part2.toFloat();
-  // int speed = part2.toInt();
 
   // Execute the command
   if (motor == "stop") stopEverything();
@@ -83,37 +81,33 @@ void parseSerialCommand() {
 
 void scienceHandler(const uint8_t* data, int length) {
   ScienceCommand command = BurtProto::decode<ScienceCommand>(data, length, ScienceCommand_fields);
-  // Individual motor control
-  if (command.dirt_carousel != 0) dirtCarouselMotor.moveBy(command.dirt_carousel);
-  if (command.science_linear != 0) scoopArmMotor.moveBy(command.science_linear);
-  if (command.dirt_linear != 0) dirtLinearMotor.moveBy(command.dirt_linear);
 
+  // Control specific hardware
+  motors.handleCommand(command);
   pumps.handleCommand(command);
   scooper.handleCommand(command);
   carousel.handleCommand(command);
 
-  // Commands
+  // General commands
   if (command.stop) stopEverything();
   else if (command.calibrate) motors.calibrate();
-  // if (command.next_tube) dirtCarousel.moveBy(PI / 6); 
-  // if (command.next_section) dirtCarousel.moveBy(2 * PI / 3);
-  // if (command.sample != 0) sample_number = command.sample - 1;
-  // if (command.state == ScienceState_COLLECT_DATA) {
-    // if (state == ScienceState_STOP_COLLECTING) test_sample(sample_number);
-    // state = command.state;
-  // }
+  if (command.sample != 0) sample_number = command.sample - 1;
+  if (command.state == ScienceState_COLLECT_DATA) {
+    if (state == ScienceState_STOP_COLLECTING) test_sample(sample_number);
+    state = command.state;
+  }
 }
 
 void sendData() {
-  // Send generic data
-  ScienceData data;
-  // ScienceData data = ScienceData_init_zero;
-  // data.sample = sample_number;
-  // can.send(SCIENCE_DATA_ID, &data, ScienceData_fields);
+  ScienceData data = ScienceData_init_zero;
+  data.sample = sample_number;
+  can.send(SCIENCE_DATA_ID, &data, ScienceData_fields);
+  serial.send(ScienceData_fields, &data, 8);
 
-  // data = ScienceData_init_zero;
-  // data.state = state;
-  // can.send(SCIENCE_DATA_ID, &data, ScienceData_fields);
+  data = ScienceData_init_zero;
+  data.state = state;
+  can.send(SCIENCE_DATA_ID, &data, ScienceData_fields);
+  serial.send(ScienceData_fields, &data, 8);
 
   data = ScienceData_init_zero;
   data.co2 = co2.read();

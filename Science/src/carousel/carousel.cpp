@@ -25,6 +25,8 @@ void DirtCarousel::handleCommand(ScienceCommand command) {
   } else if (command.dirtRelease == DirtReleaseState::DirtReleaseState_CLOSE_DIRT) {
     closeFunnel();
   }
+
+  if (command.next_tube) nextTube();
 }
 
 void DirtCarousel::goHome() {

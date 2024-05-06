@@ -2,6 +2,7 @@
 
 #include <Arduino.h>
 
+#include "../science.pb.h"
 #include "../tmc/BURT_TMC.h"
 
 class Motors {
@@ -17,4 +18,5 @@ class Motors {
     void stop();
     void block();
     void update();
+    void handleCommand(ScienceCommand command);
 };
