@@ -1,13 +1,7 @@
 #include <Servo.h>
 
-
-//#include <BURT_utils.h>
-#include "src/utils/BURT_utils.h"
-
-// Hardware code
-#include "src/co2/co2_sensor.h"
-
 #include "pinouts.h"
+#include "src/utils/BURT_utils.h"
 #include "src/science.pb.h"
 
 #define SCIENCE_COMMAND_ID 0x43
@@ -22,31 +16,11 @@ BurtSerial serial(Device::Device_SCIENCE, scienceHandler, shutdown);
 BurtCan<Can3> can(SCIENCE_COMMAND_ID, Device::Device_SCIENCE, scienceHandler, shutdown);
 BurtTimer dataTimer(250, sendData);
 
-#define CO2_PIN 17
-
-//measurements in steps, used for testing sequence
-#define DIRT_CAROUSEL_INSERT_TESTS -31000
-#define DIRT_CAROUSEL_POUR 0
-#define DIRT_CAROUSEL_NEXT_SECTION -17000
-#define DIRT_CAROUSEL_NEXT_TUBE 4600
-#define DIRT_CAROUSEL_PICTURE 0
-
-#define DIRT_LINEAR_POUR_OUTER_HOLES -500000
-#define DIRT_LINEAR_POUR_INNER_HOLE -700000
-#define DIRT_LINEAR_INSERT_TESTS -100000
-#define DIRT_LINEAR_PICTURE -650000
-
-#define SCIENCE_LINEAR_INSERT_TESTS 500000
-
 //pump speed
 #define PUMP_START -100
 
 //delays in ms
 #define BLOCK_DELAY 10
-
-#define R_0 945
-
-Co2Sensor co2 = Co2Sensor(17);
 
 ScienceState state = ScienceState_STOP_COLLECTING;
 
@@ -54,7 +28,6 @@ int sample_number = 0;
 
 void block();
 void stopEverything();
-void test_sample();
 void calibrateEverything();
 
 void setup() {

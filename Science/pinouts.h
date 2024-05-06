@@ -5,18 +5,13 @@
 #include "src/temp_humidity/temp_humidity.h"
 #include "src/pumps/pumps.h"
 #include "src/carousel/carousel.h"
+#include "src/co2/co2_sensor.h"
 
 // -------------------- Pinouts --------------------
 
-#define CO2_PIN  17 // On I2C 1
-
+#define CO2_PIN 17
 #define FUNNEL_SERVO 38  // Methane sensor connector, on SPI 1
 #define SCOOP_SERVO 39  // pH sensor connector, SPI 1
-
-#define LIMIT1 34
-#define LIMIT2 35
-#define LIMIT3 29
-#define LIMIT4 28
 
 //Stepper Motor Constants (taken from arm code, double check)
 #define ACCEL 0x00030d4d //200013 (unclear what units but this is the decimal version)
@@ -102,3 +97,4 @@ Scooper scooper(scoopArmMotor, SCOOP_SERVO);
 TempHumiditySensor tempHumidity;
 Pumps pumps;
 DirtCarousel carousel(dirtCarouselMotor, FUNNEL_SERVO);
+Co2Sensor co2 = Co2Sensor(CO2_PIN);
