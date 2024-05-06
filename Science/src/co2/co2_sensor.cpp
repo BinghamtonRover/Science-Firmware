@@ -1,4 +1,4 @@
-#include "CO2Sensor.h"
+#include "co2_sensor.h"
 
 Co2Sensor::Co2Sensor(int pin) : pin(pin) { }
 

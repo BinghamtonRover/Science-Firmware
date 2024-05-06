@@ -5,7 +5,7 @@
 #include "src/utils/BURT_utils.h"
 
 // Hardware code
-#include "src/CO2/CO2Sensor.h"
+#include "src/co2/co2_sensor.h"
 
 #include "pinouts.h"
 #include "src/science.pb.h"
