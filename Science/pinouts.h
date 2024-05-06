@@ -1,6 +1,7 @@
 #pragma once
 
 #include "src/tmc/BURT_TMC.h"
+#include "src/scooper/scooper.h"
 
 // -------------------- Pinouts --------------------
 
@@ -18,7 +19,7 @@
 #define CO2_PIN  17 // On I2C 1
 
 #define SERVO1 38  // Methane sensor connector, on SPI 1
-#define SERVO2 39  // pH sensor connector, SPI 1
+#define SCOOP_SERVO 39  // pH sensor connector, SPI 1
 
 #define LIMIT1 34
 #define LIMIT2 35
@@ -85,11 +86,11 @@ LimitSwitch dirtLinearLimit;
 StepperMotor dirtLinear(dirtLinearPins, dirtLinearConfig, dirtLinearLimit);
 
 ///Stepper3 on PCB (IC4) -- dirt-carousel
-StepperMotorPins scienceLinearPins = {
+StepperMotorPins scoopArmPins = {
 	chipSelect: 4, 
 	enable: 9, 
 };
-StepperMotorConfig scienceLinearConfig = {
+StepperMotorConfig scoopArmConfig = {
 	name: "scienceLinear", 
 	unitName: "Steps",
 	current: 400,
@@ -100,14 +101,14 @@ StepperMotorConfig scienceLinearConfig = {
 	toSteps: 1.0,
 };
 
-LimitSwitch scienceLimit;
+LimitSwitch scoopArmLimit;
 // 	pin: 32, 
 // 	triggeredValue: HIGH,
 // 	direction: -1,
 // 	position: 0,
 // };
 
-StepperMotor scienceLinear(scienceLinearPins, scienceLinearConfig, scienceLimit);
+StepperMotor scoopArmMotor(scoopArmPins, scoopArmConfig, scoopArmLimit);
 
 ///Stepper4 on PCB (IC2) -- Scooper
 StepperMotorPins dirtCarouselPins = {
@@ -133,3 +134,5 @@ LimitSwitch dirtCarouselLimit;
 // };
 
 StepperMotor dirtCarousel(dirtCarouselPins, dirtCarouselConfig, dirtCarouselLimit);
+
+Scooper scooper(scoopArmMotor, SCOOP_SERVO);

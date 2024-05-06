@@ -8,7 +8,7 @@ Scooper::Scooper(StepperMotor stepper, int servoPin) :
   servoPin(servoPin)
   { }
 
-void setup() {
+void Scooper::setup() {
   servo.attach(servoPin);
 }
 

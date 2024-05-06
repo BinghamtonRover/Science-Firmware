@@ -62,7 +62,7 @@ ScienceState state = ScienceState_STOP_COLLECTING;
 
 int sample_number = 0;
 
-Servo servo1, servo2;
+Servo servo1;
 void block();
 void stopEverything();
 void test_sample();
@@ -107,24 +107,23 @@ void setup() {
   Serial.println("Initializing stepper motors...");
   vacuumLinear.presetup();
   dirtLinear.presetup();
-  scienceLinear.presetup();
+  scoopArmMotor.presetup();
   dirtCarousel.presetup();
 
 	vacuumLinear.setup();
   dirtLinear.setup();
-  scienceLinear.setup();
+  scoopArmMotor.setup();
   dirtCarousel.setup();
 
   // Serial.println("Calibrating motors...");
   // vacuumLinear.calibrate();
-  // scienceLinear.calibrate();
+  // scoopArmMotor.calibrate();
   // dirtLinear.calibrate();
   // dirtCarousel.calibrate();
 
   Serial.println("Initializing servos...");
+  scooper.setup();
   servo1.attach(SERVO1);
-  servo2.attach(SERVO2);
-  servo2.write(SCOOP_CLOSE);
   servo1.write(FUNNEL_CLOSE);
 
   Serial.println("Initializing sensors...");
@@ -138,7 +137,7 @@ void loop() {
   /* Real Rover code */
   vacuumLinear.update();
   dirtLinear.update();
-  scienceLinear.update();
+  scoopArmMotor.update();
   dirtCarousel.update();
 
   // can.update();
@@ -173,12 +172,11 @@ void parseSerialCommand() {
   else if (motor == "stop") stopEverything();
   // else if (motor == "calibrate") calibrateEverything();
   else if (motor == "dirt-linear") dirtLinear.moveBy(distance); //dirtLinear.moveBy(distance);  
-  else if (motor == "science-linear") scienceLinear.moveBy(distance); //scienceLinear.moveBy(distance);  
+  else if (motor == "science-linear") scoopArmMotor.moveBy(distance); //scoopArmMotor.moveBy(distance);  
   else if (motor == "dirt-carousel") dirtCarousel.moveBy(distance); //dirtCarousel.moveBy(distance);  
   // else if (motor == "dirt-release") dirtRelease.moveBy(distance); //go +49 to uncover hole, -49 to go back
   // else if (motor == "science-test") test_sample(distance);
   // else if (motor == "pour-dirt") pourDirt(distance);
-  else if (motor == "dirt-release") servo2.write(distance);
   else if (motor == "pinch") servo1.write(distance);
   else if (motor == "pump") {
     digitalWrite(PUMP1, LOW);
@@ -219,7 +217,7 @@ void scienceHandler(const uint8_t* data, int length) {
   ScienceCommand command = BurtProto::decode<ScienceCommand>(data, length, ScienceCommand_fields);
   // Individual motor control
   if (command.dirt_carousel != 0) dirtCarousel.moveBy(command.dirt_carousel);
-  if (command.science_linear != 0) scienceLinear.moveBy(command.science_linear);
+  if (command.science_linear != 0) scoopArmMotor.moveBy(command.science_linear);
   // if (command.dirt_linear != 0) dirtLinear.moveBy(command.dirt_linear);
   // if (command.vacuum_linear != 0) vacuumLinear.moveBy(command.vacuum_linear);
 
@@ -240,9 +238,9 @@ void scienceHandler(const uint8_t* data, int length) {
   }
   // Scooper
   if (command.pump2 == PumpState::PumpState_PUMP_ON) {
-    servo2.write(SCOOP_OPEN);
+    scooper.open();
   } else if (command.pump2 == PumpState::PumpState_PUMP_OFF) {
-    servo2.write(SCOOP_CLOSE);
+    scooper.close();
   }
 
   // Commands
@@ -258,7 +256,7 @@ void scienceHandler(const uint8_t* data, int length) {
 }
 
 void calibrateEverything() {
-  scienceLinear.calibrate(); block();
+  scoopArmMotor.calibrate(); block();
   dirtLinear.calibrate(); block();
   dirtCarousel.calibrate(); block();
   vacuumLinear.calibrate(); block();
@@ -267,7 +265,7 @@ void calibrateEverything() {
 void stopEverything() {
   dirtCarousel.stop();
   dirtLinear.stop();
-  scienceLinear.stop();
+  scoopArmMotor.stop();
   vacuumLinear.stop();
   // vacuum.disable();
   // pump1.setSpeed(0);
@@ -305,7 +303,7 @@ void sendData() {
 
 void block() {
   while (vacuumLinear.isMoving()) delay(BLOCK_DELAY);
-  while (scienceLinear.isMoving()) delay(BLOCK_DELAY);
+  while (scoopArmMotor.isMoving()) delay(BLOCK_DELAY);
   while (dirtLinear.isMoving()) delay(BLOCK_DELAY);
   while (dirtCarousel.isMoving()) delay(BLOCK_DELAY);
 }
@@ -356,7 +354,7 @@ void test_sample(int sample) {
   { dirtCarousel.moveBy(-DIRT_CAROUSEL_NEXT_SECTION); 
     block();
   }
-  scienceLinear.moveTo(SCIENCE_LINEAR_INSERT_TESTS); block();
+  scoopArmMotor.moveTo(SCIENCE_LINEAR_INSERT_TESTS); block();
   // TODO: Re-enable the below
   
   /*
@@ -376,7 +374,7 @@ void test_sample(int sample) {
   // - dirt linear as far back as possible
   // - dirt carousel so that the clear tube is in front of camera
   /*
-  scienceLinear.moveTo(0); block();
+  scoopArmMotor.moveTo(0); block();
   dirtCarousel.moveBy(-DIRT_CAROUSEL_NEXT_TUBE); block();
   dirtLinear.moveTo(DIRT_LINEAR_PICTURE); block();
   */
