@@ -1,8 +1,6 @@
 #pragma once
 
-#include "tmc/BURT_TMC.h"
-#include "DcMotor/DcMotor.h"
-#include "Vacuum/Vacuum.h"
+#include "src/tmc/BURT_TMC.h"
 
 // -------------------- Pinouts --------------------
 
@@ -135,14 +133,3 @@ LimitSwitch dirtCarouselLimit;
 // };
 
 StepperMotor dirtCarousel(dirtCarouselPins, dirtCarouselConfig, dirtCarouselLimit);
-
-///Vacuum canister
-// DirtRelease dirtRelease(VACUUM_SERVO_PIN);
-
-/// Controls the vacuum. 
-// Vacuum vacuum = Vacuum(VACUUM_PIN);
-
-// DCMotor pump1(PUMP1_PWM_PIN, PUMP1_IN1_PIN, PUMP1_IN2_PIN);  ///< Pump 1
-// DCMotor pump2(PUMP2_PWM_PIN, PUMP2_IN1_PIN, PUMP2_IN2_PIN);  ///< Pump 2
-// DCMotor pump3(PUMP3_PWM_PIN, PUMP3_IN1_PIN, PUMP3_IN2_PIN);  ///< Pump 3
-// DCMotor pump4(PUMP4_PWM_PIN, PUMP4_IN1_PIN, PUMP4_IN2_PIN);  ///< Pump 4

@@ -1,18 +1,15 @@
 #include <DFRobot_SHT3x.h>
+#include <Servo.h>
 
 
 //#include <BURT_utils.h>
 #include "src/utils/BURT_utils.h"
 
 // Hardware code
-#include "src/CO2/src/CO2Sensor.h"
-#include "src/Methane/src/MethaneSensor.h"
-#include "src/pH/src/pH.h"
-#include "src/Humidity/src/HumiditySensor.h"
-#include "src/Vacuum/Vacuum.h"
+#include "src/CO2/CO2Sensor.h"
 
 // Contains all the StepperMotor and DCMotor objects.
-#include "src/pinouts.h"
+#include "pinouts.h"
 // Contains all the Protobuf data
 #include "src/science.pb.h"
 
@@ -56,8 +53,6 @@ DFRobot_SHT3x sht3x(&Wire,/*address=*/0x44,/*RST=*/4);
 
 #define R_0 945
 
-#define SCOOP_OPEN 150
-#define SCOOP_CLOSE 30
 #define FUNNEL_OPEN 35
 #define FUNNEL_CLOSE 90
 
