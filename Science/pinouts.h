@@ -3,6 +3,7 @@
 #include "src/tmc/BURT_TMC.h"
 #include "src/scooper/scooper.h"
 #include "src/temp_humidity/temp_humidity.h"
+#include "src/pumps/pumps.h"
 
 // -------------------- Pinouts --------------------
 
@@ -134,3 +135,4 @@ StepperMotor dirtCarousel(dirtCarouselPins, dirtCarouselConfig, dirtCarouselLimi
 
 Scooper scooper(scoopArmMotor, SCOOP_SERVO);
 TempHumiditySensor tempHumidity;
+Pumps pumps;

@@ -67,22 +67,6 @@ void setup() {
 	Serial.begin(9600);
   Serial.println("Initializing...");
 
-  Serial.println("Initializing pumps...");
-  pinMode(PUMP1, OUTPUT);
-  pinMode(PUMP2, OUTPUT);
-  pinMode(PUMP3, OUTPUT);
-  pinMode(PUMP4, OUTPUT);
-  pinMode(PUMP5, OUTPUT);
-  pinMode(PUMP6, OUTPUT);
-  pinMode(PUMP7, OUTPUT);
-  digitalWrite(PUMP1, HIGH);
-  digitalWrite(PUMP2, HIGH);
-  digitalWrite(PUMP3, HIGH);
-  digitalWrite(PUMP4, HIGH);
-  digitalWrite(PUMP5, HIGH);
-  digitalWrite(PUMP6, HIGH);
-  digitalWrite(PUMP7, HIGH);
-
   Serial.println("Initializing communications...");
   can.setup();
 
@@ -103,14 +87,14 @@ void setup() {
   // dirtLinear.calibrate();
   // dirtCarousel.calibrate();
 
-  Serial.println("Initializing servos...");
+  Serial.println("Initializing other hardware...");
   scooper.setup();
+  pumps.setup();
   servo1.attach(SERVO1);
   servo1.write(FUNNEL_CLOSE);
 
   Serial.println("Initializing sensors...");
   co2.setup();
-  // setupDF();
 
 	Serial.println("Science Subsystem ready.");
 }
@@ -153,21 +137,9 @@ void parseSerialCommand() {
   // else if (motor == "pour-dirt") pourDirt(distance);
   else if (motor == "pinch") servo1.write(distance);
   else if (motor == "pump") {
-    digitalWrite(PUMP1, LOW);
-    digitalWrite(PUMP2, LOW);
-    digitalWrite(PUMP3, LOW);
-    digitalWrite(PUMP4, LOW);
-    digitalWrite(PUMP5, LOW);
-    digitalWrite(PUMP6, LOW);
-    digitalWrite(PUMP7, LOW);
+    pumps.turnOn();
     delay(PUMP_DELAY);
-    digitalWrite(PUMP1, HIGH);
-    digitalWrite(PUMP2, HIGH);
-    digitalWrite(PUMP3, HIGH);
-    digitalWrite(PUMP4, HIGH);
-    digitalWrite(PUMP5, HIGH);
-    digitalWrite(PUMP6, HIGH);
-    digitalWrite(PUMP7, HIGH);
+    pumps.turnOff();
   } else {
     Serial.println("Command not recognized: " + input);
     Serial.println("  Commands are of the form: motor-name distance/speed.");
@@ -179,13 +151,6 @@ void parseSerialCommand() {
   }
 }
 
-void handlePumpCommand(int pin, PumpState state) {
-  if (state == PumpState::PumpState_PUMP_ON) {
-    digitalWrite(pin, LOW);
-  } else if (state == PumpState::PumpState_PUMP_OFF) {
-    digitalWrite(pin, HIGH);
-  }
-}
 
 void scienceHandler(const uint8_t* data, int length) {
   ScienceCommand command = BurtProto::decode<ScienceCommand>(data, length, ScienceCommand_fields);
@@ -196,13 +161,7 @@ void scienceHandler(const uint8_t* data, int length) {
   // if (command.vacuum_linear != 0) vacuumLinear.moveBy(command.vacuum_linear);
 
   // Pumps
-  handlePumpCommand(PUMP1, command.pump1);
-  handlePumpCommand(PUMP2, command.pump1);
-  handlePumpCommand(PUMP3, command.pump1);
-  handlePumpCommand(PUMP4, command.pump1);
-  handlePumpCommand(PUMP5, command.pump1);
-  handlePumpCommand(PUMP6, command.pump1);
-  handlePumpCommand(PUMP7, command.pump1);
+  pumps.handleCommand(command);
 
   // Dirt release
   if (command.dirtRelease == DirtReleaseState::DirtReleaseState_OPEN_DIRT) {
@@ -241,11 +200,7 @@ void stopEverything() {
   dirtLinear.stop();
   scoopArmMotor.stop();
   vacuumLinear.stop();
-  // vacuum.disable();
-  // pump1.setSpeed(0);
-  // pump2.setSpeed(0);
-  // pump3.setSpeed(0);
-  // pump4.setSpeed(0);
+  pumps.turnOff();
 }
 
 void sendData() {
@@ -333,15 +288,9 @@ void test_sample(int sample) {
   
   /*
   // Pour the test fluids into the tubes
-  pump1.setSpeed(PUMP_START);
-  pump1.setSpeed(PUMP_START);
-  pump1.setSpeed(PUMP_START);
-  pump1.setSpeed(PUMP_START);
+  pumps.turnOn();
   delay(PUMP_DELAY);
-  pump1.hardBrake();
-  pump1.hardBrake();
-  pump1.hardBrake();
-  pump1.hardBrake();
+  pumps.turnOff();
   */
 
   // Move the dirt carousel to its picture position:
