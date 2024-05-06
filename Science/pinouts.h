@@ -2,6 +2,7 @@
 
 #include "src/tmc/BURT_TMC.h"
 #include "src/scooper/scooper.h"
+#include "src/temp_humidity/temp_humidity.h"
 
 // -------------------- Pinouts --------------------
 
@@ -15,7 +16,6 @@
 #define PUMP6 27  // Avoid? On SPI 1
 #define PUMP7 1  // Avoid? On Serial1
 
-// Temp/Humidity: SDA 18, SCL 19, I2C 1
 #define CO2_PIN  17 // On I2C 1
 
 #define SERVO1 38  // Methane sensor connector, on SPI 1
@@ -25,9 +25,6 @@
 #define LIMIT2 35
 #define LIMIT3 29
 #define LIMIT4 28
-
-// CS: 3, 4, 5, 6
-// EN: 8, 9, 10, 7
 
 //Stepper Motor Constants (taken from arm code, double check)
 #define ACCEL 0x00030d4d //200013 (unclear what units but this is the decimal version)
@@ -136,3 +133,4 @@ LimitSwitch dirtCarouselLimit;
 StepperMotor dirtCarousel(dirtCarouselPins, dirtCarouselConfig, dirtCarouselLimit);
 
 Scooper scooper(scoopArmMotor, SCOOP_SERVO);
+TempHumiditySensor tempHumidity;

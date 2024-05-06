@@ -1,4 +1,3 @@
-#include <DFRobot_SHT3x.h>
 #include <Servo.h>
 
 
@@ -8,9 +7,7 @@
 // Hardware code
 #include "src/CO2/CO2Sensor.h"
 
-// Contains all the StepperMotor and DCMotor objects.
 #include "pinouts.h"
-// Contains all the Protobuf data
 #include "src/science.pb.h"
 
 #define SCIENCE_COMMAND_ID 0x43
@@ -24,8 +21,6 @@ void shutdown() { }
 BurtSerial serial(Device::Device_SCIENCE, scienceHandler, shutdown);
 BurtCan<Can3> can(SCIENCE_COMMAND_ID, Device::Device_SCIENCE, scienceHandler, shutdown);
 BurtTimer dataTimer(250, sendData);
-
-DFRobot_SHT3x sht3x(&Wire,/*address=*/0x44,/*RST=*/4);
 
 #define CO2_PIN 17
 
@@ -67,19 +62,6 @@ void block();
 void stopEverything();
 void test_sample();
 void calibrateEverything();
-
-void setupDF() {
-  while (sht3x.begin() != 0) {
-    Serial.println("Failed to Initialize the chip, please confirm the wire connection");
-    delay(1000);
-  }
-  Serial.print("Chip serial number");
-  Serial.println(sht3x.readSerialNumber());
-  if(!sht3x.softReset()){
-    Serial.println("Failed to Initialize the chip....");
-  }
-  Serial.println("Set Temp/Humidity");
-}
 
 void setup() {
 	Serial.begin(9600);
@@ -128,7 +110,7 @@ void setup() {
 
   Serial.println("Initializing sensors...");
   co2.setup();
-  setupDF();
+  // setupDF();
 
 	Serial.println("Science Subsystem ready.");
 }
@@ -140,17 +122,9 @@ void loop() {
   scoopArmMotor.update();
   dirtCarousel.update();
 
-  // can.update();
+  can.update();
   serial.update();
   sendData();
-}
-
-float read_temperature() {
-  return sht3x.getTemperatureC();
-}
-
-float read_humidity() {
-  return sht3x.getHumidityRH();
 }
 
 /* Temporary Serial Monitor interface for testing. */
@@ -291,12 +265,12 @@ void sendData() {
   serial.send(ScienceData_fields, &data, 8);
 
   data = ScienceData_init_zero;
-  data.humidity = read_humidity();
+  // data.humidity = read_humidity();
   can.send(SCIENCE_DATA_ID, &data, ScienceData_fields);
   serial.send(ScienceData_fields, &data, 8);
 
   data = ScienceData_init_zero;
-  data.temperature = read_temperature();
+  // data.temperature = read_temperature();
   can.send(SCIENCE_DATA_ID, &data, ScienceData_fields);
   serial.send(ScienceData_fields, &data, 8);
 }
