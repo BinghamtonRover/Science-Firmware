@@ -19,19 +19,17 @@
 #define SCIENCE_COMMAND_ID 0x43
 #define SCIENCE_DATA_ID 0x17
 
-#define USE_SERIAL_MONITOR true
+#define USE_SERIAL_MONITOR false
 
 void scienceHandler(const uint8_t* data, int length);
+void sendData();
 void shutdown() { }
 BurtSerial serial(Device::Device_SCIENCE, scienceHandler, shutdown);
 BurtCan<Can3> can(SCIENCE_COMMAND_ID, Device::Device_SCIENCE, scienceHandler, shutdown);
+BurtTimer dataTimer(250, sendData);
 
 DFRobot_SHT3x sht3x(&Wire,/*address=*/0x44,/*RST=*/4);
 
-
-#define PH_PIN 14
-#define METHANE_PIN 16
-#define HUM_PIN 15
 #define CO2_PIN 17
 
 //measurements in steps, used for testing sequence
@@ -58,15 +56,14 @@ DFRobot_SHT3x sht3x(&Wire,/*address=*/0x44,/*RST=*/4);
 
 #define R_0 945
 
-// MethaneSensor methanesensor = MethaneSensor(METHANE_PIN, R_0);
-// HumiditySensor humsensor = HumiditySensor(HUM_PIN);
+#define SCOOP_OPEN 150
+#define SCOOP_CLOSE 30
+#define FUNNEL_OPEN 35
+#define FUNNEL_CLOSE 90
+
 CO2Sensor co2 = CO2Sensor(17);
-// pHSensor pH = pHSensor(PH_PIN, humsensor);
 
 ScienceState state = ScienceState_STOP_COLLECTING;
-
-int canSendInterval = 3000;
-unsigned long nextSendTime;
 
 int sample_number = 0;
 
@@ -109,9 +106,8 @@ void setup() {
   digitalWrite(PUMP6, HIGH);
   digitalWrite(PUMP7, HIGH);
 
-  // Serial.println("Initializing communications...");
-  // can.setup();
-  // nextSendTime = millis() + canSendInterval;
+  Serial.println("Initializing communications...");
+  can.setup();
 
   Serial.println("Initializing stepper motors...");
   vacuumLinear.presetup();
@@ -133,31 +129,26 @@ void setup() {
   Serial.println("Initializing servos...");
   servo1.attach(SERVO1);
   servo2.attach(SERVO2);
-  servo2.write(70);
-  servo1.write(30);
-  // delay(1000);
-  // servo2.write(180);
+  servo2.write(SCOOP_CLOSE);
+  servo1.write(FUNNEL_CLOSE);
 
   Serial.println("Initializing sensors...");
-  // co2.setup();
-  // setupDF();
+  co2.setup();
+  setupDF();
 
 	Serial.println("Science Subsystem ready.");
 }
 
 void loop() {
   /* Real Rover code */
-
   vacuumLinear.update();
   dirtLinear.update();
   scienceLinear.update();
   dirtCarousel.update();
 
-  can.update();
+  // can.update();
+  serial.update();
   sendData();
-
-  if (USE_SERIAL_MONITOR) parseSerialCommand();
-  else serial.update();
 }
 
 float read_temperature() {
@@ -230,7 +221,6 @@ void handlePumpCommand(int pin, PumpState state) {
 }
 
 void scienceHandler(const uint8_t* data, int length) {
-  Serial.println("Got data");
   ScienceCommand command = BurtProto::decode<ScienceCommand>(data, length, ScienceCommand_fields);
   // Individual motor control
   if (command.dirt_carousel != 0) dirtCarousel.moveBy(command.dirt_carousel);
@@ -249,15 +239,15 @@ void scienceHandler(const uint8_t* data, int length) {
 
   // Dirt release
   if (command.dirtRelease == DirtReleaseState::DirtReleaseState_OPEN_DIRT) {
-    servo1.write(30);
+    servo1.write(FUNNEL_OPEN);
   } else if (command.dirtRelease == DirtReleaseState::DirtReleaseState_CLOSE_DIRT) {
-    servo1.write(180);
+    servo1.write(FUNNEL_CLOSE);
   }
   // Scooper
   if (command.pump2 == PumpState::PumpState_PUMP_ON) {
-    servo2.write(0);
+    servo2.write(SCOOP_OPEN);
   } else if (command.pump2 == PumpState::PumpState_PUMP_OFF) {
-    servo2.write(70);
+    servo2.write(SCOOP_CLOSE);
   }
 
   // Commands
@@ -293,7 +283,6 @@ void stopEverything() {
 
 void sendData() {
   // Send generic data
-  // if (millis() < nextSendTime) return;
   ScienceData data;
   // ScienceData data = ScienceData_init_zero;
   // data.sample = sample_number;
@@ -303,36 +292,20 @@ void sendData() {
   // data.state = state;
   // can.send(SCIENCE_DATA_ID, &data, ScienceData_fields);
 
-  // // Send sensor data
-  // if (state != ScienceState_COLLECT_DATA) return;
-  // data = ScienceData_init_zero;
-  // data.methane = methanesensor.getMethanePPM();
-  // can.send(SCIENCE_DATA_ID, &data, ScienceData_fields);
-
   data = ScienceData_init_zero;
   data.co2 = co2.read();
   can.send(SCIENCE_DATA_ID, &data, ScienceData_fields);
-  // serial.send(ScienceData_fields, &data, 8);
-  // Serial.print("CO2: ");
-  // Serial.println(data.humidity);
+  serial.send(ScienceData_fields, &data, 8);
 
   data = ScienceData_init_zero;
   data.humidity = read_humidity();
   can.send(SCIENCE_DATA_ID, &data, ScienceData_fields);
-  // serial.send(ScienceData_fields, &data, 8);
-  // Serial.print("Humidity: ");
-  // Serial.println(data.humidity);
+  serial.send(ScienceData_fields, &data, 8);
 
   data = ScienceData_init_zero;
   data.temperature = read_temperature();
   can.send(SCIENCE_DATA_ID, &data, ScienceData_fields);
-  // serial.send(ScienceData_fields, &data, 8);
-
-  // data = ScienceData_init_zero;
-  // data.pH = pH.sample_pH();
-  // can.send(SCIENCE_DATA_ID, &data, ScienceData_fields);
-
-  nextSendTime = millis() + canSendInterval;
+  serial.send(ScienceData_fields, &data, 8);
 }
 
 void block() {
