@@ -29,10 +29,12 @@ void DirtCarousel::handleCommand(ScienceCommand command) {
 
 void DirtCarousel::goHome() {
   stepper.moveTo(carouselHomePosition);
+  stepper.block();
 }
 
 void DirtCarousel::nextTube() {
   stepper.moveBy(360 / totalTubes);
+  stepper.block();
 }
 
 void DirtCarousel::nextSection() {
@@ -49,6 +51,7 @@ void DirtCarousel::goToSectionStart() {
 
 void DirtCarousel::prevTube() {
   stepper.moveBy(360 / totalTubes * -1);
+  stepper.block();
 }
 
 void DirtCarousel::prevSection() {

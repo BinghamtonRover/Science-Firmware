@@ -5,6 +5,7 @@
 
 #include "../tmc/BURT_TMC.h"
 #include "../science.pb.h"
+#include "../motors/motors.h"
 
 class DirtCarousel {
   private: 

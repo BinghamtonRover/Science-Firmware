@@ -1,5 +1,3 @@
-#include <Servo.h>
-
 #include "pinouts.h"
 #include "src/utils/BURT_utils.h"
 #include "src/science.pb.h"
@@ -16,19 +14,14 @@ BurtSerial serial(Device::Device_SCIENCE, scienceHandler, shutdown);
 BurtCan<Can3> can(SCIENCE_COMMAND_ID, Device::Device_SCIENCE, scienceHandler, shutdown);
 BurtTimer dataTimer(250, sendData);
 
-//pump speed
-#define PUMP_START -100
-
-//delays in ms
-#define BLOCK_DELAY 10
-
 ScienceState state = ScienceState_STOP_COLLECTING;
 
 int sample_number = 0;
-
-void block();
-void stopEverything();
-void calibrateEverything();
+  
+void stopEverything() {
+  motors.stop();
+  pumps.turnOff();
+}
 
 void setup() {
 	Serial.begin(9600);
@@ -37,24 +30,13 @@ void setup() {
   Serial.println("Initializing communications...");
   can.setup();
 
-  Serial.println("Initializing stepper motors...");
-  dirtLinear.presetup();
-  scoopArmMotor.presetup();
-  dirtCarouselMotor.presetup();
-
-  dirtLinear.setup();
-  scoopArmMotor.setup();
-  dirtCarouselMotor.setup();
-
-  // Serial.println("Calibrating motors...");
-  // scoopArmMotor.calibrate();
-  // dirtLinear.calibrate();
-  // dirtCarousel.calibrate();
-
-  Serial.println("Initializing other hardware...");
+  Serial.println("Initializing hardware...");
+  motors.setup();
   scooper.setup();
   pumps.setup();
   carousel.setup();
+
+  motors.calibrate();
 
   Serial.println("Initializing sensors...");
   co2.setup();
@@ -64,11 +46,7 @@ void setup() {
 }
 
 void loop() {
-  /* Real Rover code */
-  dirtLinear.update();
-  scoopArmMotor.update();
-  dirtCarouselMotor.update();
-
+  motors.update();
   can.update();
   serial.update();
   dataTimer.update();
@@ -87,13 +65,9 @@ void parseSerialCommand() {
 
   // Execute the command
   if (motor == "stop") stopEverything();
-  // else if (motor == "calibrate") calibrateEverything();
-  else if (motor == "dirt-linear") dirtLinear.moveBy(distance); //dirtLinear.moveBy(distance);  
-  else if (motor == "science-linear") scoopArmMotor.moveBy(distance); //scoopArmMotor.moveBy(distance);  
-  else if (motor == "dirt-carousel") dirtCarouselMotor.moveBy(distance); //dirtCarousel.moveBy(distance);  
-  // else if (motor == "dirt-release") dirtRelease.moveBy(distance); //go +49 to uncover hole, -49 to go back
-  // else if (motor == "science-test") test_sample(distance);
-  // else if (motor == "pour-dirt") pourDirt(distance);
+  else if (motor == "dirt-linear") motors.dirtLinear.moveBy(distance); //dirtLinear.moveBy(distance);  
+  else if (motor == "science-linear") motors.scooperArm.moveBy(distance); //scoopArmMotor.moveBy(distance);  
+  else if (motor == "dirt-carousel") motors.dirtCarousel.moveBy(distance); //dirtCarousel.moveBy(distance);  
   else if (motor == "pump") {
     pumps.fillTubes();
   } else {
@@ -112,7 +86,7 @@ void scienceHandler(const uint8_t* data, int length) {
   // Individual motor control
   if (command.dirt_carousel != 0) dirtCarouselMotor.moveBy(command.dirt_carousel);
   if (command.science_linear != 0) scoopArmMotor.moveBy(command.science_linear);
-  if (command.dirt_linear != 0) dirtLinear.moveBy(command.dirt_linear);
+  if (command.dirt_linear != 0) dirtLinearMotor.moveBy(command.dirt_linear);
 
   pumps.handleCommand(command);
   scooper.handleCommand(command);
@@ -120,7 +94,7 @@ void scienceHandler(const uint8_t* data, int length) {
 
   // Commands
   if (command.stop) stopEverything();
-  // else if (command.calibrate) calibrateEverything();
+  else if (command.calibrate) motors.calibrate();
   // if (command.next_tube) dirtCarousel.moveBy(PI / 6); 
   // if (command.next_section) dirtCarousel.moveBy(2 * PI / 3);
   // if (command.sample != 0) sample_number = command.sample - 1;
@@ -128,19 +102,6 @@ void scienceHandler(const uint8_t* data, int length) {
     // if (state == ScienceState_STOP_COLLECTING) test_sample(sample_number);
     // state = command.state;
   // }
-}
-
-void calibrateEverything() {
-  scoopArmMotor.calibrate(); block();
-  dirtLinear.calibrate(); block();
-  dirtCarouselMotor.calibrate(); block();
-}
-
-void stopEverything() {
-  dirtCarouselMotor.stop();
-  dirtLinear.stop();
-  scoopArmMotor.stop();
-  pumps.turnOff();
 }
 
 void sendData() {
@@ -170,14 +131,8 @@ void sendData() {
   serial.send(ScienceData_fields, &data, 8);
 }
 
-void block() {
-  while (scoopArmMotor.isMoving()) delay(BLOCK_DELAY);
-  while (dirtLinear.isMoving()) delay(BLOCK_DELAY);
-  while (dirtCarouselMotor.isMoving()) delay(BLOCK_DELAY);
-}
-
 void test_sample(int sample) {
-  calibrateEverything();
+  motors.calibrate();
   carousel.goToSection(sample);
   carousel.fillSection();
   carousel.goToTests();
