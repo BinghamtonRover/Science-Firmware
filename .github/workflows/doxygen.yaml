@@ -2,7 +2,7 @@ name: Document with Doxygen
 
 # Documents the BURT_science_motors library with Doxygen.
 # Publishes the result to a separate branch, `documentation`, under 
-# `libraries/BURT_science_motors/docs`, which can be published through GitHub Pages.
+# `libraries/BURT_science_motors/docs` which can be published through GitHub Pages.
 
 on: 
   push:
@@ -13,7 +13,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repo
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
+        with: 
+          fetch-depth: 1
 
       - name: Remove previous docs
         run: |
