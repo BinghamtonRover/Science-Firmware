@@ -1,12 +1,12 @@
 #include "CO2Sensor.h"
 
-CO2Sensor::CO2Sensor(int pin) : pin(pin) { }
+Co2Sensor::Co2Sensor(int pin) : pin(pin) { }
 
-void CO2Sensor::setup() {
+void Co2Sensor::setup() {
   pinMode(pin, INPUT);
 }
 
-float CO2Sensor::read() { 
+float Co2Sensor::read() { 
   // Old logic:
   float voltageOld = (float) analogRead(pin) * 5 / 1024 / CO2_GAIN;
   if (voltageOld >= CO2_OLD_VOLTAGE_400) return -1;

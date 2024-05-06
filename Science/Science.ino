@@ -46,7 +46,7 @@ BurtTimer dataTimer(250, sendData);
 
 #define R_0 945
 
-CO2Sensor co2 = CO2Sensor(17);
+Co2Sensor co2 = Co2Sensor(17);
 
 ScienceState state = ScienceState_STOP_COLLECTING;
 
