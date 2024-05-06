@@ -1,5 +1,7 @@
 #include "pumps.h"
 
+const int pumpDelay = 5000;  // milliseconds
+
 void Pumps::setup() {
   pinMode(PUMP1, OUTPUT);
   pinMode(PUMP2, OUTPUT);
@@ -30,4 +32,10 @@ void Pumps::handleCommand(ScienceCommand command) {
   } else if (command.pump1 == PumpState_PUMP_OFF) {
     turnOff();
   }
+}
+
+void Pumps::fillTubes() {
+  turnOn();
+  delay(pumpDelay);
+  turnOff();
 }

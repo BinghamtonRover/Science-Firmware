@@ -2,11 +2,11 @@
 
 #include "../science.pb.h"
 
-#define PUMP1 21  // NOT PWM
+#define PUMP1 21
 #define PUMP2 22
 #define PUMP3 23
-#define PUMP4 0  // Avoid? On Serial1
-#define PUMP5 25
+#define PUMP4 38
+#define PUMP5 39
 
 class Pumps {
   public:
@@ -14,4 +14,5 @@ class Pumps {
     void turnOn();
     void turnOff();
     void handleCommand(ScienceCommand command);
+    void fillTubes();
 };

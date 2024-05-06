@@ -12,6 +12,14 @@ void Scooper::setup() {
   servo.attach(servoPin);
 }
 
+void Scooper::handleCommand(ScienceCommand command) {
+  if (command.pump2 == PumpState::PumpState_PUMP_ON) {
+    open();
+  } else if (command.pump2 == PumpState::PumpState_PUMP_OFF) {
+    close();
+  }
+}
+
 void Scooper::rotateBy(float degrees) {
   stepper.moveBy(degrees);
 }
