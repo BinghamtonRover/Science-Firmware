@@ -39,7 +39,7 @@ StepperMotorConfig scoopArmConfig = {
 	current: 400,
 	speed: 40'000,
 	acceleration: 200'000,
-	stepsPerUnit: stepsPerDegree,
+	stepsPerUnit: microstepsPerDegree,
 };
 
 // LimitSwitch scoopArmLimit = {
@@ -64,7 +64,7 @@ StepperMotorConfig dirtCarouselConfig = {
 	current: 250, 
 	speed: 10'000,
 	acceleration: 200'000,
-	stepsPerUnit: stepsPerDegree,
+	stepsPerUnit: microstepsPerDegree * -1,
 };
 
 // LimitSwitch dirtCarouselLimit {

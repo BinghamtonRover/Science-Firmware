@@ -1,13 +1,12 @@
 #include "carousel.h"
 
-const int nextTube = 4600;
 const int tubesPerSection = 3;
 const int num_sections = 4;
 const int totalTubes = tubesPerSection * num_sections;
-const int carouselHomePosition = 0;
 const int funnelOpen = 35;
 const int funnelClose = 90;
 const int pourDelay = 200;
+const int testOffset = 15;
 
 DirtCarousel::DirtCarousel(StepperMotor stepper, int dirtReleasePin) : 
   stepper(stepper),
@@ -31,7 +30,7 @@ void DirtCarousel::handleCommand(ScienceCommand command) {
 }
 
 void DirtCarousel::goHome() {
-  stepper.moveTo(carouselHomePosition);
+  stepper.moveTo(0);
   stepper.block();
 }
 
@@ -86,17 +85,22 @@ void DirtCarousel::fillTube() {
 }
 
 void DirtCarousel::fillSection() {
-  goToSectionStart();
+  // goToSectionStart();
   for (int i = 0; i < tubesPerSection; i++) {
+    if (i != 0) nextTube();
     fillTube();
-    nextTube();
   }
 }
 
 void DirtCarousel::goToTests() {
-  // TODO
+  stepper.moveBy(testOffset); 
+  stepper.block();
+  nextSection();
 }
 
 void DirtCarousel::goToPicture() {
-  // TODO
+  stepper.moveBy(testOffset * -1);
+  stepper.block();
+  nextSection();
+  nextTube();
 }

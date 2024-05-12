@@ -109,6 +109,8 @@ void sendData() {
   can.send(SCIENCE_DATA_ID, &data, ScienceData_fields);
   serial.send(ScienceData_fields, &data, 8);
 
+  if (state != ScienceState_COLLECT_DATA) return;
+
   data = ScienceData_init_zero;
   data.co2 = co2.read();
   can.send(SCIENCE_DATA_ID, &data, ScienceData_fields);
