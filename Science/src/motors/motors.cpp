@@ -41,7 +41,8 @@ void Motors::update() {
 }
 
 void Motors::handleCommand(ScienceCommand command) {
-  if (command.dirt_carousel != 0) dirtCarousel.moveBy(command.dirt_carousel);
+  // if (command.dirt_carousel != 0) dirtCarousel.moveBy(command.dirt_carousel);
+  if (command.dirt_carousel != 0) dirtCarousel.moveBySteps(command.dirt_carousel);
   if (command.science_linear != 0) scooperArm.moveBy(command.science_linear);
   if (command.dirt_linear != 0) dirtLinear.moveBy(command.dirt_linear);
 }

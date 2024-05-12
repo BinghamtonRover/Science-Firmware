@@ -15,6 +15,7 @@ DirtCarousel::DirtCarousel(StepperMotor stepper, int dirtReleasePin) :
   { }
 
 void DirtCarousel::setup() {
+  dirtRelease.attach(dirtReleasePin);
   goHome();
   closeFunnel();
 }

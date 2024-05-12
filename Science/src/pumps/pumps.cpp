@@ -8,6 +8,7 @@ void Pumps::setup() {
   pinMode(PUMP3, OUTPUT);
   pinMode(PUMP4, OUTPUT);
   pinMode(PUMP5, OUTPUT);
+  turnOff();
 }
 
 void Pumps::turnOn() {
