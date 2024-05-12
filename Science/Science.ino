@@ -92,9 +92,15 @@ void scienceHandler(const uint8_t* data, int length) {
   if (command.stop) stopEverything();
   else if (command.calibrate) motors.calibrate();
   if (command.sample != 0) sample_number = command.sample - 1;
-  if (command.state == ScienceState_COLLECT_DATA) {
-    if (state == ScienceState_STOP_COLLECTING) test_sample(sample_number);
-    state = command.state;
+  switch (command.state) {
+    case ScienceState_SCIENCE_STATE_UNDEFINED: break;
+    case ScienceState_COLLECT_DATA: 
+      if (state == ScienceState_STOP_COLLECTING) test_sample(sample_number);
+      state = command.state;
+      break;
+    case ScienceState_STOP_COLLECTING: 
+      state = command.state;
+      break;
   }
 }
 

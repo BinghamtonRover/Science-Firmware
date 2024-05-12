@@ -13,10 +13,12 @@ void Scooper::setup() {
 }
 
 void Scooper::handleCommand(ScienceCommand command) {
-  if (command.pump2 == PumpState::PumpState_PUMP_ON) {
-    open();
-  } else if (command.pump2 == PumpState::PumpState_PUMP_OFF) {
-    close();
+  switch (command.scoop) {
+    case ServoState_SERVO_STATE_UNDEFINED: break;
+    case ServoState_SERVO_OPEN: 
+      open(); break;
+    case ServoState_SERVO_CLOSE: 
+      close(); break;
   }
 }
 

@@ -58,13 +58,11 @@ typedef struct _ScienceCommand {
 } ScienceCommand;
 
 typedef struct _ScienceData {
-    float co2;
-    float humidity;
-    float methane;
-    float pH;
-    float temperature;
     int32_t sample;
     ScienceState state;
+    float co2;
+    float humidity;
+    float temperature;
 } ScienceData;
 
 
@@ -100,9 +98,9 @@ extern "C" {
 
 /* Initializer values for message structs */
 #define ScienceCommand_init_default              {0, 0, 0, _PumpState_MIN, _ServoState_MIN, _ServoState_MIN, _CarouselCommand_MIN, 0, 0, 0, _ScienceState_MIN}
-#define ScienceData_init_default                 {0, 0, 0, 0, 0, 0, _ScienceState_MIN}
+#define ScienceData_init_default                 {0, _ScienceState_MIN, 0, 0, 0}
 #define ScienceCommand_init_zero                 {0, 0, 0, _PumpState_MIN, _ServoState_MIN, _ServoState_MIN, _CarouselCommand_MIN, 0, 0, 0, _ScienceState_MIN}
-#define ScienceData_init_zero                    {0, 0, 0, 0, 0, 0, _ScienceState_MIN}
+#define ScienceData_init_zero                    {0, _ScienceState_MIN, 0, 0, 0}
 
 /* Field tags (for use in manual encoding/decoding) */
 #define ScienceCommand_carousel_motor_tag        1
@@ -116,13 +114,11 @@ extern "C" {
 #define ScienceCommand_stop_tag                  9
 #define ScienceCommand_sample_tag                10
 #define ScienceCommand_state_tag                 11
-#define ScienceData_co2_tag                      1
-#define ScienceData_humidity_tag                 2
-#define ScienceData_methane_tag                  3
-#define ScienceData_pH_tag                       4
+#define ScienceData_sample_tag                   1
+#define ScienceData_state_tag                    2
+#define ScienceData_co2_tag                      3
+#define ScienceData_humidity_tag                 4
 #define ScienceData_temperature_tag              5
-#define ScienceData_sample_tag                   6
-#define ScienceData_state_tag                    7
 
 /* Struct field encoding specification for nanopb */
 #define ScienceCommand_FIELDLIST(X, a) \
@@ -141,13 +137,11 @@ X(a, STATIC,   SINGULAR, UENUM,    state,            11)
 #define ScienceCommand_DEFAULT NULL
 
 #define ScienceData_FIELDLIST(X, a) \
-X(a, STATIC,   SINGULAR, FLOAT,    co2,               1) \
-X(a, STATIC,   SINGULAR, FLOAT,    humidity,          2) \
-X(a, STATIC,   SINGULAR, FLOAT,    methane,           3) \
-X(a, STATIC,   SINGULAR, FLOAT,    pH,                4) \
-X(a, STATIC,   SINGULAR, FLOAT,    temperature,       5) \
-X(a, STATIC,   SINGULAR, INT32,    sample,            6) \
-X(a, STATIC,   SINGULAR, UENUM,    state,             7)
+X(a, STATIC,   SINGULAR, INT32,    sample,            1) \
+X(a, STATIC,   SINGULAR, UENUM,    state,             2) \
+X(a, STATIC,   SINGULAR, FLOAT,    co2,               3) \
+X(a, STATIC,   SINGULAR, FLOAT,    humidity,          4) \
+X(a, STATIC,   SINGULAR, FLOAT,    temperature,       5)
 #define ScienceData_CALLBACK NULL
 #define ScienceData_DEFAULT NULL
 
@@ -161,7 +155,7 @@ extern const pb_msgdesc_t ScienceData_msg;
 /* Maximum encoded size of messages (where known) */
 #define SCIENCE_PB_H_MAX_SIZE                    ScienceCommand_size
 #define ScienceCommand_size                      40
-#define ScienceData_size                         38
+#define ScienceData_size                         28
 
 #ifdef __cplusplus
 } /* extern "C" */

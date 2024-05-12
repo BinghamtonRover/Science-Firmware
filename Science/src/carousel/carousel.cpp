@@ -20,13 +20,28 @@ void DirtCarousel::setup() {
 }
 
 void DirtCarousel::handleCommand(ScienceCommand command) {
-  if (command.dirtRelease == DirtReleaseState::DirtReleaseState_OPEN_DIRT) {
-    openFunnel();
-  } else if (command.dirtRelease == DirtReleaseState::DirtReleaseState_CLOSE_DIRT) {
-    closeFunnel();
+  switch (command.funnel) {
+    case ServoState_SERVO_STATE_UNDEFINED: break;
+    case ServoState_SERVO_OPEN: 
+      openFunnel(); break; 
+    case ServoState_SERVO_CLOSE: 
+      closeFunnel(); break;
   }
-
-  if (command.next_tube) nextTube();
+  switch (command.carousel) {
+    case CarouselCommand_CAROUSEL_COMMAND_UNDEFINED: break;
+    case CarouselCommand_NEXT_TUBE:
+      nextTube(); break;
+    case CarouselCommand_PREV_TUBE: 
+      prevTube(); break;
+    case CarouselCommand_NEXT_SECTION: 
+      nextSection(); break;
+    case CarouselCommand_PREV_SECTION: 
+      prevSection(); break;
+    case CarouselCommand_FILL_TUBE: 
+      fillTube(); break;
+    case CarouselCommand_FILL_SECTION: 
+      fillSection(); break;
+  }
 }
 
 void DirtCarousel::goHome() {
