@@ -1,6 +1,6 @@
 #include "pumps.h"
 
-const int pumpDelay = 5000;  // milliseconds
+const int pumpDelay = 2000;  // milliseconds
 
 void Pumps::setup() {
   pinMode(PUMP1, OUTPUT);
@@ -8,6 +8,7 @@ void Pumps::setup() {
   pinMode(PUMP3, OUTPUT);
   pinMode(PUMP4, OUTPUT);
   pinMode(PUMP5, OUTPUT);
+  turnOff();
 }
 
 void Pumps::turnOn() {
@@ -26,11 +27,13 @@ void Pumps::turnOff() {
   digitalWrite(PUMP5, LOW);
 }
 
-void Pumps::handleCommand(ScienceCommand command) {
-  if (command.pump1 == PumpState_PUMP_ON) {
+void Pumps::handleCommand(ScienceCommand command) { 
+  if (command.pumps == PumpState_PUMP_ON) {
     turnOn();
-  } else if (command.pump1 == PumpState_PUMP_OFF) {
+  } else if (command.pumps == PumpState_PUMP_OFF) {
     turnOff();
+  } else if (command.pumps == PumpState_FILL) {
+    fillTubes();
   }
 }
 

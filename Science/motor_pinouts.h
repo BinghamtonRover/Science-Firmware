@@ -2,83 +2,76 @@
 
 #include "src/tmc/BURT_TMC.h"
 
-#define ACCEL 0x00030d4d //200013 (unclear what units but this is the decimal version)
-#define SPEED 0x000327e7 //206823 (unclear what units but this is the decimal version)
-
 // --------------- Dirt Linear  ---------------
 
 StepperMotorPins dirtLinearPins = {
-	chipSelect: 5, 
 	enable: 10, 
-};
-StepperMotorConfig dirtLinearConfig = {
-	name: "dirtLinear", 
-	unitName: "Steps",
-	current: 250, 
-	speed: SPEED / 2, 
-	accel: ACCEL, 
-	isPositive: true, 
-	toUnits: 1.0,
-	toSteps: 1.0,
+	chipSelect: 5, 
 };
 
-LimitSwitch dirtLinearLimit;
+StepperMotorConfig dirtLinearConfig = {
+	name: "dirt linear", 
+	current: 250, 
+	speed: 100'000,
+	acceleration: 200'000,
+	stepsPerUnit: 1,
+};
+
+// LimitSwitch dirtLinearLimit = {
 // 	pin: 2, 
 // 	triggeredValue: HIGH,
 // 	direction: 1,
 // 	position: 0,
+// 	maxLimit: INFINITY,
 // };
 
-StepperMotor dirtLinearMotor(dirtLinearPins, dirtLinearConfig, dirtLinearLimit);
+StepperMotor dirtLinearMotor(dirtLinearPins, dirtLinearConfig);
 
 // --------------- Scooper Arm  ---------------
 
 StepperMotorPins scoopArmPins = {
-	chipSelect: 4, 
 	enable: 9, 
-};
-StepperMotorConfig scoopArmConfig = {
-	name: "scienceLinear", 
-	unitName: "Steps",
-	current: 400,
-	speed: SPEED / 5, 
-	accel: ACCEL,
-	isPositive: true, 
-	toUnits: 1.0,
-	toSteps: 1.0,
+	chipSelect: 4, 
 };
 
-LimitSwitch scoopArmLimit;
+StepperMotorConfig scoopArmConfig = {
+	name: "science linear", 
+	current: 400,
+	speed: 40'000,
+	acceleration: 200'000,
+	stepsPerUnit: microstepsPerDegree,
+};
+
+// LimitSwitch scoopArmLimit = {
 // 	pin: 32, 
 // 	triggeredValue: HIGH,
 // 	direction: -1,
 // 	position: 0,
+// 	minLimit: -PI / 2,
 // };
 
-StepperMotor scoopArmMotor(scoopArmPins, scoopArmConfig, scoopArmLimit);
+StepperMotor scoopArmMotor(scoopArmPins, scoopArmConfig);
 
 // --------------- Dirt Carousel  ---------------
 
 StepperMotorPins dirtCarouselPins = {
-	chipSelect: 3, 
-	enable: 8, 
-};
-StepperMotorConfig dirtCarouselConfig = {
-	name: "dirtCarousel", 
-	unitName: "Steps",
-	current: 250, 
-	speed: SPEED / 20, //changed values came from testing
-	accel: ACCEL, 
-	isPositive: true, 
-	toUnits: 1.0,
-	toSteps: 1.0,
+	enable: 8,
+	chipSelect: 3,
 };
 
-LimitSwitch dirtCarouselLimit;
+StepperMotorConfig dirtCarouselConfig = {
+	name: "dirtCarousel", 
+	current: 250, 
+	speed: 10'000,
+	acceleration: 200'000,
+	stepsPerUnit: microstepsPerDegree * -1,
+};
+
+// LimitSwitch dirtCarouselLimit {
 // 	pin: 0, 
 // 	triggeredValue: HIGH,
 // 	direction: 1,
 // 	position: 0,
 // };
 
-StepperMotor dirtCarouselMotor(dirtCarouselPins, dirtCarouselConfig, dirtCarouselLimit);
+StepperMotor dirtCarouselMotor(dirtCarouselPins, dirtCarouselConfig);

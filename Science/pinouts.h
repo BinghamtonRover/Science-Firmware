@@ -10,15 +10,15 @@
 
 // -------------------- Pinouts --------------------
 
-#define CO2_PIN 17
-#define FUNNEL_SERVO 38  // Methane sensor connector, on SPI 1
-#define SCOOP_SERVO 39  // pH sensor connector, SPI 1
+const int servo1 = 25;
+const int servo2 = 33;
+const int co2Pin = 17;
 
 Motors motors(scoopArmMotor, dirtCarouselMotor, dirtLinearMotor);
-Scooper scooper(scoopArmMotor, SCOOP_SERVO);
-DirtCarousel carousel(dirtCarouselMotor, FUNNEL_SERVO);
+Scooper scooper(scoopArmMotor, servo1);
+DirtCarousel carousel(dirtCarouselMotor, servo2);
 
 TempHumiditySensor tempHumidity;
-Co2Sensor co2(CO2_PIN);
+Co2Sensor co2(co2Pin);
 
 Pumps pumps;

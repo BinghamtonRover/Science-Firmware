@@ -1,13 +1,12 @@
 #include "carousel.h"
 
-const int nextTube = 4600;
 const int tubesPerSection = 3;
 const int num_sections = 4;
 const int totalTubes = tubesPerSection * num_sections;
-const int carouselHomePosition = 0;
 const int funnelOpen = 35;
 const int funnelClose = 90;
 const int pourDelay = 200;
+const int testOffset = 15;
 
 DirtCarousel::DirtCarousel(StepperMotor stepper, int dirtReleasePin) : 
   stepper(stepper),
@@ -15,22 +14,38 @@ DirtCarousel::DirtCarousel(StepperMotor stepper, int dirtReleasePin) :
   { }
 
 void DirtCarousel::setup() {
+  dirtRelease.attach(dirtReleasePin);
   goHome();
   closeFunnel();
 }
 
 void DirtCarousel::handleCommand(ScienceCommand command) {
-  if (command.dirtRelease == DirtReleaseState::DirtReleaseState_OPEN_DIRT) {
-    openFunnel();
-  } else if (command.dirtRelease == DirtReleaseState::DirtReleaseState_CLOSE_DIRT) {
-    closeFunnel();
+  switch (command.funnel) {
+    case ServoState_SERVO_STATE_UNDEFINED: break;
+    case ServoState_SERVO_OPEN: 
+      openFunnel(); break; 
+    case ServoState_SERVO_CLOSE: 
+      closeFunnel(); break;
   }
-
-  if (command.next_tube) nextTube();
+  switch (command.carousel) {
+    case CarouselCommand_CAROUSEL_COMMAND_UNDEFINED: break;
+    case CarouselCommand_NEXT_TUBE:
+      nextTube(); break;
+    case CarouselCommand_PREV_TUBE: 
+      prevTube(); break;
+    case CarouselCommand_NEXT_SECTION: 
+      nextSection(); break;
+    case CarouselCommand_PREV_SECTION: 
+      prevSection(); break;
+    case CarouselCommand_FILL_TUBE: 
+      fillTube(); break;
+    case CarouselCommand_FILL_SECTION: 
+      fillSection(); break;
+  }
 }
 
 void DirtCarousel::goHome() {
-  stepper.moveTo(carouselHomePosition);
+  stepper.moveTo(0);
   stepper.block();
 }
 
@@ -85,17 +100,22 @@ void DirtCarousel::fillTube() {
 }
 
 void DirtCarousel::fillSection() {
-  goToSectionStart();
+  // goToSectionStart();
   for (int i = 0; i < tubesPerSection; i++) {
+    if (i != 0) nextTube();
     fillTube();
-    nextTube();
   }
 }
 
 void DirtCarousel::goToTests() {
-  // TODO
+  stepper.moveBy(testOffset); 
+  stepper.block();
+  nextSection();
 }
 
 void DirtCarousel::goToPicture() {
-  // TODO
+  stepper.moveBy(testOffset * -1);
+  stepper.block();
+  nextSection();
+  nextTube();
 }
