@@ -7,6 +7,11 @@
 
 #define USE_SERIAL_MONITOR false
 
+const Version version {
+  major: 1,
+  minor: 0,
+};
+
 void scienceHandler(const uint8_t* data, int length);
 void sendData();
 void shutdown() { }
@@ -81,6 +86,7 @@ void parseSerialCommand() {
 
 void scienceHandler(const uint8_t* data, int length) {
   ScienceCommand command = BurtProto::decode<ScienceCommand>(data, length, ScienceCommand_fields);
+  if (command.has_version && command.version.major != version.major) return;
 
   // Control specific hardware
   motors.handleCommand(command);
@@ -88,7 +94,7 @@ void scienceHandler(const uint8_t* data, int length) {
   scooper.handleCommand(command);
   carousel.handleCommand(command);
 
-  // General commands
+  // General commands  
   if (command.stop) stopEverything();
   else if (command.calibrate) motors.calibrate();
   if (command.sample != 0) sample_number = command.sample - 1;
@@ -112,6 +118,11 @@ void sendData() {
 
   data = ScienceData_init_zero;
   data.state = state;
+  can.send(SCIENCE_DATA_ID, &data, ScienceData_fields);
+  serial.send(ScienceData_fields, &data, 8);
+
+  data = ScienceData_init_zero;
+  data.version = version;
   can.send(SCIENCE_DATA_ID, &data, ScienceData_fields);
   serial.send(ScienceData_fields, &data, 8);
 
