@@ -10,12 +10,14 @@
 #endif
 
 /* Enum definitions */
+/* / The state of a servo. If undefined, don't open or close. */
 typedef enum _ServoState {
     ServoState_SERVO_STATE_UNDEFINED = 0,
     ServoState_SERVO_OPEN = 1,
     ServoState_SERVO_CLOSE = 2
 } ServoState;
 
+/* / The state of a pump. If undefined: don't do anything. If fill: turn on, wait, then turn off. */
 typedef enum _PumpState {
     PumpState_PUMP_STATE_UNDEFINED = 0,
     PumpState_PUMP_ON = 1,
@@ -23,12 +25,14 @@ typedef enum _PumpState {
     PumpState_FILL = 3
 } PumpState;
 
+/* / The state of the science subsystem. If not COLLECT_DATA, don't stream data at all. */
 typedef enum _ScienceState {
     ScienceState_SCIENCE_STATE_UNDEFINED = 0,
     ScienceState_COLLECT_DATA = 1,
     ScienceState_STOP_COLLECTING = 2
 } ScienceState;
 
+/* / A command for the carousel and funnel to follow. */
 typedef enum _CarouselCommand {
     CarouselCommand_CAROUSEL_COMMAND_UNDEFINED = 0,
     CarouselCommand_NEXT_TUBE = 1,
@@ -40,12 +44,13 @@ typedef enum _CarouselCommand {
 } CarouselCommand;
 
 /* Struct definitions */
+/* / A command to the science subsystem. */
 typedef struct _ScienceCommand {
     /* Individual control over each motor. Indicates steps to move */
     float carousel_motor;
     float scoop_motor;
     float subsurface_motor;
-    /* Vacuum */
+    /* Control over other hardware */
     PumpState pumps;
     ServoState funnel;
     ServoState scoop;
@@ -57,9 +62,12 @@ typedef struct _ScienceCommand {
     ScienceState state;
 } ScienceCommand;
 
+/* / Data coming from the science subsystem. */
 typedef struct _ScienceData {
+    /* High-level data */
     int32_t sample;
     ScienceState state;
+    /* Sensor data */
     float co2;
     float humidity;
     float temperature;
