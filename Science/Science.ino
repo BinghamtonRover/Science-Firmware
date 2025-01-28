@@ -105,12 +105,14 @@ void scienceHandler(const uint8_t* data, int length) {
 }
 
 void sendData() {
+  Serial.println("Sending:");
   ScienceData data = ScienceData_init_zero;
   data.sample = sample_number;
   can.send(SCIENCE_DATA_ID, &data, ScienceData_fields);
   serial.send(ScienceData_fields, &data, 8);
 
   data = ScienceData_init_zero;
+  state = ScienceState_COLLECT_DATA;
   data.state = state;
   can.send(SCIENCE_DATA_ID, &data, ScienceData_fields);
   serial.send(ScienceData_fields, &data, 8);
@@ -127,10 +129,16 @@ void sendData() {
   can.send(SCIENCE_DATA_ID, &data, ScienceData_fields);
   serial.send(ScienceData_fields, &data, 8);
 
+  Serial.print("Humidity Pct: ");
+  Serial.println(data.humidity);
+
   data = ScienceData_init_zero;
   data.temperature = tempHumidity.getTemperature();
   can.send(SCIENCE_DATA_ID, &data, ScienceData_fields);
   serial.send(ScienceData_fields, &data, 8);
+
+  Serial.print("Temp: ");
+  Serial.println(data.temperature);
 }
 
 void test_sample(int sample) {
