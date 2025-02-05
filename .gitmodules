@@ -7,3 +7,7 @@
 [submodule "Science/src/utils"]
 	path = Science/src/utils
 	url = https://github.com/BinghamtonRover/Firmware-Utilities
+[submodule "Science/src/temp_humidity/dfrobot"]
+	path = Science/src/temp_humidity/dfrobot
+	url = https://github.com/BinghamtonRover/DFRobot_SHT3x
+	branch = fixes
