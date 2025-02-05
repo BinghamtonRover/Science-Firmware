@@ -1,13 +1,13 @@
 #pragma once
 
 #include <Arduino.h>
-#include <DFRobot_SHT3x.h>
+#include "dfrobot/DFRobot_SHT3x.h"
 
 class TempHumiditySensor {
-  private: 
+  private:
     DFRobot_SHT3x sensor;
 
-  public: 
+  public:
     TempHumiditySensor();
 
     void setup();
