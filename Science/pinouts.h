@@ -12,13 +12,13 @@
 
 const int servo1 = 25;
 const int servo2 = 33;
-const int co2Pin = 17;
+const int co2_address = 105;
 
 Motors motors(scoopArmMotor, dirtCarouselMotor, dirtLinearMotor);
 Scooper scooper(scoopArmMotor, servo1);
 DirtCarousel carousel(dirtCarouselMotor, servo2);
 
 TempHumiditySensor tempHumidity;
-Co2Sensor co2(co2Pin);
+Co2Sensor co2(co2_address);
 
 Pumps pumps;
