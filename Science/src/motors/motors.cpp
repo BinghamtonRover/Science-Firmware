@@ -35,9 +35,9 @@ void Motors::stop() {
 }
 
 void Motors::update() {
-  scooperArm.calibrate();
-  dirtCarousel.calibrate();
-  dirtLinear.calibrate();
+  scooperArm.update();
+  dirtCarousel.update();
+  dirtLinear.update();
 }
 
 void Motors::handleCommand(ScienceCommand command) {
