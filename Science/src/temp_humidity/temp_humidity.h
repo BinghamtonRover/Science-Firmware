@@ -1,7 +1,7 @@
 #pragma once
 
 #include <Arduino.h>
-#include "dfrobot/DFRobot_SHT3x.h"
+#include "DFRobot_SHT3x.h"
 
 class TempHumiditySensor {
   private:

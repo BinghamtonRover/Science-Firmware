@@ -1,6 +1,7 @@
 #include "pinouts.h"
 #include "src/utils/BURT_utils.h"
 #include "src/science.pb.h"
+#include "DFRobot_SHT3x.h"
 
 #define SCIENCE_COMMAND_ID 0x43
 #define SCIENCE_DATA_ID 0x17
@@ -37,11 +38,14 @@ void setup() {
   pumps.setup();
   carousel.setup();
 
+  subSurface.setup();
+
   Serial.println("Initializing sensors...");
   co2.setup();
   tempHumidity.setup();
 
 	Serial.println("Science Subsystem ready.");
+  
 }
 
 void loop() {
