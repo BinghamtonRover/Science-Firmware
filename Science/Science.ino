@@ -29,46 +29,29 @@ void setup() {
   Serial.println("Initializing...");
 
   Serial.println("Initializing communications...");
-  // can.setup();
+  can.setup();
 
   Serial.println("Initializing hardware...");
-  // motors.setup();
-  // motors.calibrate();
-  // scooper.setup();
-  // pumps.setup();
-  // carousel.setup();
+  motors.setup();
+  motors.calibrate();
+  scooper.setup();
+  pumps.setup();
+  carousel.setup();
 
-  // subSurface.setup();
+  subSurface.setup();
 
   Serial.println("Initializing sensors...");
   co2.setup();
-  // tempHumidity.setup();
+  tempHumidity.setup();
 
 	Serial.println("Science Subsystem ready.");
-  
-  // pumps.turnOn();
-  // delay(5000);
-  // pumps.turnOff();
-
-  // subSurface.open();
-  // delay(5000);
-  // subSurface.close();
-
-  // dirtCarouselMotor.presetup();
-  // dirtCarouselMotor.setup();
-  // dirtCarouselMotor.moveBySteps(200000);
 }
 
 void loop() {
-  // motors.update();
-  // can.update();
+  motors.update();
+  can.update();
   serial.update();
   dataTimer.update();
-  Serial.println(co2.read());
-  // Serial.print("Temp: ");
-  // Serial.println(tempHumidity.getTemperature());
-  // Serial.print("Humidity: ");
-  // Serial.println(tempHumidity.getHumidity());
 }
 
 /* Temporary Serial Monitor interface for testing. */
