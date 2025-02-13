@@ -90,7 +90,6 @@ void scienceHandler(const uint8_t* data, int length) {
   // Control specific hardware
   motors.handleCommand(command);
   pumps.handleCommand(command);
-  scooper.handleCommand(command);
   carousel.handleCommand(command);
   subSurface.handleCommand(command);
 

@@ -15,9 +15,8 @@ const int servo1 = 25;
 const int servo2 = 33;
 const int co2_address = 105;
 
-Motors motors(scoopArmMotor, dirtCarouselMotor, dirtLinearMotor);
+Motors motors(dirtCarouselMotor, dirtLinearMotor);
 SubSurfaceBox subSurface;
-Scooper scooper(scoopArmMotor, servo1);
 DirtCarousel carousel(dirtCarouselMotor, servo2);
 
 TempHumiditySensor tempHumidity;
