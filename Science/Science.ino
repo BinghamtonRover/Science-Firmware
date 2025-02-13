@@ -8,6 +8,8 @@
 
 #define USE_SERIAL_MONITOR false
 
+Version version = {major: 2, minor: 0};
+
 void scienceHandler(const uint8_t* data, int length);
 void sendData();
 void shutdown() { }
