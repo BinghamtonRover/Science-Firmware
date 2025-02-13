@@ -92,6 +92,7 @@ void scienceHandler(const uint8_t* data, int length) {
   pumps.handleCommand(command);
   scooper.handleCommand(command);
   carousel.handleCommand(command);
+  subSurface.handleCommand(command);
 
   // General commands
   if (command.stop) stopEverything();
