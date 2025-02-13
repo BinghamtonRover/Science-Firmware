@@ -22,7 +22,7 @@ bool Co2Sensor::hasError() {
   return WIRE.read() != 1;
 }
 
-float Co2Sensor::read() {
+int Co2Sensor::read() {
   // Send the 'r' (read) command to the CO2 sensor.
   WIRE.beginTransmission(address);
   WIRE.write('r');
@@ -36,7 +36,7 @@ float Co2Sensor::read() {
   char response[20];
   while (WIRE.available()) {
     char character = WIRE.read();
-    response[i] = character;
+    response[i++] = character;
     if (character == 0) break;
   }
 

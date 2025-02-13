@@ -1,11 +1,14 @@
 #include "pinouts.h"
 #include "src/utils/BURT_utils.h"
 #include "src/science.pb.h"
+#include "DFRobot_SHT3x.h"
 
 #define SCIENCE_COMMAND_ID 0x43
 #define SCIENCE_DATA_ID 0x17
 
 #define USE_SERIAL_MONITOR false
+
+Version version = {major: 2, minor: 0};
 
 void scienceHandler(const uint8_t* data, int length);
 void sendData();
@@ -36,6 +39,8 @@ void setup() {
   scooper.setup();
   pumps.setup();
   carousel.setup();
+
+  subSurface.setup();
 
   Serial.println("Initializing sensors...");
   co2.setup();
@@ -85,8 +90,8 @@ void scienceHandler(const uint8_t* data, int length) {
   // Control specific hardware
   motors.handleCommand(command);
   pumps.handleCommand(command);
-  scooper.handleCommand(command);
   carousel.handleCommand(command);
+  subSurface.handleCommand(command);
 
   // General commands
   if (command.stop) stopEverything();
