@@ -62,7 +62,7 @@ StepperMotorPins dirtCarouselPins = {
 StepperMotorConfig dirtCarouselConfig = {
 	name: "dirtCarousel", 
 	current: 250, 
-	speed: 10'000,
+	speed: 20'000,
 	acceleration: 200'000,
 	stepsPerUnit: microstepsPerDegree * -1,
 };

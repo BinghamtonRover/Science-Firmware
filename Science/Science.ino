@@ -117,7 +117,7 @@ void sendData() {
   can.send(SCIENCE_DATA_ID, &data, ScienceData_fields);
   serial.send(ScienceData_fields, &data, 8);
 
-  if (state != ScienceState_COLLECT_DATA) return;
+  // if (state != ScienceState_COLLECT_DATA) return;
 
   data = ScienceData_init_zero;
   data.co2 = co2.read();
@@ -136,10 +136,11 @@ void sendData() {
 }
 
 void test_sample(int sample) {
-  motors.calibrate();
-  carousel.goToSection(sample);
-  carousel.fillSection();
+  // motors.calibrate();
+  // carousel.goToSection(sample);
+  // carousel.fillSection();
   carousel.goToTests();
-  pumps.fillTubes();
+  delay(1000);
+  // pumps.fillTubes();
   carousel.goToPicture();
 }

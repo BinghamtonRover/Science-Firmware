@@ -88,14 +88,16 @@ void DirtCarousel::fillSection() {
 }
 
 void DirtCarousel::goToTests() {
-  stepper.moveBy(testOffset); 
-  stepper.block();
+  // stepper.moveBy(testOffset); 
+  // stepper.block();
+  // nextTube();
+  nextTube();
   nextSection();
 }
 
 void DirtCarousel::goToPicture() {
-  stepper.moveBy(testOffset * -1);
-  stepper.block();
-  nextSection();
+  // stepper.moveBy(testOffset * -1);
+  // stepper.block();
+  // prevSection();
   nextTube();
 }

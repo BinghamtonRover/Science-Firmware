@@ -6,6 +6,13 @@
 // This lets us easily switch between them.
 #define WIRE Wire1
 
+/// The constant offset to add to the CO2 sensor's readings.
+///
+/// The CO2 sensor is *precise*, but not accurate. Meaning, it will accurately detect spikes and
+/// dips, but the actual value it reports may not be accurate. A simple fix is to just add a 
+/// constant amount to all its readings, preserving the shape while fixing the accuracy.
+const int co2Offset = 200;
+
 Co2Sensor::Co2Sensor(int address) : address(address) {}
 
 void Co2Sensor::setup() {
@@ -41,5 +48,5 @@ int Co2Sensor::read() {
   }
 
   // The response is an ASCII-encoded string of the ppm value.
-  return atoi(response);
+  return atoi(response) + co2Offset;
 }
