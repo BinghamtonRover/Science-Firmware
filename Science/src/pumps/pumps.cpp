@@ -1,6 +1,5 @@
 #include "pumps.h"
 
-const int pumpDelay1 = 2000; //Not being used
 const int pumpDelay2 = 6600; //H202 
 const int pumpDelay3 = 3300; //FDA
 const int pumpDelay4 = 10000; //Water

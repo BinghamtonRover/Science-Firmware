@@ -75,10 +75,6 @@ void DirtCarousel::goToSection(int section) {
   }
 }
 
-void DirtCarousel::fillTube() {
-  // TODO: Remove this
-}
-
 void DirtCarousel::fillSection() {
   // goToSectionStart();
   for (int i = 0; i < tubesPerSection; i++) {
