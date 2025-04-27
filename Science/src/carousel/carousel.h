@@ -20,7 +20,6 @@ class DirtCarousel {
     DirtCarousel(StepperMotor stepper);
 
     void setup();
-    void goHome();
     void goToTests();
     void goToPicture();
     void handleCommand(ScienceCommand command);

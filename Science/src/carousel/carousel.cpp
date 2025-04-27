@@ -8,12 +8,21 @@ const int funnelClose = 90;
 const int pourDelay = 200;
 const int testOffset = 15;
 
+const int indexPin = 40;
+bool atHome = false;
+
 DirtCarousel::DirtCarousel(StepperMotor stepper) : 
   stepper(stepper)
   { }
 
 void DirtCarousel::setup() {
-  //goHome();
+  pinMode(indexPin,INPUT);
+  attachInterrupt(digitalPinToInterrupt(indexPin), Home, CHANGE);
+  while (!atHome){
+    stepper.moveby(1);
+  }
+  stepper.block
+  detachInterupt(digitalPinToInterrupt(indexPin));
 }
 
 void DirtCarousel::handleCommand(ScienceCommand command) {
@@ -32,11 +41,6 @@ void DirtCarousel::handleCommand(ScienceCommand command) {
     case CarouselCommand_FILL_SECTION: 
       fillSection(); break;
   }
-}
-
-void DirtCarousel::goHome() {
-  stepper.moveTo(0);
-  stepper.block();
 }
 
 void DirtCarousel::nextTube() {
@@ -74,11 +78,6 @@ void DirtCarousel::goToSection(int section) {
     nextSection();
   }
 }
-
-void DirtCarousel::fillTube() {
-  // TODO: Remove this
-}
-
 void DirtCarousel::fillSection() {
   // goToSectionStart();
   for (int i = 0; i < tubesPerSection; i++) {
