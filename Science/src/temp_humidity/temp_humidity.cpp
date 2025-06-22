@@ -34,7 +34,7 @@ void TempHumiditySensor::setup(){
     Serial.print(".");
      if (millis() - startTime > timeout) {
         // Timeout reached, so issue an error
-        Serial.println("Sensor setup failed failed.");
+        Serial.println("Sensor setup failed.");
         return;
     }
     delay(500);
