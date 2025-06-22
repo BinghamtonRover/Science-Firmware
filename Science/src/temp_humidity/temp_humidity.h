@@ -7,12 +7,15 @@
 class TempHumiditySensor{
   private:
     uint8_t buf[4] = {0};
+    uint8_t reg;
+    uint8_t addr;
     void readReg();
   
   public:
     void setup();
     float getTemperature();
     float getHumidity();
+    TempHumiditySensor(uint8_t reg, uint8_t addr);
 };
 
 #endif

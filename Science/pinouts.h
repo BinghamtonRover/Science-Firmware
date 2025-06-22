@@ -18,7 +18,7 @@ Motors motors(scoopArmMotor, dirtCarouselMotor, dirtLinearMotor);
 Scooper scooper(scoopArmMotor, servo1);
 DirtCarousel carousel(dirtCarouselMotor, servo2);
 
-TempHumiditySensor tempHumidity;
+TempHumiditySensor tempHumidity(0x00, 0x40);
 Co2Sensor co2(co2_address);
 
 Pumps pumps;
