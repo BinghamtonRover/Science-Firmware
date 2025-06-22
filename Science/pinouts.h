@@ -13,12 +13,14 @@
 const int servo1 = 25;
 const int servo2 = 33;
 const int co2_address = 105;
+const int temphum_register = 0x00;
+const int temphum_address = 0x40;
 
 Motors motors(scoopArmMotor, dirtCarouselMotor, dirtLinearMotor);
 Scooper scooper(scoopArmMotor, servo1);
 DirtCarousel carousel(dirtCarouselMotor, servo2);
 
-TempHumiditySensor tempHumidity(0x00, 0x40);
+TempHumiditySensor tempHumidity(temphum_register, temphum_address);
 Co2Sensor co2(co2_address);
 
 Pumps pumps;
