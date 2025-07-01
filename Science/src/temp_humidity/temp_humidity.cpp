@@ -1,6 +1,10 @@
 #include "temp_humidity.h"
 
 void TempHumiditySensor::readReg(){
+  if(!isReady){
+    Serial.println("Error: Temp/humidity sensor has not been properly initialized.");
+    return;
+  }
   Wire.beginTransmission(addr);
   // Rewrote with overloaded method so that you don't need to use & on a literal
   Wire.write(reg);
@@ -17,29 +21,40 @@ void TempHumiditySensor::readReg(){
   delay(20);
   
   // Requesting 4 bytes to get data from registers 0x00 and 0x01 and putting it in buf[0:4]
-  Wire.requestFrom(addr, 4);
+  uint8_t bytesRead = Wire.requestFrom(addr, 4);
+  if (bytesRead != 4) {
+    memset(buf, 0, 4);
+    Serial.println("Error: Incomplete I2C read from sensor.");
+    return;
+  }
   for(int i = 0; i < 4; i++){
     buf[i] = Wire.read();
   }
-  return;
 }
 
 void TempHumiditySensor::setup(){ 
-  // 5 second delay before issuing error
-  unsigned long startTime = millis();
-  unsigned long timeout = 5000;
-
   Serial.print("Initializing temp/humidity sensor...");
-  while (Wire.begin() != 1) {
-    Serial.print(".");
-     if (millis() - startTime > timeout) {
-        // Timeout reached, so issue an error
-        Serial.println("Sensor setup failed.");
-        return;
+  Wire.begin();
+  delay(100);
+
+  // Creating a test write to ensure that the bus is properly connected
+  // 5 seconds before considering failure
+  uint8_t error = 0;
+  for(int i = 0; i < 5; i++){
+    Wire.beginTransmission(addr);
+    error = Wire.endTransmission();
+    if (error == 0) {
+      Serial.println(" Done!");
+      isReady = true;
+      return;
     }
-    delay(500);
+    Serial.print(".");
+    delay(1000);
   }
-  Serial.println(" Done!");
+  Serial.print(" Temp/humidity sensor failed to connect (Error code ");
+  Serial.print(error);
+  Serial.println(")");
+  isReady = false;
 }
 
 float TempHumiditySensor::getTemperature(){
@@ -54,4 +69,4 @@ float TempHumiditySensor::getHumidity(){
   return ((float) hum / 65535.0) * 100;
 }
 
-TempHumiditySensor(uint8_t reg, uint8_t addr) : reg(reg), addr(addr) {}
+TempHumiditySensor::TempHumiditySensor(uint8_t reg, uint8_t addr) : reg(reg), addr(addr) {}

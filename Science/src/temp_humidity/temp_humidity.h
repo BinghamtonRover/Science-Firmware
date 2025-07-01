@@ -9,6 +9,7 @@ class TempHumiditySensor{
     uint8_t buf[4] = {0};
     uint8_t reg;
     uint8_t addr;
+    bool isReady = false;
     void readReg();
   
   public:
