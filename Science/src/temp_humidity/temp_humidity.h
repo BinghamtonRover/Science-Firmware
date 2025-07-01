@@ -1,16 +1,22 @@
-#pragma once
+#ifndef  TEMP_HUMIDITY_H
+#define  TEMP_HUMIDITY_H
 
 #include <Arduino.h>
-#include "dfrobot/DFRobot_SHT3x.h"
+#include "Wire.h"
 
-class TempHumiditySensor {
+class TempHumiditySensor{
   private:
-    DFRobot_SHT3x sensor;
-
+    uint8_t buf[4] = {0};
+    uint8_t reg;
+    uint8_t addr;
+    bool isReady = false;
+    void readReg();
+  
   public:
-    TempHumiditySensor();
-
     void setup();
     float getTemperature();
     float getHumidity();
+    TempHumiditySensor(uint8_t reg, uint8_t addr);
 };
+
+#endif
