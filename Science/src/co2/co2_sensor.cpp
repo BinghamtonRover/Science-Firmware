@@ -29,7 +29,7 @@ float Co2Sensor::read() {
   WIRE.requestFrom(address, 20, 1);
   int error = checkError();
   if (error != 1) {
-    Serial.println("CO2 Error: ");
+    Serial.print("CO2 Error: ");
     Serial.println(error);
     return -1;
   }
