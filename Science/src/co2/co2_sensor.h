@@ -7,7 +7,7 @@
 class Co2Sensor {
   private:
     int address;
-    bool hasError();
+    int checkError();
 
   public:
     Co2Sensor(int addresss);
