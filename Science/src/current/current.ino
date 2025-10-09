@@ -1,14 +1,42 @@
 // THIS FILE IS FOR TESTING CURRENT SENSOR, IT IS NOT A CLASS YET
 
+#include <math.h> // for fabsf
+
+// Initialized Deadband
+const float DB = 0.06f; // represents the threshold for noise
+
+// State for the estimate current for the innovation formula 
+static bool inited = false; // detects whether there's an estimated current value (first setting it to false)
+static float s_hat = 0.0f; // filtered/estimated current value
+
 void setup()
 {
   // put your setup code here, to run once:
-  pinMode(23, INPUT);
-  analogReadAveraging(4);
+  pinMode(23, INPUT); // sets the ADC pin   
+  analogReadAveraging(4); // takes four sample voltage values and averages them to reduce noise
 }
 
 void loop()
 {
   // put your main code here, to run repeatedly:
-  Serial.println((((3.3 / 1023) * analogRead(23)) - 1.65) / 0.132);
+  float x = Serial.println((((3.3 / 1023) * analogRead(23)) - 1.65) / 0.132); // Convert ADC --> volts --> amps 
+
+  if (!inited) {
+    s_hat = x; inited = true; // If an estimated current has been detected then set the state to true
+  }
+  /* Measuring the accuracy of the current with the Innovation Formula */
+  float delta = x - s_hat // measuring how far the new current is from the estimated current (amps)
+  float a = fabsf(delta); 
+  
+  // Deadband Conditions to measure how large the difference is
+  float delta_db;
+  if (a <= DB) {
+    delta_db = 0.0f;                   // ignore tiny noise if the noise is smaller than the threshold
+  } else {
+    float sign = (delta >= 0.0f) ? 1.0f : -1.0f; // If the noise outside of the threshold then it reduces it by 
+    delta_db = sign * (a - DB);                  // the deadband threshold value so that the sensor doesn't react 
+  }                                              // to the initial noise
+
+
 }
+
