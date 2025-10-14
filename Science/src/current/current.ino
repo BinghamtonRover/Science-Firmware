@@ -40,7 +40,8 @@ void loop()
     delta_db = sign * (a - DB);                  // the deadband threshold value so that the sensor doesn't react 
   }                                              // to the initial noise
 
-  float f_delta_db = 0.0f;  // this is openness variable
+  float f_delta_db = tanh(K * delta_db);  // this is openness variable
 
+  
 }
 
