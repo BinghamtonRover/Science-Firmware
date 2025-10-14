@@ -12,8 +12,8 @@ float s_hat = 0.0f; // filtered/estimated current value
 float u90 = 0.5;  // if current spike (innovation) is (u90) Amps or greater, filter is almost fully open
 float K = 1.4722 / u90;
 
-const alpha_min = 0.08f;
-const alpha_max = 0.4;
+const float alpha_min = 0.08f;
+const float alpha_max = 0.4;
 
 void setup()
 {
@@ -31,7 +31,7 @@ void loop()
     s_hat = x; inited = true; // If an estimated current has been detected then set the state to true
   }
   /* Measuring the accuracy of the current with the Innovation Formula */
-  float delta = x - s_hat // measuring how far the new current is from the estimated current (amps)
+  float delta = x - s_hat; // measuring how far the new current is from the estimated current (amps)
   float a = fabsf(delta); 
   
   // Deadband Conditions to measure how large the difference is
