@@ -12,6 +12,9 @@ float s_hat = 0.0f; // filtered/estimated current value
 float u90 = 0.5;  // if current spike (innovation) is (u90) Amps or greater, filter is almost fully open
 float K = 1.4722 / u90;
 
+const alpha_min = 0.08f;
+const alpha_max = 0.4;
+
 void setup()
 {
   // put your setup code here, to run once:
@@ -22,7 +25,7 @@ void setup()
 void loop()
 {
   // put your main code here, to run repeatedly:
-  float x = Serial.println((((3.3 / 1023) * analogRead(23)) - 1.65) / 0.132); // Convert ADC --> volts --> amps 
+  float x = (((3.3 / 1023) * analogRead(23)) - 1.65) / 0.132; // Convert ADC --> volts --> amps 
 
   if (!inited) {
     s_hat = x; inited = true; // If an estimated current has been detected then set the state to true
@@ -42,6 +45,11 @@ void loop()
 
   float f_delta_db = tanh(K * delta_db);  // this is openness variable
 
-  
+  float alpha = alpha_min + (alpha_max - alpha_min) * f_delta_db;
+  s_hat = s_hat + alpha*(x - s_hat);  // update the estimate
+
+  Serial.print(x);
+  Serial.print(",");
+  Serial.println(s_hat);
 }
 
