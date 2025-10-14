@@ -1,13 +1,16 @@
 // THIS FILE IS FOR TESTING CURRENT SENSOR, IT IS NOT A CLASS YET
-
+#include <Arduino.h>
 #include <math.h> // for fabsf
 
 // Initialized Deadband
 const float DB = 0.06f; // represents the threshold for noise
 
 // State for the estimate current for the innovation formula 
-static bool inited = false; // detects whether there's an estimated current value (first setting it to false)
-static float s_hat = 0.0f; // filtered/estimated current value
+bool inited = false; // detects whether there's an estimated current value (first setting it to false)
+float s_hat = 0.0f; // filtered/estimated current value
+
+float u90 = 0.5;  // if current spike (innovation) is (u90) Amps or greater, filter is almost fully open
+float K = 1.4722 / u90;
 
 void setup()
 {
@@ -37,6 +40,7 @@ void loop()
     delta_db = sign * (a - DB);                  // the deadband threshold value so that the sensor doesn't react 
   }                                              // to the initial noise
 
+  float f_delta_db = 0.0f;  // this is openness variable
 
 }
 
