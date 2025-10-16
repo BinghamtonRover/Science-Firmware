@@ -45,6 +45,7 @@ void loop()
   }                                              // to the initial noise
 
   float f_delta_db = tanh(K * delta_db);  // this is openness variable
+<<<<<<< HEAD
   float f01 = 0.5f * (f_delta_db + 1.0f);
   float alpha = alpha_min + (alpha_max - alpha_min) * f01;
   s_hat = s_hat + alpha*(delta);  // update the estimate
@@ -53,3 +54,14 @@ void loop()
   Serial.print(",");
   Serial.println(s_hat);
 }
+=======
+
+  float alpha = alpha_min + (alpha_max - alpha_min) * f_delta_db;
+  s_hat = s_hat + alpha*(x - s_hat);  // update the estimate
+
+  Serial.print(x);
+  Serial.print(",");
+  Serial.println(s_hat);
+}
+
+>>>>>>> 09fa5ddf6573808e2ed9ae5631bfe7b558bc983f
