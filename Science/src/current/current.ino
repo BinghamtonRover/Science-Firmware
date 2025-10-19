@@ -12,7 +12,6 @@ float s_hat = 0.0f; // filtered/estimated current value
 
 float u90 = 0.5;  // if current spike (innovation) is (u90) Amps or greater, filter is almost fully open
 float K = 1.4722 / u90;
-
 const float alpha_min = 0.08f;
 const float alpha_max = 0.4;
 
@@ -21,7 +20,7 @@ void setup()
   // put your setup code here, to run once:
   pinMode(23, INPUT); // sets the ADC pin   
   analogReadAveraging(4); // takes four sample voltage values and averages them to reduce noise
-}
+} 
 
 void loop()
 {
@@ -44,14 +43,17 @@ void loop()
     delta_db = sign * (a - DB);                  // the deadband threshold value so that the sensor doesn't react 
   }                                              // to the initial noise
 
-  float f_delta_db = tanh(K * delta_db);  // this is openness variable
-<<<<<<< HEAD
+  float f_delta_db = tanh(K * fabsf(delta_db));  // this is openness variable that measures the magnitude 
   float f01 = 0.5f * (f_delta_db + 1.0f);
-  float alpha = alpha_min + (alpha_max - alpha_min) * f01;
-  s_hat = s_hat + alpha*(delta);  // update the estimate
+  float alpha = alpha_min + (alpha_max - alpha_min) * f01; 
+  s_hat = s_hat + alpha*(delta_db);  // update the estimate
 
   Serial.print(x);
   Serial.print(",");
   Serial.println(s_hat);
 }
+
+
+
+
 
