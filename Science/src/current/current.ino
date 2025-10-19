@@ -25,7 +25,7 @@ void setup()
 void loop()
 {
   // put your main code here, to run repeatedly:
-  float x = (((3.3 / 1023) * analogRead(23)) - 1.65) / 0.132; // Convert ADC --> volts --> amps 
+  float x = (((3.3 / 1023) * analogRead(23)) - 1.65) / 0.134; // Convert ADC --> volts --> amps 
 
   if (!inited) {
     s_hat = x; inited = true; // If an estimated current has been detected then set the state to true
@@ -42,6 +42,7 @@ void loop()
     float sign = (delta >= 0.0f) ? 1.0f : -1.0f; // If the noise outside of the threshold then it reduces it by 
     delta_db = sign * (a - DB);                  // the deadband threshold value so that the sensor doesn't react 
   }                                              // to the initial noise
+
 
   float f_delta_db = tanh(K * fabsf(delta_db));  // this is openness variable that measures the magnitude 
   float f01 = 0.5f * (f_delta_db + 1.0f);
