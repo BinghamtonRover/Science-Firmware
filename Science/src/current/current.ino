@@ -26,7 +26,7 @@ void setup()
 void loop()
 {
   // put your main code here, to run repeatedly:
-  float x = (((3.3 / 1023) * analogRead(23)) - 1.65) / 0.132; // Convert ADC --> volts --> amps 
+  float x = (((3.3 / 1023) * analogRead(23)) - 1.65) / 0.134; // Convert ADC --> volts --> amps 
 
   if (!inited) {
     s_hat = x; inited = true; // If an estimated current has been detected then set the state to true
@@ -45,7 +45,6 @@ void loop()
   }                                              // to the initial noise
 
   float f_delta_db = tanh(K * delta_db);  // this is openness variable
-<<<<<<< HEAD
   float f01 = 0.5f * (f_delta_db + 1.0f);
   float alpha = alpha_min + (alpha_max - alpha_min) * f01;
   s_hat = s_hat + alpha*(delta);  // update the estimate
