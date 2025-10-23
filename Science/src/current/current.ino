@@ -4,7 +4,7 @@
 #include <float.h>
 
 // Initialized Deadband
-const float DB = 0.10f; // represents the threshold for noise
+const float DB = 0.5f; // represents the threshold for noise
 
 // State for the estimate current for the innovation formula 
 bool inited = false; // detects whether there's an estimated current value (first setting it to false)
@@ -12,14 +12,15 @@ float s_hat = 0.0f; // filtered/estimated current value
 
 float u90 = 0.5;  // if current spike (innovation) is (u90) Amps or greater, filter is almost fully open
 float K = 1.4722 / u90;
-const float alpha_min = 0.04f;
-const float alpha_max = 0.2; // Controls how fast the filter reacts to the noisy current readings   
+const float alpha_min = 0.5f;
+const float alpha_max = 0.5; // Controls how fast the filter reacts to the noisy current readings   
 
 void setup()
 {
   // put your setup code here, to run once:
   pinMode(23, INPUT); // sets the ADC pin   
   analogReadAveraging(4); // takes four sample voltage values and averages them to reduce noise
+  Serial.begin(115200);
 } 
 
 void loop()
@@ -36,22 +37,25 @@ void loop()
   
   // Deadband Conditions to measure how large the difference is
   float delta_db;
+  float alpha = 0;
   if (a <= DB) {
     delta_db = 0.0f;                   // ignore tiny noise if the noise is smaller than the threshold
   } else {
     float sign = (delta >= 0.0f) ? 1.0f : -1.0f; // If the noise outside of the threshold then it reduces it by 
-    delta_db = sign * (a - DB);                  // the deadband threshold value so that the sensor doesn't react 
-  }                                              // to the initial noise
-
-
-  float f_delta_db = tanh(K * fabsf(delta_db));  // this is openness variable that measures the magnitude 
-  float f01 = 0.5f * (f_delta_db + 1.0f);
-  float alpha = alpha_min + (alpha_max - alpha_min) * f01; 
+    delta_db = sign * (a - DB);  
+    float f_delta_db = tanh(K * fabsf(delta_db));  // this is openness variable that measures the magnitude 
+    float f01 = 0.5f * (f_delta_db + 1.0f);
+    alpha = alpha_min + (alpha_max - alpha_min) * f01;           // the deadband threshold value so that the sensor doesn't react 
+  }                                                                   // to the initial noise
+  
   s_hat = s_hat + alpha*(x - s_hat);  // update the estimate
 
-  Serial.print(x);
-  Serial.print(",");
-  Serial.println(s_hat);
+  noInterrupts();
+  Serial.print(x, 2);
+  Serial.print(F(", "));
+  Serial.println(s_hat, 2);
+  interrupts();
+
 }
 
 
