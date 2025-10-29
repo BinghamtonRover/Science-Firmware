@@ -45,8 +45,8 @@ void loop()
     delta_db = sign * (a - DB);  
     float f_delta_db = tanh(K * fabsf(delta_db));  // this is openness variable that measures the magnitude 
     float f01 = 0.5f * (f_delta_db + 1.0f);
-    alpha = alpha_min + (alpha_max - alpha_min) * f01;           // the deadband threshold value so that the sensor doesn't react 
-  }                                                                   // to the initial noise
+    alpha = alpha_min + (alpha_max - alpha_min) * f01;        // the deadband threshold value so that the sensor doesn't react 
+  }                                                                  // to the initial noise
   
   s_hat = s_hat + alpha*(x - s_hat);  // update the estimate
 
@@ -57,6 +57,8 @@ void loop()
   interrupts();
 
 }
+
+
 
 
 
