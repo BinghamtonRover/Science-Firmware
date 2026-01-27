@@ -1,0 +1,60 @@
+syntax = "proto3";
+
+import "core.proto";
+
+message DriveCommand {
+	// The max speed, as a percentage of the rover's possible speed.
+	float throttle = 1;  
+
+	// Speed of the left wheels, as a percentage of [throttle].
+	float left = 2;
+
+	// Speed of the right wheels, as a percentage of [throttle].
+	float right = 3;
+
+	// Indicates that [left] = 0 is valid, even though 0 usually means no value.
+	bool set_left = 4;
+
+	// Indicates that [right] = 0 is valid, even though 0 usually means no value.
+	bool set_right = 5;
+
+	// Indicates that [throttle] = 0 is valid, even though 0 usually means no value.
+	bool set_throttle = 6;
+
+	float front_swivel = 7;
+	float front_tilt = 8;
+	float rear_swivel = 9;
+	float rear_tilt = 10;
+
+	RoverStatus status = 11;
+}
+
+message DriveData {
+	// The max speed, as a percentage of the rover's possible speed.
+	float throttle = 1;  
+
+	// Speed of the left wheels, as a percentage of [throttle].
+	float left = 2;
+
+	// Speed of the right wheels, as a percentage of [throttle].
+	float right = 3;
+
+	// Indicates that [left] = 0 is valid, even though 0 usually means no value.
+	bool set_left = 4;
+
+	// Indicates that [right] = 0 is valid, even though 0 usually means no value.
+	bool set_right = 5;
+
+	// Indicates that [throttle] = 0 is valid, even though 0 usually means no value.
+	bool set_throttle = 6;
+
+	float front_swivel = 7;
+	float front_tilt = 8;
+	float rear_swivel = 9;
+	float rear_tilt = 10;
+
+	// Vitals for the whole rover
+	float battery_voltage = 11;
+	float battery_current = 12;
+	float battery_temperature = 13;
+}

@@ -1,0 +1,37 @@
+syntax = "proto3";
+
+import "gps.proto";
+
+enum AutonomyState {
+	AUTONOMY_STATE_UNDEFINED = 0;
+	PATHING = 2;
+	APPROACHING = 3;
+	AT_DESTINATION = 4;
+	DRIVING = 5;
+	SEARCHING = 6;
+	NO_SOLUTION = 7;
+	ABORTING = 8;
+}
+
+enum AutonomyTask {
+	AUTONOMY_TASK_UNDEFINED = 0;
+	GPS_ONLY = 1;
+	VISUAL_MARKER = 2;
+	BETWEEN_GATES = 3;
+}
+
+message AutonomyData {
+	AutonomyState state = 1;
+	GpsCoordinates destination = 2;
+	repeated GpsCoordinates obstacles = 3;
+	repeated GpsCoordinates path = 4;
+	AutonomyTask task = 5;
+	bool crash = 6;
+}
+
+message AutonomyCommand {
+	GpsCoordinates destination = 1;
+	AutonomyTask task = 2;
+	int32 aruco_id = 3;
+	bool abort = 4;
+}

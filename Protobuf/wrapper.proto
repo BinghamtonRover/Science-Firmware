@@ -1,0 +1,9 @@
+syntax = "proto3";
+
+import "google/protobuf/timestamp.proto";
+
+message WrappedMessage {
+	bytes data = 1;
+	string name = 2;
+	google.protobuf.Timestamp timestamp = 3;
+}

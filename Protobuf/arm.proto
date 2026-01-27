@@ -1,0 +1,93 @@
+syntax = "proto3";
+
+enum MotorDirection {
+	MOTOR_DIRECTION_UNDEFINED = 0;
+	UP = 1;
+	DOWN = 2;
+	LEFT = 3;
+	RIGHT = 4;
+	CLOCKWISE = 5;
+	COUNTER_CLOCKWISE = 6;
+	OPENING = 7;
+	CLOSING = 8;
+	NOT_MOVING = 9;
+}
+
+message Coordinates {
+	float x = 1;
+	float y = 2;
+	float z = 3;
+}
+
+message MotorData {
+	bool is_moving = 1;
+	bool is_limit_switch_pressed = 2;
+	MotorDirection direction = 3;
+
+	int32 current_step = 4;
+	int32 target_step = 5;
+	float angle = 6;
+}
+
+message MotorCommand {
+	// Debug control: Move by individual steps
+	int32 move_steps = 1;
+
+	// Precise control: Move by radians
+	float move_radians = 2;
+}
+
+message ArmData {
+	Coordinates currentPosition = 1;
+	Coordinates targetPosition = 2;
+
+	MotorData base = 3;
+	MotorData shoulder = 4;
+	MotorData elbow = 5;
+}
+
+message ArmCommand {
+	// General commands
+	bool stop = 1;
+	bool calibrate = 2;
+
+	// Move individual motors
+	MotorCommand swivel = 3;
+	MotorCommand shoulder = 4;
+	MotorCommand elbow = 5;
+
+	// Needed for IK: If the wrist-lift moves, we need to re-calculate IK to keep the end-effector
+	// stationary. See /Arm/src/ik/README.md in the Arm-Firmware repository.
+	MotorCommand gripper_lift = 6;
+
+	// optional Coordinates ik_target = 7;
+
+	float ik_x = 7;
+	float ik_y = 8;
+	float ik_z = 9;
+
+	// Custom actions
+	bool jab = 10;
+}
+
+message GripperData {
+	MotorData lift = 1;
+	MotorData rotate = 2;
+	MotorData pinch = 3;
+}
+
+message GripperCommand {
+	// General commands
+	bool stop = 1;
+	bool calibrate = 2;
+
+	// Move individual motors
+	MotorCommand lift = 3;
+	MotorCommand rotate = 4;
+	MotorCommand pinch = 5;
+
+	// Custom actions
+	bool open = 6;
+	bool close = 7;
+	bool spin = 8;
+}

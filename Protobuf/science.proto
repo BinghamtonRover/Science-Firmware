@@ -1,0 +1,69 @@
+// Version 1.0.0
+
+syntax = "proto3";
+
+/// The state of a servo. If undefined, don't open or close.
+enum ServoState {
+	SERVO_STATE_UNDEFINED = 0;
+	SERVO_OPEN = 1;
+	SERVO_CLOSE = 2;
+}
+
+/// The state of a pump. If undefined: don't do anything. If fill: turn on, wait, then turn off.
+enum PumpState {
+	PUMP_STATE_UNDEFINED = 0;
+	PUMP_ON = 1;
+	PUMP_OFF = 2;
+	FILL = 3;
+}
+
+/// The state of the science subsystem. If not COLLECT_DATA, don't stream data at all.
+enum ScienceState {
+	SCIENCE_STATE_UNDEFINED = 0;
+	COLLECT_DATA = 1;
+	STOP_COLLECTING = 2;
+}
+
+/// A command for the carousel and funnel to follow.
+enum CarouselCommand {
+	CAROUSEL_COMMAND_UNDEFINED = 0;
+	NEXT_TUBE = 1;
+	PREV_TUBE = 2;
+	NEXT_SECTION = 3;
+	PREV_SECTION = 4;
+	FILL_TUBE = 5;
+	FILL_SECTION = 6;
+}
+
+/// A command to the science subsystem.
+message ScienceCommand {
+	// Individual control over each motor. Indicates steps to move
+	float carousel_motor = 1;
+	float scoop_motor = 2;
+	float subsurface_motor = 3;
+	float carousel_subsurface = 12;
+
+	// Control over other hardware
+	PumpState pumps = 4;
+	ServoState funnel = 5;
+	ServoState scoop = 6;
+	CarouselCommand carousel = 7;	
+
+	// High level commands
+	bool calibrate = 8;
+	bool stop = 9;
+	int32 sample = 10;
+	ScienceState state = 11;
+}
+
+/// Data coming from the science subsystem.
+message ScienceData {
+	// High-level data
+	int32 sample = 1;
+	ScienceState state = 2;
+	
+	// Sensor data
+	float co2 = 3;
+	float humidity = 4;
+	float temperature = 5;
+}

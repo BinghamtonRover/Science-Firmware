@@ -1,0 +1,20 @@
+syntax = "proto3";
+
+import "core.proto";
+
+enum BurtLogLevel {
+  BURT_LOG_LEVEL_UNDEFINED = 0;
+  critical = 1;
+  error = 2;
+  warning = 3;
+  info = 4;
+  debug = 5;
+  trace = 6;
+}
+
+message BurtLog {
+  BurtLogLevel level = 1;
+  string title = 2;
+  string body = 3;
+  Device device = 4;
+}

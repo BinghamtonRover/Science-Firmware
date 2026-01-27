@@ -1,0 +1,28 @@
+syntax = "proto3";
+
+import "gps.proto";
+
+enum MarsStatus {
+	MARS_STATUS_UNDEFINED = 0;
+	PORT_NOT_FOUND = 1;
+	TEENSY_UNRESPONSIVE = 2;
+	FAILED_HANDSHAKE = 3;
+	TEENSY_CONNECTED = 4;
+}
+
+message MarsCommand {
+	// Manual control
+	float swivel = 1;
+	float tilt = 2;
+
+	// Automatic control
+	GpsCoordinates rover = 3;
+	GpsCoordinates baseStationOverride = 4;
+}
+
+message MarsData {
+	float swivel = 1;
+	float tilt = 2;
+	GpsCoordinates coordinates = 3;
+	MarsStatus status = 4;
+}

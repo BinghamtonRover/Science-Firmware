@@ -1,0 +1,54 @@
+syntax = "proto3";
+
+// Used for a simple handshake between devices.
+message Connect { 
+	Device sender = 1;
+	Device receiver = 2;
+}
+
+// Notifies the recipient that the sender will no longer be connected.
+message Disconnect { 
+	Device sender = 1;
+}
+
+/// Update a sensitive setting, such as the rover's status.
+/// 
+/// This message must be triggered manually and the recipient (usually the subsystems Pi)
+/// must respond with the exact same message to confirm its receipt.
+message UpdateSetting {
+	RoverStatus status = 1;
+	ProtoColor color = 2;
+}
+
+message ProtoColor {
+	float red = 1;
+	float green = 2;
+	float blue = 3;
+}
+
+enum Device {
+	DEVICE_UNDEFINED = 0;
+	DASHBOARD = 1;
+	SUBSYSTEMS = 2;
+	VIDEO = 3;
+	AUTONOMY = 4;
+	FIRMWARE = 5;
+	ARM =  6;
+	GRIPPER = 7;
+	SCIENCE = 8;
+	DRIVE = 9;
+}
+
+/// Changes the way the rover listens to incoming commands.
+/// 
+/// - When IDLE, all subsystems will ignore all commands
+/// - When MANUAL, all subsystems will accept all commands
+/// - When AUTONOMOUS, the rover will ignore commands from the dashboard
+enum RoverStatus {
+	DISCONNECTED = 0;   // no signal at all means disconnected
+	IDLE = 1;          // Yellow button should be lit.
+	MANUAL = 2;       // Must show blue LEDs. Green button should be lit.
+	AUTONOMOUS = 3;  // See [AutonomyState] for LED colors
+	POWER_OFF = 4;  // Press the red button to turn off the Pis on the rover
+	RESTART = 5;  // Reboots the program that receives this message
+}

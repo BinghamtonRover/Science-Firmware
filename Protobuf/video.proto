@@ -1,0 +1,75 @@
+syntax = "proto3";
+
+enum CameraStatus {
+	CAMERA_STATUS_UNDEFINED = 0;
+	CAMERA_DISCONNECTED = 1;    /// The camera is not even on the rover
+	CAMERA_ENABLED = 2;         /// The camera is actively streaming video
+	CAMERA_DISABLED = 3;        /// Not streaming, but it can be enabled
+	CAMERA_NOT_RESPONDING = 4;  /// Connected but not responding
+	CAMERA_LOADING = 5;         /// Camera is still turning on
+	FRAME_TOO_LARGE = 6;        /// The camera is reading too many pixels
+	CAMERA_HAS_NO_NAME = 7;     /// The camera was not assigned a name
+}
+
+enum CameraName {
+	CAMERA_NAME_UNDEFINED = 0;
+	ROVER_FRONT = 1;
+	ROVER_REAR = 2;
+	AUTONOMY_DEPTH = 3;
+	SUBSYSTEM1 = 4;
+	SUBSYSTEM2 = 5;
+	SUBSYSTEM3 = 6;
+}
+
+/// Details about a specific camera.
+message CameraDetails {
+	/// The name of the camera.
+	CameraName name = 1;
+
+	/// The width and height of the image frame.
+	int32 resolution_width = 2;
+	int32 resolution_height = 3;
+
+	/// The quality of the frame, as a percentage. Used for JPG compression.
+	int32 quality = 4;
+
+	/// The amount of frames per second. Eg, 60 FPS or 24 FPS.
+	int32 fps = 5;
+
+	/// The status of this camera.
+	CameraStatus status = 6;
+
+	bool autofocus = 7;
+	
+	int32 zoom = 8;
+
+	int32 pan = 9;
+
+	int32 tilt = 10;
+
+	int32 focus = 11;
+
+}
+
+/// Reports data about a camera.
+message VideoData {
+	/// The unique ID of this camera.
+	string id = 1;
+
+	/// The details for this camera.
+	CameraDetails details = 2;
+
+	/// The latest frame from this camera.
+	bytes frame = 3;
+}
+
+/// Make changes to a camera feed.
+message VideoCommand {
+	/// The unique ID of the camera to change.
+	string id = 1;
+
+	/// The new details for this camera.
+	/// 
+	/// If changing [CameraDetails.status], you cannot set it to [CameraStatus.DISCONNECTED].
+	CameraDetails details = 2;
+}
