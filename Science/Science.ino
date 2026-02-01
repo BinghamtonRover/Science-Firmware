@@ -107,6 +107,7 @@ void scienceHandler(const uint8_t* data, int length) {
 
 void sendData() {
   ScienceData data = ScienceData_init_zero;
+  data.version = version;
   data.sample = sample_number;
   can.send(SCIENCE_DATA_ID, &data, ScienceData_fields);
   serial.send(ScienceData_fields, &data, 8);
