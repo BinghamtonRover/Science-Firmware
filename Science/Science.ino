@@ -14,6 +14,7 @@ BurtSerial serial(Device::Device_SCIENCE, scienceHandler, shutdown);
 BurtCan<Can3> can(SCIENCE_COMMAND_ID, Device::Device_SCIENCE, scienceHandler, shutdown);
 BurtTimer dataTimer(250, sendData);
 
+Version version = {major: 1, minor: 1};
 ScienceState state = ScienceState_STOP_COLLECTING;
 
 int sample_number = 0;
@@ -106,6 +107,7 @@ void scienceHandler(const uint8_t* data, int length) {
 
 void sendData() {
   ScienceData data = ScienceData_init_zero;
+  data.version = version;
   data.sample = sample_number;
   can.send(SCIENCE_DATA_ID, &data, ScienceData_fields);
   serial.send(ScienceData_fields, &data, 8);
