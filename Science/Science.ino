@@ -14,6 +14,7 @@ BurtSerial serial(Device::Device_SCIENCE, scienceHandler, shutdown);
 BurtCan<Can3> can(SCIENCE_COMMAND_ID, Device::Device_SCIENCE, scienceHandler, shutdown);
 BurtTimer dataTimer(250, sendData);
 
+Version version = {major: 1, minor: 1};
 ScienceState state = ScienceState_STOP_COLLECTING;
 
 int sample_number = 0;
