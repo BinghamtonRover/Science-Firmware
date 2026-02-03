@@ -7,12 +7,14 @@
 #include "src/carousel/carousel.h"
 #include "src/co2/co2_sensor.h"
 #include "src/motors/motors.h"
+#include "src/encoder/encoder.h"
 
 // -------------------- Pinouts --------------------
 
 const int servo1 = 25;
 const int servo2 = 33;
 const int co2_address = 105;
+const int encoderIndex = 0; // TODO
 
 Motors motors(scoopArmMotor, dirtCarouselMotor, dirtLinearMotor);
 Scooper scooper(scoopArmMotor, servo1);
@@ -22,3 +24,5 @@ TempHumiditySensor tempHumidity;
 Co2Sensor co2(co2_address);
 
 Pumps pumps;
+
+Encoder encoder(encoderIndex);
