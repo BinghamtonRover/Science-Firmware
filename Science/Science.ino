@@ -39,7 +39,7 @@ void setup() {
 
   Serial.println("Initializing sensors...");
   co2.setup();
-  tempHumidity.setup();
+  //tempHumidity.setup();
 
 	Serial.println("Science Subsystem ready.");
 }
@@ -122,6 +122,7 @@ void sendData() {
   can.send(SCIENCE_DATA_ID, &data, ScienceData_fields);
   serial.send(ScienceData_fields, &data, 8);
 
+  /*
   data = ScienceData_init_zero;
   data.humidity = tempHumidity.getHumidity();
   can.send(SCIENCE_DATA_ID, &data, ScienceData_fields);
@@ -131,6 +132,7 @@ void sendData() {
   data.temperature = tempHumidity.getTemperature();
   can.send(SCIENCE_DATA_ID, &data, ScienceData_fields);
   serial.send(ScienceData_fields, &data, 8);
+  */
 }
 
 void test_sample(int sample) {

@@ -4,12 +4,12 @@ bool Encoder::isHomed(){
     return homed;
 }
 
-void setHome(){
+void Encoder::setHome(){
     homed = true;
 }
 
 void Encoder::setup(){
-    pinmode(indexPin, INPUT);
+    pinMode(indexPin, INPUT);
 }
 
 Encoder::Encoder(int indexPin) : indexPin(indexPin) {}

@@ -10,4 +10,4 @@ class Encoder{
         void setup();
         void setHome();
         Encoder(int indexPin);
-}
+};
