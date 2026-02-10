@@ -57,11 +57,9 @@ void StepperMotor::check_driver() {
   } else if (ioin.sd_mode) {
     Serial.println("Motor is configured for Step & Direction mode: ");
     Serial.println(config.name);
-    while (true);
   } else if (ioin.drv_enn) {
     Serial.println("Motor is not hardware enabled: ");
     Serial.println(config.name);
-    while (true);
   }
 }
 

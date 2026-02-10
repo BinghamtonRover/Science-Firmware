@@ -59,14 +59,20 @@ void TempHumiditySensor::setup(){
 
 float TempHumiditySensor::getTemperature(){
   readReg();
-  uint16_t temp = buf[0] << 8 | buf[1];
-  return ((float) temp * 165 / 65535.0) - 40.0;
+  if(isReady){
+    uint16_t temp = buf[0] << 8 | buf[1];
+    return ((float) temp * 165 / 65535.0) - 40.0;
+  }
+  return -1;
 }
 
 float TempHumiditySensor::getHumidity(){
   readReg();
-  uint16_t hum = buf[2] << 8 | buf[3];
-  return ((float) hum / 65535.0) * 100;
+  if(isReady){
+    uint16_t hum = buf[2] << 8 | buf[3];
+    return ((float) hum / 65535.0) * 100;
+  }
+  return -1;
 }
 
 TempHumiditySensor::TempHumiditySensor(uint8_t reg, uint8_t addr) : reg(reg), addr(addr) {}

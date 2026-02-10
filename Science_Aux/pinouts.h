@@ -2,40 +2,55 @@
 #include "src/temp_humidity/temp_humidity.h"
 #include "src/subsurface/subsurface.h"
 #include "src/tmc/BURT_TMC.h"
+#include "src/current_sensor/current_sensor.h"
 
 // -------------------- Pinouts --------------------
 
-const int servo1PIN = 0; // TBD
-const int servo2PIN = 0; // TBD
+const int servo1PIN = 10;
+const int servo2PIN = 3;
 
 SubSurfaceBox servo1(servo1PIN);
 SubSurfaceBox servo2(servo2PIN);
 
-StepperMotorPins stepper1PINS = {0,0}; // TBD
-StepperMotorPins stepper2PINS = {0,0}; // TBD
+/*struct StepperMotorPins {
+  int enable;
+  int chipSelect;
+};
 
-StepperMotorConfig stepper1CONFIG = {
-    "null",
-    0,
-    0,
-    0,
-    0.0
+struct StepperMotorConfig {
+  String name;
+  int current;
+  int speed;
+  int acceleration;
+  double stepsPerUnit;
+};*/
+
+StepperMotorPins stepper1PINS = {0,15};  // 7, 5
+StepperMotorPins stepper2PINS = {0,14};  // 2, 6
+
+
+StepperMotorConfig stepper1CONFIG = { // arm swivel configs
+    "step1",
+    2000,
+    200'000,
+    200'000,
+    microstepsPerRadian * 47
 };
 
 StepperMotorConfig stepper2CONFIG = {
-    "null",
-    0,
-    0,
-    0,
-    0.0
+    "step2",
+    2000,
+    200'000,
+    200'000,
+    microstepsPerRadian * 47
 };
-
-// Limit swithces, if part of the stepper
 
 StepperMotor stepper1(stepper1PINS, stepper1CONFIG);
 StepperMotor stepper2(stepper2PINS, stepper2CONFIG);
 
-uint8_t reg;
-uint8_t addr;
+uint8_t reg = 0x00;
+uint8_t addr = 0x40;
 
 TempHumiditySensor tempHumidity(reg, addr);
+
+CurrentSensor currentSensor(23);

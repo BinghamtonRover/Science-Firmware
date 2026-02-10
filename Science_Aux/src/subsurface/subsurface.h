@@ -14,5 +14,6 @@ class SubSurfaceBox {
       void setup();
       void open();
       void close();
+      bool attached();
       void handleCommand(ScienceCommand command);
 };

@@ -22,3 +22,7 @@ void SubSurfaceBox::handleCommand(ScienceCommand command){
     if (command.subsurface_motor == ServoState_SERVO_OPEN) open();
     else if (command.subsurface_motor == ServoState_SERVO_CLOSE) close();
 }
+
+bool SubSurfaceBox::attached(){
+    return subSurfaceServo.attached();
+}

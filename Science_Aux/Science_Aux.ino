@@ -23,34 +23,57 @@ void stopEverything() {
   stepper2.stop();
 }
 
+void sampleISR() {
+  currentSensor.updateFromISR(analogRead(23));
+}
+
 void setup() {
 	Serial.begin(9600);
   Serial.println("Initializing...");
 
+  /*
   Serial.println("Initializing communications...");
   can.setup();
-
-  Serial.println("Initializing hardware...");
-  stepper1.setup();
-  stepper1.calibrate();
-  stepper2.setup();
-  stepper2.calibrate();
-
-  servo1.setup();
-  servo2.setup();
 
   Serial.println("Initializing sensors...");
   tempHumidity.setup();
 
+  servo1.setup();
+  servo2.setup();
+  */
+  delay(3000);
+  currentSensor.begin();
+  Timer1.initialize(1000);
+  Timer1.attachInterrupt(sampleISR);
+
+  /*
+  Serial.println("Initializing hardware...");
+  stepper1.presetup();
+  stepper1.setup();
+  stepper1.calibrate();
+  
+  
+  stepper2.presetup();
+  stepper2.setup();
+  stepper2.calibrate();
+  */
+
 	Serial.println("Science Auxiliary Subsystem ready.");
 }
 
-void loop() {
-  stepper1.update();
-  stepper2.update();
-  can.update();
-  serial.update();
-  dataTimer.update();
+void loop(){
+  /*
+  stepper1.moveBy(.02);
+  stepper2.moveBy(.02);
+  delay(1500);
+  */
+  if (currentSensor.hasNewSample()) {
+    currentSensor.process();
+
+    Serial.print(currentSensor.getRawCurrent(), 2);
+    Serial.print(", ");
+    Serial.println(currentSensor.getFilteredCurrent(), 2);
+  }
 }
 
 /* Temporary Serial Monitor interface for testing. 
