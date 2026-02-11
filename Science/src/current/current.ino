@@ -37,7 +37,7 @@ void setup() {
   Timer1.attachInterrupt(sampleISR);
 }
 
-// ================== Main Loop ==================
+// ================== Main Loop ================== //
 
 void loop() {
   if (!newSample) return;    // Wait for ISR sample
