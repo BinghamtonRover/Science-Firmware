@@ -15,6 +15,6 @@ void SubSurfaceBox::close(){
 }
 
 void SubSurfaceBox::handleCommand(ScienceCommand command){
-    if (command.subsurface == ServoState_SERVO_OPEN) open();
-    else if (command.subsurface == ServoState_SERVO_CLOSE) close();
+    if (command.funnel == ServoState_SERVO_OPEN) open();
+    else if (command.funnel == ServoState_SERVO_CLOSE) close();
 }

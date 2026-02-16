@@ -17,12 +17,12 @@ DirtCarousel::DirtCarousel(StepperMotor stepper) :
 
 void DirtCarousel::setup() {
   pinMode(indexPin,INPUT);
-  attachInterrupt(digitalPinToInterrupt(indexPin), Home, CHANGE);
-  while (!atHome){
-    stepper.moveby(1);
-  }
-  stepper.block
-  detachInterupt(digitalPinToInterrupt(indexPin));
+  //attachInterrupt(digitalPinToInterrupt(indexPin), Home, CHANGE);
+  //while (!atHome){
+    //stepper.moveby(1);
+  //}
+  //stepper.block();
+  //detachInterupt(digitalPinToInterrupt(indexPin));
 }
 
 void DirtCarousel::handleCommand(ScienceCommand command) {
@@ -37,7 +37,7 @@ void DirtCarousel::handleCommand(ScienceCommand command) {
     case CarouselCommand_PREV_SECTION: 
       prevSection(); break;
     case CarouselCommand_FILL_TUBE: 
-      fillTube(); break;
+      // fillTube(); break;
     case CarouselCommand_FILL_SECTION: 
       fillSection(); break;
   }
@@ -73,7 +73,7 @@ void DirtCarousel::prevSection() {
 }
 
 void DirtCarousel::goToSection(int section) {
-  goHome();
+  // goHome();
   for (int i = 0; i < section; i++) {
     nextSection();
   }
@@ -82,7 +82,7 @@ void DirtCarousel::fillSection() {
   // goToSectionStart();
   for (int i = 0; i < tubesPerSection; i++) {
     if (i != 0) nextTube();
-    fillTube();
+    //fillTube();
   }
 }
 

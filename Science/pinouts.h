@@ -15,7 +15,7 @@ const int servo1 = 25;
 const int co2_address = 105;
 
 Motors motors(dirtCarouselMotor);
-SubSurfaceBox subSurfaceServo;
+SubSurfaceBox subSurface;
 SubSurfaceBox corouselServo;
 DirtCarousel carousel(dirtCarouselMotor);
 

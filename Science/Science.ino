@@ -1,7 +1,8 @@
 #include "pinouts.h"
 #include "src/utils/BURT_utils.h"
 #include "src/science.pb.h"
-#include "DFRobot_SHT3x.h"
+#include "src/version.pb.h"
+//#include "DFRobot_SHT3x.h"
 
 #define SCIENCE_COMMAND_ID 0x43
 #define SCIENCE_DATA_ID 0x17
@@ -13,6 +14,7 @@ Version version = {major: 1, minor: 1};
 void scienceHandler(const uint8_t* data, int length);
 void sendData();
 void shutdown() { }
+
 BurtSerial serial(Device::Device_SCIENCE, scienceHandler, shutdown);
 BurtCan<Can3> can(SCIENCE_COMMAND_ID, Device::Device_SCIENCE, scienceHandler, shutdown);
 BurtTimer dataTimer(250, sendData);
@@ -89,6 +91,7 @@ void scienceHandler(const uint8_t* data, int length) {
   pumps.handleCommand(command);
   carousel.handleCommand(command);
   subSurface.handleCommand(command);
+  
 
   // General commands
   if (command.stop) stopEverything();
