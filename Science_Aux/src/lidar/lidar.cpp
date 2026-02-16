@@ -3,15 +3,15 @@
 LidarSensor::LidarSensor(){}
 LidarSensor::~LidarSensor(){}
 
-void setup(){
+void LidarSensor::setup(){
     lidar.begin(0, true);
     lidar.configure(0);
 }
 
-void update(){
+void LidarSensor::update(){
     distance = lidar.distance();
 }
 
-float getDistance(){
+float LidarSensor::getDistance(){
     return distance;
 }
