@@ -4,7 +4,8 @@ TempHumiditySensor::TempHumiditySensor() : sensor(&Wire, 0x44, 4) { }
 
 void TempHumiditySensor::setup() {
   Serial.print("Initializing temp/humidity sensor...");
-  while (sensor.begin() != 0) {
+  for (int i = 0; i < 5; i++) {
+    if (sensor.begin() == 0) break;
     Serial.print(".");
     delay(500);
   }

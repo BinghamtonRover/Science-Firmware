@@ -1,15 +1,20 @@
 #include "pinouts.h"
 #include "src/utils/BURT_utils.h"
 #include "src/science.pb.h"
+#include "src/version.pb.h"
+//#include "DFRobot_SHT3x.h"
 
 #define SCIENCE_COMMAND_ID 0x43
 #define SCIENCE_DATA_ID 0x17
 
 #define USE_SERIAL_MONITOR false
 
+Version version = {major: 1, minor: 1};
+
 void scienceHandler(const uint8_t* data, int length);
 void sendData();
 void shutdown() { }
+
 BurtSerial serial(Device::Device_SCIENCE, scienceHandler, shutdown);
 BurtCan<Can3> can(SCIENCE_COMMAND_ID, Device::Device_SCIENCE, scienceHandler, shutdown);
 BurtTimer dataTimer(250, sendData);
@@ -32,10 +37,11 @@ void setup() {
 
   Serial.println("Initializing hardware...");
   motors.setup();
-  motors.calibrate();
-  scooper.setup();
+  // motors.calibrate();
   pumps.setup();
   carousel.setup();
+
+  subSurface.setup();
 
   Serial.println("Initializing sensors...");
   co2.setup();
@@ -63,8 +69,6 @@ void parseSerialCommand() {
 
   // Execute the command
   if (motor == "stop") stopEverything();
-  else if (motor == "dirt-linear") motors.dirtLinear.moveBy(distance); //dirtLinear.moveBy(distance);  
-  else if (motor == "science-linear") motors.scooperArm.moveBy(distance); //scoopArmMotor.moveBy(distance);  
   else if (motor == "dirt-carousel") motors.dirtCarousel.moveBy(distance); //dirtCarousel.moveBy(distance);  
   else if (motor == "pump") {
     pumps.fillTubes();
@@ -85,8 +89,9 @@ void scienceHandler(const uint8_t* data, int length) {
   // Control specific hardware
   motors.handleCommand(command);
   pumps.handleCommand(command);
-  scooper.handleCommand(command);
   carousel.handleCommand(command);
+  subSurface.handleCommand(command);
+  
 
   // General commands
   if (command.stop) stopEverything();
@@ -115,7 +120,7 @@ void sendData() {
   can.send(SCIENCE_DATA_ID, &data, ScienceData_fields);
   serial.send(ScienceData_fields, &data, 8);
 
-  if (state != ScienceState_COLLECT_DATA) return;
+  // if (state != ScienceState_COLLECT_DATA) return;
 
   data = ScienceData_init_zero;
   data.co2 = co2.read();
@@ -134,10 +139,11 @@ void sendData() {
 }
 
 void test_sample(int sample) {
-  motors.calibrate();
-  carousel.goToSection(sample);
-  carousel.fillSection();
+  // motors.calibrate();
+  // carousel.goToSection(sample);
+  // carousel.fillSection();
   carousel.goToTests();
-  pumps.fillTubes();
+  delay(1000);
+  // pumps.fillTubes();
   carousel.goToPicture();
 }

@@ -23,7 +23,7 @@ struct StepperMotorConfig {
   int speed;
   int acceleration;
   double stepsPerUnit;
-};*/
+};
 
 StepperMotorPins stepper1PINS = {0,15};  // 7, 5
 StepperMotorPins stepper2PINS = {0,14};  // 2, 6
@@ -47,6 +47,9 @@ StepperMotorConfig stepper2CONFIG = {
 
 StepperMotor stepper1(stepper1PINS, stepper1CONFIG);
 StepperMotor stepper2(stepper2PINS, stepper2CONFIG);
+*/
+
+// TODO: Initialize refactored Steppers
 
 uint8_t reg = 0x00;
 uint8_t addr = 0x40;
