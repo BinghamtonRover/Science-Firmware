@@ -1,5 +1,5 @@
 #include "pinouts.h"
-#include "src/utils/BURT_utils.h"
+#include "src/Firmware-Utilities/BURT_utils.h"
 #include "src/science.pb.h"
 
 #define SCIENCE_COMMAND_ID 0x43

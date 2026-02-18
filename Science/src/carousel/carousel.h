@@ -3,7 +3,7 @@
 #include <Arduino.h>
 #include <Servo.h>
 
-#include "../tmc/BURT_TMC.h"
+#include "../TMC-Firmware/BURT_TMC.h"
 #include "../science.pb.h"
 #include "../motors/motors.h"
 

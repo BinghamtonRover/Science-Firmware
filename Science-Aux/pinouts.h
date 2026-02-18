@@ -1,7 +1,7 @@
 #pragma once
 #include "src/temp_humidity/temp_humidity.h"
 #include "src/subsurface/subsurface.h"
-#include "src/tmc/BURT_TMC.h"
+#include "src/TMC-Firmware/BURT_TMC.h"
 #include "src/current_sensor/current_sensor.h"
 
 // -------------------- Pinouts --------------------

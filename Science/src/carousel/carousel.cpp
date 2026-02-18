@@ -3,8 +3,6 @@
 const int tubesPerSection = 3;
 const int num_sections = 3;
 const int totalTubes = tubesPerSection * num_sections;
-const int funnelOpen = 35;
-const int funnelClose = 90;
 const int pourDelay = 200;
 const int testOffset = 15;
 
@@ -16,13 +14,13 @@ DirtCarousel::DirtCarousel(StepperMotor stepper) :
   { }
 
 void DirtCarousel::setup() {
-  pinMode(indexPin,INPUT);
-  //attachInterrupt(digitalPinToInterrupt(indexPin), Home, CHANGE);
-  //while (!atHome){
-    //stepper.moveby(1);
-  //}
-  //stepper.block();
-  //detachInterupt(digitalPinToInterrupt(indexPin));
+  // pinMode(indexPin,INPUT);
+  // attachInterrupt(digitalPinToInterrupt(indexPin), Home, CHANGE);
+  // while (!atHome){
+  // stepper.moveby(1);
+  // }
+  // stepper.block();
+  // detachInterupt(digitalPinToInterrupt(indexPin));
 }
 
 void DirtCarousel::handleCommand(ScienceCommand command) {

@@ -3,7 +3,7 @@
 #include <Arduino.h>
 
 #include "../science.pb.h"
-#include "../tmc/BURT_TMC.h"
+#include "../TMC-Firmware/BURT_TMC.h"
 
 class Motors {
   public: 
