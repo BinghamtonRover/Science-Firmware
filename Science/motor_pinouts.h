@@ -4,17 +4,19 @@
 
 // --------------- Dirt Carousel  ---------------
 
-StepperMotorPins dirtCarouselPins = {
-	enable: 8,
-	chipSelect: 3,
+StepperGeneralConfig dirtCarouselGeneralConfig ={
+	name: "dirtCarousel",
+	steps_per_unit: microsteps_per_deg * -1,
 };
 
-StepperMotorConfig dirtCarouselConfig = {
-	name: "dirtCarousel", 
+StepperMotorPins dirtCarouselPins = {
+	chip_select: 3,
+};
+
+InternalRampConfig dirtCarouselConfig = {
 	current: 250, 
 	speed: 20'000,
 	acceleration: 200'000,
-	stepsPerUnit: microstepsPerDegree * -1,
 };
 
 // LimitSwitch dirtCarouselLimit {
