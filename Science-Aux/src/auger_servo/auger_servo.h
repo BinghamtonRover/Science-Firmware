@@ -4,13 +4,13 @@
 
 #include "../science.pb.h"
 
-class SubSurfaceBox {
+class AugerServo {
     private:
-      Servo subSurfaceServo;
+      Servo servo;
       int servoPIN;
 
     public:    
-      SubSurfaceBox(int servoPIN);
+      AugerServo(int servoPIN);
       void setup();
       void open();
       void close();
