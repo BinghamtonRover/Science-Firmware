@@ -1,8 +1,7 @@
 #include "pinouts.h"
-#include "src/utils/BURT_utils.h"
+#include "src/Firmware-Utilities/BURT_utils.h"
 #include "src/science.pb.h"
 #include "src/version.pb.h"
-//#include "DFRobot_SHT3x.h"
 
 #define SCIENCE_COMMAND_ID 0x43
 #define SCIENCE_DATA_ID 0x17
@@ -33,26 +32,22 @@ void setup() {
   Serial.println("Initializing...");
 
   Serial.println("Initializing communications...");
-  can.setup();
 
   Serial.println("Initializing hardware...");
   motors.setup();
+
   // motors.calibrate();
   pumps.setup();
   carousel.setup();
 
-  subSurface.setup();
-
   Serial.println("Initializing sensors...");
   co2.setup();
-  tempHumidity.setup();
 
 	Serial.println("Science Subsystem ready.");
 }
 
 void loop() {
   motors.update();
-  can.update();
   serial.update();
   dataTimer.update();
 }
@@ -90,7 +85,6 @@ void scienceHandler(const uint8_t* data, int length) {
   motors.handleCommand(command);
   pumps.handleCommand(command);
   carousel.handleCommand(command);
-  subSurface.handleCommand(command);
   
 
   // General commands
@@ -117,24 +111,10 @@ void sendData() {
 
   data = ScienceData_init_zero;
   data.state = state;
-  can.send(SCIENCE_DATA_ID, &data, ScienceData_fields);
   serial.send(ScienceData_fields, &data, 8);
-
   // if (state != ScienceState_COLLECT_DATA) return;
-
   data = ScienceData_init_zero;
   data.co2 = co2.read();
-  can.send(SCIENCE_DATA_ID, &data, ScienceData_fields);
-  serial.send(ScienceData_fields, &data, 8);
-
-  data = ScienceData_init_zero;
-  data.humidity = tempHumidity.getHumidity();
-  can.send(SCIENCE_DATA_ID, &data, ScienceData_fields);
-  serial.send(ScienceData_fields, &data, 8);
-
-  data = ScienceData_init_zero;
-  data.temperature = tempHumidity.getTemperature();
-  can.send(SCIENCE_DATA_ID, &data, ScienceData_fields);
   serial.send(ScienceData_fields, &data, 8);
 }
 
