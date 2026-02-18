@@ -6,7 +6,8 @@
 
 class SubSurfaceBox {
     private:
-      Servo subSurfaceServo;
+      
+    Servo subSurfaceServo;
 
     public:    
       void setup();
