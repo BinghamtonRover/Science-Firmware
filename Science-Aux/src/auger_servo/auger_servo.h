@@ -15,5 +15,5 @@ class AugerServo {
       void open();
       void close();
       bool attached();
-      void handleCommand(ScienceCommand command);
+      void handleCommand(ServoState servo_state);
 };

@@ -3,7 +3,7 @@
 
 #ifndef PB_SCIENCE_PB_H_INCLUDED
 #define PB_SCIENCE_PB_H_INCLUDED
-#include "utils/pb.h"
+#include "Firmware-Utilities/pb.h"
 #include "version.pb.h"
 
 #if PB_PROTO_HEADER_VERSION != 40

@@ -26,4 +26,4 @@ InternalRampConfig dirtCarouselConfig = {
 // 	position: 0,
 // };
 
-StepperMotor dirtCarouselMotor(dirtCarouselPins, dirtCarouselConfig);
+StepperMotor dirtCarouselMotor(dirtCarouselGeneralConfig,dirtCarouselPins, dirtCarouselConfig);

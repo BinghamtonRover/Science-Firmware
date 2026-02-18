@@ -14,8 +14,8 @@ void scienceHandler(const uint8_t* data, int length);
 void sendData();
 void shutdown() { }
 
-BurtSerial serial(Device::Device_SCIENCE, scienceHandler, shutdown);
-BurtCan<Can3> can(SCIENCE_COMMAND_ID, Device::Device_SCIENCE, scienceHandler, shutdown);
+BurtSerial serial(Device::Device_SCIENCE, scienceHandler, ScienceData_fields, ScienceData_size);
+// BurtCan<Can3> can(SCIENCE_COMMAND_ID, Device::Device_SCIENCE, scienceHandler, shutdown);
 BurtTimer dataTimer(250, sendData);
 
 ScienceState state = ScienceState_STOP_COLLECTING;
@@ -106,16 +106,14 @@ void scienceHandler(const uint8_t* data, int length) {
 void sendData() {
   ScienceData data = ScienceData_init_zero;
   data.sample = sample_number;
-  can.send(SCIENCE_DATA_ID, &data, ScienceData_fields);
-  serial.send(ScienceData_fields, &data, 8);
-
+  serial.send(&data);
   data = ScienceData_init_zero;
   data.state = state;
-  serial.send(ScienceData_fields, &data, 8);
+  serial.send(&data);
   // if (state != ScienceState_COLLECT_DATA) return;
   data = ScienceData_init_zero;
   data.co2 = co2.read();
-  serial.send(ScienceData_fields, &data, 8);
+  serial.send(&data);
 }
 
 void test_sample(int sample) {

@@ -5,7 +5,7 @@ Motors::Motors(StepperMotor dirtCarousel) :
   { }
 
 void Motors::setup() {
-  dirtCarousel.presetup();
+  dirtCarousel.preetup();
   dirtCarousel.setup();
 }
 

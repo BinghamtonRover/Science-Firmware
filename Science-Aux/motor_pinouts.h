@@ -1,70 +1,44 @@
-// #pragma once
+#pragma once
 
-// #include "src/tmc/BURT_TMC.h"
+#include "src/TMC-Firmware/BURT_TMC.h"
 
-// // --------------- Dirt Linear  ---------------
+// --------------- Dirt Linear  ---------------
 
-// // StepperMotorPins dirtLinearPins = {
-// // 	enable: 10, 
-// // 	chipSelect: 5, 
-// // };
+StepperGeneralConfig linearSliderGeneralConfig ={
+    name: "linearSlider",
+    steps_per_unit: microsteps_per_deg,
+};
 
-// // StepperMotorConfig dirtLinearConfig = {
-// // 	name: "dirt linear", 
-// // 	current: 250, 
-// // 	speed: 100'000,
-// // 	acceleration: 200'000,
-// // 	stepsPerUnit: 1,
-// // };
+StepperMotorPins linearSliderPins = {
+	chip_select: 5, 
+};
 
-// // // LimitSwitch dirtLinearLimit = {
-// // // 	pin: 2, 
-// // // 	triggeredValue: HIGH,
-// // // 	direction: 1,
-// // // 	position: 0,
-// // // 	maxLimit: INFINITY,
-// // // };
+InternalRampConfig linearSliderConfig = {
+	current: 250, 
+	speed: 100'000,
+	acceleration: 200'000,
+};
 
-// // StepperMotor dirtLinearMotor(dirtLinearPins, dirtLinearConfig);
-
-// // --------------- Scooper Arm  ---------------
-
-// // StepperMotorPins scoopArmPins = {
-// // 	enable: 9, 
-// // 	chipSelect: 4, 
-// // };
-
-// // StepperMotorConfig scoopArmConfig = {
-// // 	name: "science linear", 
-// // 	current: 400,
-// // 	speed: 40'000,
-// // 	acceleration: 200'000,
-// // 	stepsPerUnit: microstepsPerDegree,
-// // };
-
-// // LimitSwitch scoopArmLimit = {
-// // 	pin: 32, 
-// // 	triggeredValue: HIGH,
-// // 	direction: -1,
-// // 	position: 0,
-// // 	minLimit: -PI / 2,
-// // };
-
-// // StepperMotor scoopArmMotor(scoopArmPins, scoopArmConfig);
-
-// // --------------- Auger Motor  ---------------
-
-// StepperMotorPins augerMotorPins = {
-// 	enable: 8,
-// 	chipSelect: 3,
+// LimitSwitch dirtLinearLimit = {
+// 	pin: 2, 
+// 	triggeredValue: HIGH,
+// 	direction: 1,
+// 	position: 0,
+// 	maxLimit: INFINITY,
 // };
 
-// StepperMotorConfig augerMotorConfig = {
-// 	name: "dirtCarousel", 
-// 	current: 250, 
-// 	speed: 20'000,
-// 	acceleration: 200'000,
-// 	stepsPerUnit: microstepsPerDegree * -1,
-// };
+StepperMotor linearSlider(linearSliderGeneralConfig, linearSliderPins, linearSliderConfig);
 
-// StepperMotor augerMotor(augerMotorPins, augerMotorConfig);
+// // ---------------  Auger  ---------------
+
+StepperMotorPins augerMotorPins = {
+	enable: 8,
+};
+
+StepDirConfig augerMotorConfig = {
+	current: 250, 
+	speed: 20'000,
+	acceleration: 200'000,
+};
+
+StepperMotor augerMotor(augerMotorPins, augerMotorConfig);

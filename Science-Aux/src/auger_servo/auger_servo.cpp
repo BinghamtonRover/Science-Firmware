@@ -1,6 +1,7 @@
-#include "subsurface.h"
+#include "auger_servo.h"
 
 // Removed servo pin hard code, put it in constructor
+
 const int openPOS = 90;
 const int closePOS = 150;
 
@@ -18,11 +19,13 @@ void AugerServo::close(){
     servo.write(closePOS); 
 }
 
-void AugerServo::handleCommand(ScienceCommand command){
-    if (command.lower_auger_servo == ServoState_SERVO_OPEN) open();
-    else if (command.upper_auger_servo == ServoState_SERVO_CLOSE) close();
-}
-
 bool AugerServo::attached(){
     return servo.attached();
 }
+
+void AugerServo::handleCommand(ServoState servo_state){
+    if (servo_state == ServoState_SERVO_OPEN) open();
+    else if (servo_state == ServoState_SERVO_CLOSE) close();
+}
+
+
