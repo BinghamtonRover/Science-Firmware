@@ -6,7 +6,6 @@
 #define PUMP2 22
 #define PUMP3 23
 #define PUMP4 39
-#define PUMP5 38
 
 class Pumps {
   public:
