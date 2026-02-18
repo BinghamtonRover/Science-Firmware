@@ -49,12 +49,12 @@ typedef enum _CarouselCommand {
 typedef struct _ScienceCommand {
     /* Individual control over each motor. Indicates steps to move */
     float carousel_motor;
-    float unused_2;
-    float unused_3;
+    float auger;
+    float linear_slider;
     /* Control over other hardware */
     PumpState pumps;
-    ServoState unused_5;
-    ServoState subsurface;
+    ServoState lower_auger_servo;
+    ServoState upper_auger_servo;
     CarouselCommand carousel;
     /* High level commands */
     bool calibrate;
@@ -76,8 +76,9 @@ typedef struct _ScienceData {
     float temperature;
     bool has_version;
     Version version;
-    ServoState subsurface;
+    ServoState lower_auger_servo;
     float dist_to_ground;
+    ServoState upper_auger_servo;
 } ScienceData;
 
 
@@ -103,28 +104,29 @@ extern "C" {
 #define _CarouselCommand_ARRAYSIZE ((CarouselCommand)(CarouselCommand_FILL_SECTION+1))
 
 #define ScienceCommand_pumps_ENUMTYPE PumpState
-#define ScienceCommand_unused_5_ENUMTYPE ServoState
-#define ScienceCommand_subsurface_ENUMTYPE ServoState
+#define ScienceCommand_lower_auger_servo_ENUMTYPE ServoState
+#define ScienceCommand_upper_auger_servo_ENUMTYPE ServoState
 #define ScienceCommand_carousel_ENUMTYPE CarouselCommand
 #define ScienceCommand_state_ENUMTYPE ScienceState
 
 #define ScienceData_state_ENUMTYPE ScienceState
-#define ScienceData_subsurface_ENUMTYPE ServoState
+#define ScienceData_lower_auger_servo_ENUMTYPE ServoState
+#define ScienceData_upper_auger_servo_ENUMTYPE ServoState
 
 
 /* Initializer values for message structs */
 #define ScienceCommand_init_default              {0, 0, 0, _PumpState_MIN, _ServoState_MIN, _ServoState_MIN, _CarouselCommand_MIN, 0, 0, 0, _ScienceState_MIN, false, Version_init_default}
-#define ScienceData_init_default                 {0, _ScienceState_MIN, 0, 0, 0, false, Version_init_default, _ServoState_MIN, 0}
+#define ScienceData_init_default                 {0, _ScienceState_MIN, 0, 0, 0, false, Version_init_default, _ServoState_MIN, 0, _ServoState_MIN}
 #define ScienceCommand_init_zero                 {0, 0, 0, _PumpState_MIN, _ServoState_MIN, _ServoState_MIN, _CarouselCommand_MIN, 0, 0, 0, _ScienceState_MIN, false, Version_init_zero}
-#define ScienceData_init_zero                    {0, _ScienceState_MIN, 0, 0, 0, false, Version_init_zero, _ServoState_MIN, 0}
+#define ScienceData_init_zero                    {0, _ScienceState_MIN, 0, 0, 0, false, Version_init_zero, _ServoState_MIN, 0, _ServoState_MIN}
 
 /* Field tags (for use in manual encoding/decoding) */
 #define ScienceCommand_carousel_motor_tag        1
-#define ScienceCommand_unused_2_tag              2
-#define ScienceCommand_unused_3_tag              3
+#define ScienceCommand_auger_tag                 2
+#define ScienceCommand_linear_slider_tag         3
 #define ScienceCommand_pumps_tag                 4
-#define ScienceCommand_unused_5_tag              5
-#define ScienceCommand_subsurface_tag            6
+#define ScienceCommand_lower_auger_servo_tag     5
+#define ScienceCommand_upper_auger_servo_tag     6
 #define ScienceCommand_carousel_tag              7
 #define ScienceCommand_calibrate_tag             8
 #define ScienceCommand_stop_tag                  9
@@ -137,17 +139,18 @@ extern "C" {
 #define ScienceData_humidity_tag                 4
 #define ScienceData_temperature_tag              5
 #define ScienceData_version_tag                  6
-#define ScienceData_subsurface_tag               7
+#define ScienceData_lower_auger_servo_tag        7
 #define ScienceData_dist_to_ground_tag           8
+#define ScienceData_upper_auger_servo_tag        9
 
 /* Struct field encoding specification for nanopb */
 #define ScienceCommand_FIELDLIST(X, a) \
 X(a, STATIC,   SINGULAR, FLOAT,    carousel_motor,    1) \
-X(a, STATIC,   SINGULAR, FLOAT,    unused_2,          2) \
-X(a, STATIC,   SINGULAR, FLOAT,    unused_3,          3) \
+X(a, STATIC,   SINGULAR, FLOAT,    auger,             2) \
+X(a, STATIC,   SINGULAR, FLOAT,    linear_slider,     3) \
 X(a, STATIC,   SINGULAR, UENUM,    pumps,             4) \
-X(a, STATIC,   SINGULAR, UENUM,    unused_5,          5) \
-X(a, STATIC,   SINGULAR, UENUM,    subsurface,        6) \
+X(a, STATIC,   SINGULAR, UENUM,    lower_auger_servo,   5) \
+X(a, STATIC,   SINGULAR, UENUM,    upper_auger_servo,   6) \
 X(a, STATIC,   SINGULAR, UENUM,    carousel,          7) \
 X(a, STATIC,   SINGULAR, BOOL,     calibrate,         8) \
 X(a, STATIC,   SINGULAR, BOOL,     stop,              9) \
@@ -165,8 +168,9 @@ X(a, STATIC,   SINGULAR, FLOAT,    co2,               3) \
 X(a, STATIC,   SINGULAR, FLOAT,    humidity,          4) \
 X(a, STATIC,   SINGULAR, FLOAT,    temperature,       5) \
 X(a, STATIC,   OPTIONAL, MESSAGE,  version,           6) \
-X(a, STATIC,   SINGULAR, UENUM,    subsurface,        7) \
-X(a, STATIC,   SINGULAR, FLOAT,    dist_to_ground,    8)
+X(a, STATIC,   SINGULAR, UENUM,    lower_auger_servo,   7) \
+X(a, STATIC,   SINGULAR, FLOAT,    dist_to_ground,    8) \
+X(a, STATIC,   SINGULAR, UENUM,    upper_auger_servo,   9)
 #define ScienceData_CALLBACK NULL
 #define ScienceData_DEFAULT NULL
 #define ScienceData_version_MSGTYPE Version
@@ -181,7 +185,7 @@ extern const pb_msgdesc_t ScienceData_msg;
 /* Maximum encoded size of messages (where known) */
 #define SCIENCE_PB_H_MAX_SIZE                    ScienceCommand_size
 #define ScienceCommand_size                      64
-#define ScienceData_size                         59
+#define ScienceData_size                         61
 
 #ifdef __cplusplus
 } /* extern "C" */
