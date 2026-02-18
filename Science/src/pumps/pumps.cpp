@@ -1,10 +1,9 @@
 #include "pumps.h"
 
-const int pumpDelay1 = 2000; //Not being used
-const int pumpDelay2 = 6600; //H202 
-const int pumpDelay3 = 3300; //FDA
-const int pumpDelay4 = 10000; //Water
-const int pumpDelay5 = 6000; //Buffer
+const int pumpDelay1 = 6600; //H202 
+const int pumpDelay2 = 3300; //FDA
+const int pumpDelay3 = 10000; //Water
+const int pumpDelay4 = 6000; //Buffer
 
 void Pumps::setup() {
   pinMode(PUMP1, OUTPUT);
@@ -41,20 +40,21 @@ void Pumps::handleCommand(ScienceCommand command) {
 }
 
 void Pumps::fillTubes() {
+  // Timings to be tested
   turnOn();
 
   delay(pumpDelay3);
 
-  digitalWrite(PUMP3, LOW);
+  digitalWrite(PUMP2, LOW);
 
   delay(pumpDelay2 - pumpDelay3);
 
-  digitalWrite(PUMP2, LOW);
-  digitalWrite(, LOW);
-
-  delay(pumpDelay4 - pumpDelay2);
-
+  digitalWrite(PUMP1, LOW);
   digitalWrite(PUMP4, LOW);
+
+  delay(pumpDelay3 - pumpDelay1);
+
+  digitalWrite(PUMP3, LOW);
 
   turnOff();
 }

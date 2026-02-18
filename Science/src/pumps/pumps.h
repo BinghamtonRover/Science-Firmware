@@ -7,13 +7,13 @@
 #define PUMP3 23
 #define PUMP4 39
 
+// *Todo seperate pump and pumps class for better modularity
 class Pumps {
+  
   public:
-
     void setup();
     void turnOn();
     void turnOff();
     void handleCommand(ScienceCommand command);
     void fillTubes();
-    
 };
