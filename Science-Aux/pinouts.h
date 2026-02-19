@@ -2,7 +2,7 @@
 #include "src/auger_servo/auger_servo.h"
 #include "src/temp_humidity/temp_humidity.h"
 #include "src/subsurface/subsurface.h"
-#include "src/TMC-Firmware/BURT_TMC.h"
+#include "src/tmc/BURT_TMC.h"
 #include "src/current_sensor/current_sensor.h"
 
 // -------------------- Pinouts --------------------
@@ -20,43 +20,44 @@ TempHumiditySensor tempHumidity(reg, addr);
 
 CurrentSensor currentSensor(23);
 
-// --------------- Dirt Linear  ---------------
+StepperMotor linearSlider(
+  StepperGeneralConfig{
+    .name ="linearSlider",
+    .steps_per_unit = microsteps_per_deg,
+},
 
-StepperGeneralConfig linearSliderGeneralConfig ={
-    name: "linearSlider",
-    steps_per_unit: microsteps_per_deg,
-};
+StepperMotorPins {
+	.chip_select = 15, 
+},
 
-StepperMotorPins linearSliderPins = {
-	chip_select: 5, 
-};
+InternalRampConfig{
+	.current = 250, 
+	.speed = 100'000,
+	.acceleration = 200'000,
+});
 
-InternalRampConfig linearSliderConfig = {
-	current: 250, 
-	speed: 100'000,
-	acceleration: 200'000,
-};
-
-// LimitSwitch dirtLinearLimit = {
-// 	pin: 2, 
-// 	triggeredValue: HIGH,
-// 	direction: 1,
-// 	position: 0,
-// 	maxLimit: INFINITY,
-// };
-
-StepperMotor linearSlider(linearSliderGeneralConfig, linearSliderPins, linearSliderConfig);
 
 // // ---------------  Auger  ---------------
 
-StepperMotorPins augerMotorPins = {
-	enable: 8,
-};
+StepperMotor augerMotor(
+  StepperGeneralConfig{
+    .name ="augerMotor",
+    .steps_per_unit = microsteps_per_deg,
+},
 
-StepDirConfig augerMotorConfig = {
-	current: 250, 
-	speed: 20'000,
-	acceleration: 200'000,
-};
+StepperMotorPins {
+	.chip_select = 14,
+  .step_pin = 6,
+  .dir_pin = 2
+},
 
-StepperMotor augerMotor(augerMotorPins, augerMotorConfig);
+StepDirConfig {
+    .gear_ratio = 24,
+    .double_edge = true,
+    .run_current_scale = 16,
+    .hold_current_scale = 4,
+    .ihold_delay_scale = 8,
+    .invert_dir = false,
+    .stealth_chop_en = false,
+    .spread_cycle_start_thrs = 8
+});

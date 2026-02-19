@@ -8,9 +8,11 @@ class AugerServo {
     private:
       Servo servo;
       int servoPIN;
+      int openPOS;
+      int closePOS;
 
     public:    
-      AugerServo(int servoPIN);
+      AugerServo(int servoPIN, int openPOS, int closePOS);
       void setup();
       void open();
       void close();

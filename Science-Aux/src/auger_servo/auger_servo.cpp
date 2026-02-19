@@ -1,12 +1,9 @@
 #include "auger_servo.h"
 
-// Removed servo pin hard code, put it in constructor
-
-const int openPOS = 90;
-const int closePOS = 150;
-
-AugerServo::AugerServo(int servoPIN){
+AugerServo::AugerServo(int servoPIN, int openPOS, int closePOS){
     this->servoPIN = servoPIN;
+    this->openPOS = openPOS;
+    this->closePOS = closePOS;
 }
 
 void AugerServo::setup(){

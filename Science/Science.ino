@@ -1,5 +1,5 @@
 #include "pinouts.h"
-#include "src/Firmware-Utilities/BURT_utils.h"
+#include "src/utils/BURT_utils.h"
 #include "src/science.pb.h"
 #include "src/version.pb.h"
 
@@ -118,10 +118,10 @@ void sendData() {
 
 void test_sample(int sample) {
   // motors.calibrate();
-  // carousel.goToSection(sample);
-  // carousel.fillSection();
+  carousel.goToSection(sample);
+  carousel.fillSection();
   carousel.goToTests();
   delay(1000);
-  // pumps.fillTubes();
+  pumps.fillTubes();
   carousel.goToPicture();
 }

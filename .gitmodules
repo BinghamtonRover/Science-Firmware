@@ -7,25 +7,14 @@
 [submodule "Science/src/utils"]
 	path = Science/src/utils
 	url = https://github.com/BinghamtonRover/Firmware-Utilities
+[submodule "Science/src/temp_humidity/dfrobot"]
+	path = Science/src/temp_humidity/dfrobot
+	url = https://github.com/BinghamtonRover/DFRobot_SHT3x
+	branch = fixes
+
 [submodule "Science-Aux/src/tmc"]
 	path = Science-Aux/src/tmc
 	url = https://github.com/BinghamtonRover/TMC-Firmware
 [submodule "Science-Aux/src/utils"]
 	path = Science-Aux/src/utils
 	url = https://github.com/BinghamtonRover/Firmware-Utilities
-[submodule "Science/src/temp_humidity/dfrobot"]
-	path = Science/src/temp_humidity/dfrobot
-	url = https://github.com/BinghamtonRover/DFRobot_SHT3x
-	branch = fixes
-[submodule "Science/src/TMC-Firmware"]
-	path = Science/src/TMC-Firmware
-	url = https://github.com/BinghamtonRover/TMC-Firmware.git
-[submodule "Science/src/Firmware-Utilities"]
-	path = Science/src/Firmware-Utilities
-	url = https://github.com/BinghamtonRover/Firmware-Utilities.git
-[submodule "Science-Aux/src/TMC-Firmware"]
-	path = Science-Aux/src/TMC-Firmware
-	url = https://github.com/BinghamtonRover/TMC-Firmware.git
-[submodule "Science-Aux/src/Firmware-Utilities"]
-	path = Science-Aux/src/Firmware-Utilities
-	url = https://github.com/BinghamtonRover/Firmware-Utilities.git
