@@ -49,7 +49,6 @@ void TempHumiditySensor::setup(){
       return;
     }
     Serial.print(".");
-    delay(1000);
   }
   Serial.print(" Temp/humidity sensor failed to connect (Error code ");
   Serial.print(error);

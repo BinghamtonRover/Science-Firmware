@@ -1,5 +1,5 @@
 #pragma once
-#include <Arudino.h>
+#include <Arduino.h>
 #include "src/LIDARLite.h"
 
 class LidarSensor {
