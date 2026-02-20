@@ -32,6 +32,8 @@ void stopEverything() {
 
 void setup() {
 	Serial.begin(9600);
+  
+  dataTimer.setup();
   Serial.println("Initializing...");
 
   Serial.println("Initializing communications...");
@@ -60,10 +62,10 @@ void setup() {
 }
 
 void loop(){
-  serial.update();
   augerMotor.update();
   linearSlider.update();
   lidar.update();
+  serial.update();
   dataTimer.update();
 }
 
@@ -127,7 +129,7 @@ void sendData() {
   data.state = state;
   serial.send(&data);
 
-  // if (state != ScienceState_COLLECT_DATA) return;
+  //if (state != ScienceState_COLLECT_DATA) return;
 
   // Removed CO2 here
 
@@ -143,7 +145,7 @@ void sendData() {
   data.auger.distance_to_ground_cm = lidar.getDistance();
   serial.send(&data);
 
-  data = ScienceData_init_zero;
-  data.auger.current = currentSensor.getFilteredCurrent();
-  serial.send(&data);
+  // data = ScienceData_init_zero;
+  // data.auger.current = currentSensor.getFilteredCurrent();
+  // serial.send(&data);
 }
