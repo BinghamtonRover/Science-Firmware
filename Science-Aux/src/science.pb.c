@@ -6,6 +6,12 @@
 #error Regenerate this file with the current version of nanopb generator.
 #endif
 
+PB_BIND(AugerCommand, AugerCommand, AUTO)
+
+
+PB_BIND(AugerData, AugerData, AUTO)
+
+
 PB_BIND(ScienceCommand, ScienceCommand, AUTO)
 
 

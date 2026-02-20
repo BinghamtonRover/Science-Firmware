@@ -45,16 +45,31 @@ typedef enum _CarouselCommand {
 } CarouselCommand;
 
 /* Struct definitions */
+/* / Command to control the auger */
+typedef struct _AugerCommand {
+    /* Speed of the auger in RPM, between 0.0 - 0.4 */
+    bool has_speed_rpm;
+    float speed_rpm;
+    ServoState upper_servo;
+    ServoState lower_servo;
+} AugerCommand;
+
+/* / Data from the auger */
+typedef struct _AugerData {
+    ServoState lower_servo;
+    ServoState upper_servo;
+    /* Distance to ground, in centimeters */
+    float distance_to_ground_cm;
+    float current;
+} AugerData;
+
 /* / A command to the science subsystem. */
 typedef struct _ScienceCommand {
     /* Individual control over each motor. Indicates steps to move */
     float carousel_motor;
-    float auger;
     float linear_slider;
     /* Control over other hardware */
     PumpState pumps;
-    ServoState upper_auger_servo;
-    ServoState lower_auger_servo;
     CarouselCommand carousel;
     /* High level commands */
     bool calibrate;
@@ -63,6 +78,8 @@ typedef struct _ScienceCommand {
     ScienceState state;
     bool has_version;
     Version version;
+    bool has_auger;
+    AugerCommand auger;
 } ScienceCommand;
 
 /* / Data coming from the science subsystem. */
@@ -76,10 +93,8 @@ typedef struct _ScienceData {
     float temperature;
     bool has_version;
     Version version;
-    ServoState lower_auger_servo;
-    ServoState upper_auger_servo;
-    float dist_to_ground;
-    float aux_current;
+    bool has_auger;
+    AugerData auger;
 } ScienceData;
 
 
@@ -104,64 +119,86 @@ extern "C" {
 #define _CarouselCommand_MAX CarouselCommand_FILL_SECTION
 #define _CarouselCommand_ARRAYSIZE ((CarouselCommand)(CarouselCommand_FILL_SECTION+1))
 
+#define AugerCommand_upper_servo_ENUMTYPE ServoState
+#define AugerCommand_lower_servo_ENUMTYPE ServoState
+
+#define AugerData_lower_servo_ENUMTYPE ServoState
+#define AugerData_upper_servo_ENUMTYPE ServoState
+
 #define ScienceCommand_pumps_ENUMTYPE PumpState
-#define ScienceCommand_upper_auger_servo_ENUMTYPE ServoState
-#define ScienceCommand_lower_auger_servo_ENUMTYPE ServoState
 #define ScienceCommand_carousel_ENUMTYPE CarouselCommand
 #define ScienceCommand_state_ENUMTYPE ScienceState
 
 #define ScienceData_state_ENUMTYPE ScienceState
-#define ScienceData_lower_auger_servo_ENUMTYPE ServoState
-#define ScienceData_upper_auger_servo_ENUMTYPE ServoState
 
 
 /* Initializer values for message structs */
-#define ScienceCommand_init_default              {0, 0, 0, _PumpState_MIN, _ServoState_MIN, _ServoState_MIN, _CarouselCommand_MIN, 0, 0, 0, _ScienceState_MIN, false, Version_init_default}
-#define ScienceData_init_default                 {0, _ScienceState_MIN, 0, 0, 0, false, Version_init_default, _ServoState_MIN, _ServoState_MIN, 0, 0}
-#define ScienceCommand_init_zero                 {0, 0, 0, _PumpState_MIN, _ServoState_MIN, _ServoState_MIN, _CarouselCommand_MIN, 0, 0, 0, _ScienceState_MIN, false, Version_init_zero}
-#define ScienceData_init_zero                    {0, _ScienceState_MIN, 0, 0, 0, false, Version_init_zero, _ServoState_MIN, _ServoState_MIN, 0, 0}
+#define AugerCommand_init_default                {false, 0, _ServoState_MIN, _ServoState_MIN}
+#define AugerData_init_default                   {_ServoState_MIN, _ServoState_MIN, 0, 0}
+#define ScienceCommand_init_default              {0, 0, _PumpState_MIN, _CarouselCommand_MIN, 0, 0, 0, _ScienceState_MIN, false, Version_init_default, false, AugerCommand_init_default}
+#define ScienceData_init_default                 {0, _ScienceState_MIN, 0, 0, 0, false, Version_init_default, false, AugerData_init_default}
+#define AugerCommand_init_zero                   {false, 0, _ServoState_MIN, _ServoState_MIN}
+#define AugerData_init_zero                      {_ServoState_MIN, _ServoState_MIN, 0, 0}
+#define ScienceCommand_init_zero                 {0, 0, _PumpState_MIN, _CarouselCommand_MIN, 0, 0, 0, _ScienceState_MIN, false, Version_init_zero, false, AugerCommand_init_zero}
+#define ScienceData_init_zero                    {0, _ScienceState_MIN, 0, 0, 0, false, Version_init_zero, false, AugerData_init_zero}
 
 /* Field tags (for use in manual encoding/decoding) */
+#define AugerCommand_speed_rpm_tag               1
+#define AugerCommand_upper_servo_tag             2
+#define AugerCommand_lower_servo_tag             3
+#define AugerData_lower_servo_tag                1
+#define AugerData_upper_servo_tag                2
+#define AugerData_distance_to_ground_cm_tag      3
+#define AugerData_current_tag                    4
 #define ScienceCommand_carousel_motor_tag        1
-#define ScienceCommand_auger_tag                 2
 #define ScienceCommand_linear_slider_tag         3
 #define ScienceCommand_pumps_tag                 4
-#define ScienceCommand_upper_auger_servo_tag     5
-#define ScienceCommand_lower_auger_servo_tag     6
 #define ScienceCommand_carousel_tag              7
 #define ScienceCommand_calibrate_tag             8
 #define ScienceCommand_stop_tag                  9
 #define ScienceCommand_sample_tag                10
 #define ScienceCommand_state_tag                 11
 #define ScienceCommand_version_tag               12
+#define ScienceCommand_auger_tag                 13
 #define ScienceData_sample_tag                   1
 #define ScienceData_state_tag                    2
 #define ScienceData_co2_tag                      3
 #define ScienceData_humidity_tag                 4
 #define ScienceData_temperature_tag              5
 #define ScienceData_version_tag                  6
-#define ScienceData_lower_auger_servo_tag        7
-#define ScienceData_upper_auger_servo_tag        8
-#define ScienceData_dist_to_ground_tag           9
-#define ScienceData_aux_current_tag              10
+#define ScienceData_auger_tag                    7
 
 /* Struct field encoding specification for nanopb */
+#define AugerCommand_FIELDLIST(X, a) \
+X(a, STATIC,   OPTIONAL, FLOAT,    speed_rpm,         1) \
+X(a, STATIC,   SINGULAR, UENUM,    upper_servo,       2) \
+X(a, STATIC,   SINGULAR, UENUM,    lower_servo,       3)
+#define AugerCommand_CALLBACK NULL
+#define AugerCommand_DEFAULT NULL
+
+#define AugerData_FIELDLIST(X, a) \
+X(a, STATIC,   SINGULAR, UENUM,    lower_servo,       1) \
+X(a, STATIC,   SINGULAR, UENUM,    upper_servo,       2) \
+X(a, STATIC,   SINGULAR, FLOAT,    distance_to_ground_cm,   3) \
+X(a, STATIC,   SINGULAR, FLOAT,    current,           4)
+#define AugerData_CALLBACK NULL
+#define AugerData_DEFAULT NULL
+
 #define ScienceCommand_FIELDLIST(X, a) \
 X(a, STATIC,   SINGULAR, FLOAT,    carousel_motor,    1) \
-X(a, STATIC,   SINGULAR, FLOAT,    auger,             2) \
 X(a, STATIC,   SINGULAR, FLOAT,    linear_slider,     3) \
 X(a, STATIC,   SINGULAR, UENUM,    pumps,             4) \
-X(a, STATIC,   SINGULAR, UENUM,    upper_auger_servo,   5) \
-X(a, STATIC,   SINGULAR, UENUM,    lower_auger_servo,   6) \
 X(a, STATIC,   SINGULAR, UENUM,    carousel,          7) \
 X(a, STATIC,   SINGULAR, BOOL,     calibrate,         8) \
 X(a, STATIC,   SINGULAR, BOOL,     stop,              9) \
 X(a, STATIC,   SINGULAR, INT32,    sample,           10) \
 X(a, STATIC,   SINGULAR, UENUM,    state,            11) \
-X(a, STATIC,   OPTIONAL, MESSAGE,  version,          12)
+X(a, STATIC,   OPTIONAL, MESSAGE,  version,          12) \
+X(a, STATIC,   OPTIONAL, MESSAGE,  auger,            13)
 #define ScienceCommand_CALLBACK NULL
 #define ScienceCommand_DEFAULT NULL
 #define ScienceCommand_version_MSGTYPE Version
+#define ScienceCommand_auger_MSGTYPE AugerCommand
 
 #define ScienceData_FIELDLIST(X, a) \
 X(a, STATIC,   SINGULAR, INT32,    sample,            1) \
@@ -170,25 +207,29 @@ X(a, STATIC,   SINGULAR, FLOAT,    co2,               3) \
 X(a, STATIC,   SINGULAR, FLOAT,    humidity,          4) \
 X(a, STATIC,   SINGULAR, FLOAT,    temperature,       5) \
 X(a, STATIC,   OPTIONAL, MESSAGE,  version,           6) \
-X(a, STATIC,   SINGULAR, UENUM,    lower_auger_servo,   7) \
-X(a, STATIC,   SINGULAR, UENUM,    upper_auger_servo,   8) \
-X(a, STATIC,   SINGULAR, FLOAT,    dist_to_ground,    9) \
-X(a, STATIC,   SINGULAR, FLOAT,    aux_current,      10)
+X(a, STATIC,   OPTIONAL, MESSAGE,  auger,             7)
 #define ScienceData_CALLBACK NULL
 #define ScienceData_DEFAULT NULL
 #define ScienceData_version_MSGTYPE Version
+#define ScienceData_auger_MSGTYPE AugerData
 
+extern const pb_msgdesc_t AugerCommand_msg;
+extern const pb_msgdesc_t AugerData_msg;
 extern const pb_msgdesc_t ScienceCommand_msg;
 extern const pb_msgdesc_t ScienceData_msg;
 
 /* Defines for backwards compatibility with code written before nanopb-0.4.0 */
+#define AugerCommand_fields &AugerCommand_msg
+#define AugerData_fields &AugerData_msg
 #define ScienceCommand_fields &ScienceCommand_msg
 #define ScienceData_fields &ScienceData_msg
 
 /* Maximum encoded size of messages (where known) */
+#define AugerCommand_size                        9
+#define AugerData_size                           14
 #define SCIENCE_PB_H_MAX_SIZE                    ScienceData_size
-#define ScienceCommand_size                      64
-#define ScienceData_size                         66
+#define ScienceCommand_size                      66
+#define ScienceData_size                         68
 
 #ifdef __cplusplus
 } /* extern "C" */

@@ -88,7 +88,7 @@ void scienceHandler(const uint8_t* data, int length) {
   
 
   // General commands
-  if (command.stop) stopEverything();
+  if (command.stop){}//stopEverything();
   else if (command.calibrate) motors.calibrate();
   if (command.sample != 0) sample_number = command.sample - 1;
   switch (command.state) {

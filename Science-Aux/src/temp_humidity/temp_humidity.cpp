@@ -2,7 +2,7 @@
 
 void TempHumiditySensor::readReg(){
   if(!isReady){
-    Serial.println("Error: Temp/humidity sensor has not been properly initialized.");
+    // Serial.println("Error: Temp/humidity sensor has not been properly initialized.");
     return;
   }
   Wire.beginTransmission(addr);
@@ -12,19 +12,17 @@ void TempHumiditySensor::readReg(){
   if(code != 0){
     // Wiping buffer if there is an error
     memset(buf, 0, 4);
-    Serial.print("Error: Could not read temperature/humidity (Error code ");
-    Serial.print(code);
-    Serial.println(")");
+    // Serial.print("Error: Could not read temperature/humidity (Error code ");
+    // Serial.print(code);
+    // Serial.println(")");
     return;
   }
-
-  delay(20);
   
   // Requesting 4 bytes to get data from registers 0x00 and 0x01 and putting it in buf[0:4]
   uint8_t bytesRead = Wire.requestFrom(addr, 4);
   if (bytesRead != 4) {
     memset(buf, 0, 4);
-    Serial.println("Error: Incomplete I2C read from sensor.");
+    // Serial.println("Error: Incomplete I2C read from sensor.");
     return;
   }
   for(int i = 0; i < 4; i++){
@@ -33,10 +31,8 @@ void TempHumiditySensor::readReg(){
 }
 
 void TempHumiditySensor::setup(){ 
-  Serial.print("Initializing temp/humidity sensor...");
+  //Serial.print("Initializing temp/humidity sensor...");
   Wire.begin();
-  delay(100);
-
   // Creating a test write to ensure that the bus is properly connected
   // 5 seconds before considering failure
   uint8_t error = 0;
@@ -44,15 +40,15 @@ void TempHumiditySensor::setup(){
     Wire.beginTransmission(addr);
     error = Wire.endTransmission();
     if (error == 0) {
-      Serial.println(" Done!");
+      // Serial.println(" Done!");
       isReady = true;
       return;
     }
-    Serial.print(".");
+    //Serial.print(".");
   }
-  Serial.print(" Temp/humidity sensor failed to connect (Error code ");
-  Serial.print(error);
-  Serial.println(")");
+  // Serial.print(" Temp/humidity sensor failed to connect (Error code ");
+  // Serial.print(error);
+  // Serial.println(")");
   isReady = false;
 }
 

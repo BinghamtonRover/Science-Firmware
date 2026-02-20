@@ -11,7 +11,7 @@
 /// The CO2 sensor is *precise*, but not accurate. Meaning, it will accurately detect spikes and
 /// dips, but the actual value it reports may not be accurate. A simple fix is to just add a 
 /// constant amount to all its readings, preserving the shape while fixing the accuracy.
-const int co2Offset = 200;
+const int co2Offset = 10;
 
 Co2Sensor::Co2Sensor(int address) : address(address) {}
 

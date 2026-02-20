@@ -1,11 +1,14 @@
 #include "pinouts.h"
 #include "src/utils/BURT_utils.h"
 #include "src/science.pb.h"
+#include "src/version.pb.h"
 
 #define SCIENCE_COMMAND_ID 0x43
 #define SCIENCE_DATA_ID 0x17
 
 #define USE_SERIAL_MONITOR false
+
+Version version = {major: 1, minor: 1};
 
 void scienceHandler(const uint8_t* data, int length);
 void sendData();
@@ -23,9 +26,9 @@ void stopEverything() {
   linearSlider.stop();
 }
 
-void sampleISR() {
-  currentSensor.updateFromISR(analogRead(23));
-}
+// void sampleISR() {
+//   currentSensor.updateFromISR(analogRead(23));
+// }
 
 void setup() {
 	Serial.begin(9600);
@@ -41,27 +44,27 @@ void setup() {
   
   lidar.setup();
 
-  currentSensor.begin();
+  // currentSensor.begin();
 
-  Timer1.initialize(1000);
-  Timer1.attachInterrupt(sampleISR);
+  //Timer1.initialize(1000);
+  //Timer1.attachInterrupt(sampleISR);
 
   Serial.println("Initializing hardware...");
   augerMotor.preSetup();
   augerMotor.setup();
   
-  
   linearSlider.preSetup();
   linearSlider.setup();
   
-
 	Serial.println("Science Auxiliary Subsystem ready.");
 }
 
 void loop(){
+  serial.update();
   augerMotor.update();
   linearSlider.update();
   lidar.update();
+  dataTimer.update();
 }
 
 /* Temporary Serial Monitor interface for testing. 
@@ -95,15 +98,16 @@ void scienceHandler(const uint8_t* data, int length) {
   ScienceCommand command = BurtProto::decode<ScienceCommand>(data, length, ScienceCommand_fields);
 
   // Control specific hardware
-  if (command.auger != 0){
-    augerMotor.setMotorRps(command.auger);
+  if (command.stop) augerMotor.setMotorRps(0);
+  if (command.auger.speed_rpm != 0){
+    augerMotor.setMotorRps(command.auger.speed_rpm);
   }
   if (command.linear_slider != 0){
     linearSlider.moveBy(command.linear_slider);
   }
   
-  upper_servo.handleCommand(command.upper_auger_servo);
-  lower_servo.handleCommand(command.lower_auger_servo);
+  upper_servo.handleCommand(command.auger.upper_servo);
+  lower_servo.handleCommand(command.auger.lower_servo);
 
   // General commands
   if (command.stop) stopEverything();
@@ -136,10 +140,10 @@ void sendData() {
   serial.send(&data);
   
   data = ScienceData_init_zero;
-  data.dist_to_ground = lidar.getDistance();
+  data.auger.distance_to_ground_cm = lidar.getDistance();
   serial.send(&data);
 
   data = ScienceData_init_zero;
-  data.aux_current = currentSensor.getFilteredCurrent();
+  data.auger.current = currentSensor.getFilteredCurrent();
   serial.send(&data);
 }

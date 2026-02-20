@@ -247,7 +247,7 @@ void LIDARLite::write(char myAddress, char myValue, char lidarliteAddress)
   int nackCatcher = Wire1.endTransmission();
   if(nackCatcher != 0)
   {
-    Serial.println("> nack");
+    // Serial.println("> nack");
   }
 
   delay(1); // 1 ms delay for robustness with successive reads and writes
@@ -288,7 +288,7 @@ void LIDARLite::read(char myAddress, int numOfBytes, byte arrayToSave[2], bool m
     int nackCatcher = Wire1.endTransmission();
     if(nackCatcher != 0)
     {
-      Serial.println("> nack");
+      // Serial.println("> nack");
     }
 
     Wire1.requestFrom((int)lidarliteAddress,1); // Read register 0x01
@@ -313,7 +313,7 @@ void LIDARLite::read(char myAddress, int numOfBytes, byte arrayToSave[2], bool m
     int nackCatcher = Wire1.endTransmission();
     if(nackCatcher != 0)
     {
-      Serial.println("> nack");
+      //Serial.println("> nack");
     }
 
     // Perform read of 1 or 2 bytes, save in arrayToSave
@@ -334,7 +334,7 @@ void LIDARLite::read(char myAddress, int numOfBytes, byte arrayToSave[2], bool m
   {
     bailout:
       busyCounter = 0;
-      Serial.println("> read failed");
+      // Serial.println("> read failed");
   }
 } /* LIDARLite::read */
 
