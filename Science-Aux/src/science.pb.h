@@ -79,6 +79,7 @@ typedef struct _ScienceData {
     ServoState lower_auger_servo;
     ServoState upper_auger_servo;
     float dist_to_ground;
+    float aux_current;
 } ScienceData;
 
 
@@ -116,9 +117,9 @@ extern "C" {
 
 /* Initializer values for message structs */
 #define ScienceCommand_init_default              {0, 0, 0, _PumpState_MIN, _ServoState_MIN, _ServoState_MIN, _CarouselCommand_MIN, 0, 0, 0, _ScienceState_MIN, false, Version_init_default}
-#define ScienceData_init_default                 {0, _ScienceState_MIN, 0, 0, 0, false, Version_init_default, _ServoState_MIN, _ServoState_MIN, 0}
+#define ScienceData_init_default                 {0, _ScienceState_MIN, 0, 0, 0, false, Version_init_default, _ServoState_MIN, _ServoState_MIN, 0, 0}
 #define ScienceCommand_init_zero                 {0, 0, 0, _PumpState_MIN, _ServoState_MIN, _ServoState_MIN, _CarouselCommand_MIN, 0, 0, 0, _ScienceState_MIN, false, Version_init_zero}
-#define ScienceData_init_zero                    {0, _ScienceState_MIN, 0, 0, 0, false, Version_init_zero, _ServoState_MIN, _ServoState_MIN, 0}
+#define ScienceData_init_zero                    {0, _ScienceState_MIN, 0, 0, 0, false, Version_init_zero, _ServoState_MIN, _ServoState_MIN, 0, 0}
 
 /* Field tags (for use in manual encoding/decoding) */
 #define ScienceCommand_carousel_motor_tag        1
@@ -142,6 +143,7 @@ extern "C" {
 #define ScienceData_lower_auger_servo_tag        7
 #define ScienceData_upper_auger_servo_tag        8
 #define ScienceData_dist_to_ground_tag           9
+#define ScienceData_aux_current_tag              10
 
 /* Struct field encoding specification for nanopb */
 #define ScienceCommand_FIELDLIST(X, a) \
@@ -170,7 +172,8 @@ X(a, STATIC,   SINGULAR, FLOAT,    temperature,       5) \
 X(a, STATIC,   OPTIONAL, MESSAGE,  version,           6) \
 X(a, STATIC,   SINGULAR, UENUM,    lower_auger_servo,   7) \
 X(a, STATIC,   SINGULAR, UENUM,    upper_auger_servo,   8) \
-X(a, STATIC,   SINGULAR, FLOAT,    dist_to_ground,    9)
+X(a, STATIC,   SINGULAR, FLOAT,    dist_to_ground,    9) \
+X(a, STATIC,   SINGULAR, FLOAT,    aux_current,      10)
 #define ScienceData_CALLBACK NULL
 #define ScienceData_DEFAULT NULL
 #define ScienceData_version_MSGTYPE Version
@@ -183,9 +186,9 @@ extern const pb_msgdesc_t ScienceData_msg;
 #define ScienceData_fields &ScienceData_msg
 
 /* Maximum encoded size of messages (where known) */
-#define SCIENCE_PB_H_MAX_SIZE                    ScienceCommand_size
+#define SCIENCE_PB_H_MAX_SIZE                    ScienceData_size
 #define ScienceCommand_size                      64
-#define ScienceData_size                         61
+#define ScienceData_size                         66
 
 #ifdef __cplusplus
 } /* extern "C" */
