@@ -104,6 +104,7 @@ void scienceHandler(const uint8_t* data, int length) {
   if (command.auger.speed_rpm != 0){
     augerMotor.setMotorRps(command.auger.speed_rpm);
   }
+  if (command.auger.clear_stallstop) augerMotor.clearStallStop();
   if (command.linear_slider != 0){
     linearSlider.moveBy(command.linear_slider);
   }
@@ -143,6 +144,12 @@ void sendData() {
   
   data = ScienceData_init_zero;
   data.auger.distance_to_ground_cm = lidar.getDistance();
+  serial.send(&data);
+
+  // why is sendData structured like this?
+  // shouldn't has_auger be set?
+  data = ScienceData_init_zero;
+  data.auger.is_stalled = augerMotor.isStalled();
   serial.send(&data);
 
   // data = ScienceData_init_zero;
