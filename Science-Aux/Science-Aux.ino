@@ -105,10 +105,10 @@ void scienceHandler(const uint8_t* data, int length) {
   if (command.auger.speed_rpm != 0){
     augerMotor.setMotorRps(command.auger.speed_rpm);
   }
-  if (command.auger.clear_stallstop) augerMotor.clearStallStop();
   if (command.linear_slider != 0){
     linearSlider.moveBy(command.linear_slider);
   }
+  if (command.linear_slider.clear_stallstop) linearSlider.clearStallStop();
   
   upper_servo.handleCommand(command.auger.upper_servo);
   lower_servo.handleCommand(command.auger.lower_servo);
@@ -150,7 +150,7 @@ void sendData() {
   // why is sendData structured like this?
   // shouldn't has_auger be set?
   data = ScienceData_init_zero;
-  data.auger.is_stalled = augerMotor.isStalled();
+  data.linear_slider.is_stalled = linearSlider.isStalled();
   serial.send(&data);
 
   // data = ScienceData_init_zero;
