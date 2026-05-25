@@ -12,6 +12,12 @@ PB_BIND(AugerCommand, AugerCommand, AUTO)
 PB_BIND(AugerData, AugerData, AUTO)
 
 
+PB_BIND(LinearSliderCommand, LinearSliderCommand, AUTO)
+
+
+PB_BIND(LinearSliderData, LinearSliderData, AUTO)
+
+
 PB_BIND(ScienceCommand, ScienceCommand, AUTO)
 
 

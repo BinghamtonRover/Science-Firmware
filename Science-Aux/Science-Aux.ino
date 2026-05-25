@@ -55,6 +55,7 @@ void setup() {
   augerMotor.preSetup();
   augerMotor.setup();
   
+  linearSlider.enableStallStop(100, 10000);
   linearSlider.preSetup();
   linearSlider.setup();
   
