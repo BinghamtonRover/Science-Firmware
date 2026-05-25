@@ -52,6 +52,7 @@ typedef struct _AugerCommand {
     float speed_rpm;
     ServoState upper_servo;
     ServoState lower_servo;
+    bool clear_stallstop;
 } AugerCommand;
 
 /* / Data from the auger */
@@ -61,6 +62,7 @@ typedef struct _AugerData {
     /* Distance to ground, in centimeters */
     float distance_to_ground_cm;
     float current;
+    bool is_stalled;
 } AugerData;
 
 /* / A command to the science subsystem. */
@@ -133,12 +135,12 @@ extern "C" {
 
 
 /* Initializer values for message structs */
-#define AugerCommand_init_default                {false, 0, _ServoState_MIN, _ServoState_MIN}
-#define AugerData_init_default                   {_ServoState_MIN, _ServoState_MIN, 0, 0}
+#define AugerCommand_init_default                {false, 0, _ServoState_MIN, _ServoState_MIN, 0}
+#define AugerData_init_default                   {_ServoState_MIN, _ServoState_MIN, 0, 0, 0}
 #define ScienceCommand_init_default              {0, 0, _PumpState_MIN, _CarouselCommand_MIN, 0, 0, 0, _ScienceState_MIN, false, Version_init_default, false, AugerCommand_init_default}
 #define ScienceData_init_default                 {0, _ScienceState_MIN, 0, 0, 0, false, Version_init_default, false, AugerData_init_default}
-#define AugerCommand_init_zero                   {false, 0, _ServoState_MIN, _ServoState_MIN}
-#define AugerData_init_zero                      {_ServoState_MIN, _ServoState_MIN, 0, 0}
+#define AugerCommand_init_zero                   {false, 0, _ServoState_MIN, _ServoState_MIN, 0}
+#define AugerData_init_zero                      {_ServoState_MIN, _ServoState_MIN, 0, 0, 0}
 #define ScienceCommand_init_zero                 {0, 0, _PumpState_MIN, _CarouselCommand_MIN, 0, 0, 0, _ScienceState_MIN, false, Version_init_zero, false, AugerCommand_init_zero}
 #define ScienceData_init_zero                    {0, _ScienceState_MIN, 0, 0, 0, false, Version_init_zero, false, AugerData_init_zero}
 
@@ -146,10 +148,12 @@ extern "C" {
 #define AugerCommand_speed_rpm_tag               1
 #define AugerCommand_upper_servo_tag             2
 #define AugerCommand_lower_servo_tag             3
+#define AugerCommand_clear_stallstop_tag         4
 #define AugerData_lower_servo_tag                1
 #define AugerData_upper_servo_tag                2
 #define AugerData_distance_to_ground_cm_tag      3
 #define AugerData_current_tag                    4
+#define AugerData_is_stalled_tag                 5
 #define ScienceCommand_carousel_motor_tag        1
 #define ScienceCommand_linear_slider_tag         3
 #define ScienceCommand_pumps_tag                 4
@@ -172,7 +176,8 @@ extern "C" {
 #define AugerCommand_FIELDLIST(X, a) \
 X(a, STATIC,   OPTIONAL, FLOAT,    speed_rpm,         1) \
 X(a, STATIC,   SINGULAR, UENUM,    upper_servo,       2) \
-X(a, STATIC,   SINGULAR, UENUM,    lower_servo,       3)
+X(a, STATIC,   SINGULAR, UENUM,    lower_servo,       3) \
+X(a, STATIC,   SINGULAR, BOOL,     clear_stallstop,   4)
 #define AugerCommand_CALLBACK NULL
 #define AugerCommand_DEFAULT NULL
 
@@ -180,7 +185,8 @@ X(a, STATIC,   SINGULAR, UENUM,    lower_servo,       3)
 X(a, STATIC,   SINGULAR, UENUM,    lower_servo,       1) \
 X(a, STATIC,   SINGULAR, UENUM,    upper_servo,       2) \
 X(a, STATIC,   SINGULAR, FLOAT,    distance_to_ground_cm,   3) \
-X(a, STATIC,   SINGULAR, FLOAT,    current,           4)
+X(a, STATIC,   SINGULAR, FLOAT,    current,           4) \
+X(a, STATIC,   SINGULAR, BOOL,     is_stalled,        5)
 #define AugerData_CALLBACK NULL
 #define AugerData_DEFAULT NULL
 
@@ -225,11 +231,11 @@ extern const pb_msgdesc_t ScienceData_msg;
 #define ScienceData_fields &ScienceData_msg
 
 /* Maximum encoded size of messages (where known) */
-#define AugerCommand_size                        9
-#define AugerData_size                           14
+#define AugerCommand_size                        11
+#define AugerData_size                           16
 #define SCIENCE_PB_H_MAX_SIZE                    ScienceData_size
-#define ScienceCommand_size                      66
-#define ScienceData_size                         68
+#define ScienceCommand_size                      68
+#define ScienceData_size                         70
 
 #ifdef __cplusplus
 } /* extern "C" */
