@@ -66,6 +66,7 @@ typedef struct _AugerData {
 /* / Command for linear slider */
 typedef struct _LinearSliderCommand {
     bool clear_stallstop;
+    double move_by;
 } LinearSliderCommand;
 
 /* / Data from linear slider */
@@ -150,13 +151,13 @@ extern "C" {
 /* Initializer values for message structs */
 #define AugerCommand_init_default                {false, 0, _ServoState_MIN, _ServoState_MIN}
 #define AugerData_init_default                   {_ServoState_MIN, _ServoState_MIN, 0, 0}
-#define LinearSliderCommand_init_default         {0}
+#define LinearSliderCommand_init_default         {0, 0}
 #define LinearSliderData_init_default            {0}
 #define ScienceCommand_init_default              {0, _PumpState_MIN, _CarouselCommand_MIN, 0, 0, 0, _ScienceState_MIN, false, Version_init_default, false, AugerCommand_init_default, false, LinearSliderCommand_init_default}
 #define ScienceData_init_default                 {0, _ScienceState_MIN, 0, 0, 0, false, Version_init_default, false, AugerData_init_default, false, LinearSliderData_init_default}
 #define AugerCommand_init_zero                   {false, 0, _ServoState_MIN, _ServoState_MIN}
 #define AugerData_init_zero                      {_ServoState_MIN, _ServoState_MIN, 0, 0}
-#define LinearSliderCommand_init_zero            {0}
+#define LinearSliderCommand_init_zero            {0, 0}
 #define LinearSliderData_init_zero               {0}
 #define ScienceCommand_init_zero                 {0, _PumpState_MIN, _CarouselCommand_MIN, 0, 0, 0, _ScienceState_MIN, false, Version_init_zero, false, AugerCommand_init_zero, false, LinearSliderCommand_init_zero}
 #define ScienceData_init_zero                    {0, _ScienceState_MIN, 0, 0, 0, false, Version_init_zero, false, AugerData_init_zero, false, LinearSliderData_init_zero}
@@ -170,6 +171,7 @@ extern "C" {
 #define AugerData_distance_to_ground_cm_tag      3
 #define AugerData_current_tag                    4
 #define LinearSliderCommand_clear_stallstop_tag  1
+#define LinearSliderCommand_move_by_tag          2
 #define LinearSliderData_is_stalled_tag          1
 #define ScienceCommand_carousel_motor_tag        1
 #define ScienceCommand_pumps_tag                 4
@@ -207,7 +209,8 @@ X(a, STATIC,   SINGULAR, FLOAT,    current,           4)
 #define AugerData_DEFAULT NULL
 
 #define LinearSliderCommand_FIELDLIST(X, a) \
-X(a, STATIC,   SINGULAR, BOOL,     clear_stallstop,   1)
+X(a, STATIC,   SINGULAR, BOOL,     clear_stallstop,   1) \
+X(a, STATIC,   SINGULAR, DOUBLE,   move_by,           2)
 #define LinearSliderCommand_CALLBACK NULL
 #define LinearSliderCommand_DEFAULT NULL
 
@@ -266,10 +269,10 @@ extern const pb_msgdesc_t ScienceData_msg;
 /* Maximum encoded size of messages (where known) */
 #define AugerCommand_size                        9
 #define AugerData_size                           14
-#define LinearSliderCommand_size                 2
+#define LinearSliderCommand_size                 11
 #define LinearSliderData_size                    2
-#define SCIENCE_PB_H_MAX_SIZE                    ScienceData_size
-#define ScienceCommand_size                      65
+#define SCIENCE_PB_H_MAX_SIZE                    ScienceCommand_size
+#define ScienceCommand_size                      74
 #define ScienceData_size                         72
 
 #ifdef __cplusplus

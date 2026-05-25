@@ -105,8 +105,8 @@ void scienceHandler(const uint8_t* data, int length) {
   if (command.auger.speed_rpm != 0){
     augerMotor.setMotorRps(command.auger.speed_rpm);
   }
-  if (command.linear_slider != 0){
-    linearSlider.moveBy(command.linear_slider);
+  if (command.linear_slider.move_by != 0){
+    linearSlider.moveBy(command.linear_slider.move_by);
   }
   if (command.linear_slider.clear_stallstop) linearSlider.clearStallStop();
   
