@@ -5,10 +5,11 @@
 #define PUMP1 21
 #define PUMP2 22
 #define PUMP3 23
-#define PUMP4 38
-#define PUMP5 39
+#define PUMP4 39
 
+// *Todo seperate pump and pumps class for better modularity
 class Pumps {
+  
   public:
     void setup();
     void turnOn();

@@ -15,7 +15,6 @@ void sendData();
 void shutdown() { }
 
 BurtSerial serial(Device::Device_SCIENCE, scienceHandler, ScienceData_fields, ScienceData_size);
-// BurtCan<Can3> can(SCIENCE_COMMAND_ID, Device::Device_SCIENCE, scienceHandler, shutdown);
 BurtTimer dataTimer(250, sendData);
 
 ScienceState state = ScienceState_STOP_COLLECTING;
@@ -23,36 +22,55 @@ ScienceState state = ScienceState_STOP_COLLECTING;
 int sample_number = 0;
   
 void stopEverything() {
-  motors.stop();
-  pumps.turnOff();
+  augerMotor.stop();
+  linearSlider.stop();
 }
+
+// void sampleISR() {
+//   currentSensor.updateFromISR(analogRead(23));
+// }
 
 void setup() {
 	Serial.begin(9600);
+  
+  dataTimer.setup();
   Serial.println("Initializing...");
 
   Serial.println("Initializing communications...");
 
-  Serial.println("Initializing hardware...");
-  motors.setup();
-
-  // motors.calibrate();
-  pumps.setup();
-  carousel.setup();
-
   Serial.println("Initializing sensors...");
-  co2.setup();
+  tempHumidity.setup();
 
-	Serial.println("Science Subsystem ready.");
+  upper_servo.setup();
+  lower_servo.setup();
+  
+  lidar.setup();
+
+  // currentSensor.begin();
+
+  //Timer1.initialize(1000);
+  //Timer1.attachInterrupt(sampleISR);
+
+  Serial.println("Initializing hardware...");
+  augerMotor.preSetup();
+  augerMotor.setup();
+  
+  linearSlider.enableStallStop(100, 10000);
+  linearSlider.preSetup();
+  linearSlider.setup();
+  
+	Serial.println("Science Auxiliary Subsystem ready.");
 }
 
-void loop() {
-  motors.update();
+void loop(){
+  augerMotor.update();
+  linearSlider.update();
+  lidar.update();
   serial.update();
   dataTimer.update();
 }
 
-/* Temporary Serial Monitor interface for testing. */
+/* Temporary Serial Monitor interface for testing. 
 void parseSerialCommand() {
   String input = Serial.readString();
   int delimiter = input.indexOf(" ");
@@ -77,51 +95,65 @@ void parseSerialCommand() {
     Serial.println("");
   }
 }
+*/
 
 void scienceHandler(const uint8_t* data, int length) {
   ScienceCommand command = BurtProto::decode<ScienceCommand>(data, length, ScienceCommand_fields);
 
   // Control specific hardware
-  motors.handleCommand(command);
-  pumps.handleCommand(command);
-  carousel.handleCommand(command);
+  if (command.stop) augerMotor.setMotorRps(0);
+  if (command.auger.speed_rpm != 0){
+    augerMotor.setMotorRps(command.auger.speed_rpm);
+  }
+  if (command.linear_slider.move_by != 0){
+    linearSlider.moveBy(command.linear_slider.move_by);
+  }
+  if (command.linear_slider.clear_stallstop) linearSlider.clearStallStop();
   
+  upper_servo.handleCommand(command.auger.upper_servo);
+  lower_servo.handleCommand(command.auger.lower_servo);
 
   // General commands
-  if (command.stop){}//stopEverything();
-  else if (command.calibrate) motors.calibrate();
-  if (command.sample != 0) sample_number = command.sample - 1;
-  switch (command.state) {
-    case ScienceState_SCIENCE_STATE_UNDEFINED: break;
-    case ScienceState_COLLECT_DATA: 
-      if (state == ScienceState_STOP_COLLECTING) test_sample(sample_number);
-      state = command.state;
-      break;
-    case ScienceState_STOP_COLLECTING: 
-      state = command.state;
-      break;
+  if (command.stop) stopEverything();
+  else if (command.calibrate){
+    augerMotor.calibrate();
+    linearSlider.calibrate();
   }
 }
 
 void sendData() {
+
   ScienceData data = ScienceData_init_zero;
   data.sample = sample_number;
   serial.send(&data);
+
   data = ScienceData_init_zero;
   data.state = state;
   serial.send(&data);
-  // if (state != ScienceState_COLLECT_DATA) return;
-  data = ScienceData_init_zero;
-  data.co2 = co2.read();
-  serial.send(&data);
-}
 
-void test_sample(int sample) {
-  // motors.calibrate();
-  carousel.goToSection(sample);
-  carousel.fillSection();
-  carousel.goToTests();
-  delay(1000);
-  pumps.fillTubes();
-  carousel.goToPicture();
+  //if (state != ScienceState_COLLECT_DATA) return;
+
+  // Removed CO2 here
+
+  data = ScienceData_init_zero;
+  data.humidity = tempHumidity.getHumidity();
+  serial.send(&data);
+
+  data = ScienceData_init_zero;
+  data.temperature = tempHumidity.getTemperature();
+  serial.send(&data);
+  
+  data = ScienceData_init_zero;
+  data.auger.distance_to_ground_cm = lidar.getDistance();
+  serial.send(&data);
+
+  // why is sendData structured like this?
+  // shouldn't has_auger be set?
+  data = ScienceData_init_zero;
+  data.linear_slider.is_stalled = linearSlider.isStalled();
+  serial.send(&data);
+
+  // data = ScienceData_init_zero;
+  // data.auger.current = currentSensor.getFilteredCurrent();
+  // serial.send(&data);
 }

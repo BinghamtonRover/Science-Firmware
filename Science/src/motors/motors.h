@@ -7,11 +7,9 @@
 
 class Motors {
   public: 
-    StepperMotor scooperArm;
     StepperMotor dirtCarousel;
-    StepperMotor dirtLinear;
     
-    Motors(StepperMotor scooperArm, StepperMotor dirtCarousel, StepperMotor dirtLinear);
+    Motors(StepperMotor dirtCarousel);
 
     void setup();
     void calibrate();

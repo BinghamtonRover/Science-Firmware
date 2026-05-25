@@ -11,3 +11,10 @@
 	path = Science/src/temp_humidity/dfrobot
 	url = https://github.com/BinghamtonRover/DFRobot_SHT3x
 	branch = fixes
+
+[submodule "Science-Aux/src/tmc"]
+	path = Science-Aux/src/tmc
+	url = https://github.com/BinghamtonRover/TMC-Firmware
+[submodule "Science-Aux/src/utils"]
+	path = Science-Aux/src/utils
+	url = https://github.com/BinghamtonRover/Firmware-Utilities

@@ -12,7 +12,7 @@ class Co2Sensor {
   public:
     Co2Sensor(int addresss);
     void setup();
-    float read();
+    int read();
 };
 
 #endif
