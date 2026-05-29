@@ -1,32 +1,28 @@
 #include "carousel.h"
 
 const int tubesPerSection = 3;
-const int num_sections = 4;
+const int num_sections = 3;
 const int totalTubes = tubesPerSection * num_sections;
-const int funnelOpen = 35;
-const int funnelClose = 90;
 const int pourDelay = 200;
 const int testOffset = 15;
 
-DirtCarousel::DirtCarousel(StepperMotor stepper, int dirtReleasePin) : 
-  stepper(stepper),
-  dirtReleasePin(dirtReleasePin)
+const int indexPin = 40;
+
+DirtCarousel::DirtCarousel(StepperMotor stepper) : 
+  stepper(stepper)
   { }
 
 void DirtCarousel::setup() {
-  dirtRelease.attach(dirtReleasePin);
-  goHome();
-  closeFunnel();
+  // pinMode(indexPin,INPUT);
+  // attachInterrupt(digitalPinToInterrupt(indexPin), Home, CHANGE);
+  // while (!atHome){
+  // stepper.moveby(1);
+  // }
+  // stepper.block();
+  // detachInterupt(digitalPinToInterrupt(indexPin));
 }
 
 void DirtCarousel::handleCommand(ScienceCommand command) {
-  switch (command.funnel) {
-    case ServoState_SERVO_STATE_UNDEFINED: break;
-    case ServoState_SERVO_OPEN: 
-      openFunnel(); break; 
-    case ServoState_SERVO_CLOSE: 
-      closeFunnel(); break;
-  }
   switch (command.carousel) {
     case CarouselCommand_CAROUSEL_COMMAND_UNDEFINED: break;
     case CarouselCommand_NEXT_TUBE:
@@ -38,15 +34,10 @@ void DirtCarousel::handleCommand(ScienceCommand command) {
     case CarouselCommand_PREV_SECTION: 
       prevSection(); break;
     case CarouselCommand_FILL_TUBE: 
-      fillTube(); break;
+      // fillTube(); break;
     case CarouselCommand_FILL_SECTION: 
       fillSection(); break;
   }
-}
-
-void DirtCarousel::goHome() {
-  stepper.moveTo(0);
-  stepper.block();
 }
 
 void DirtCarousel::nextTube() {
@@ -55,6 +46,7 @@ void DirtCarousel::nextTube() {
 }
 
 void DirtCarousel::nextSection() {
+  
   for (int index = tubeIndex; index < tubesPerSection; index++) {
     nextTube();
   }
@@ -79,43 +71,30 @@ void DirtCarousel::prevSection() {
 }
 
 void DirtCarousel::goToSection(int section) {
-  goHome();
+  //goHome();
   for (int i = 0; i < section; i++) {
     nextSection();
   }
 }
-
-void DirtCarousel::openFunnel() {
-  dirtRelease.write(funnelOpen);
-}
-
-void DirtCarousel::closeFunnel() {
-  dirtRelease.write(funnelClose);
-}
-
-void DirtCarousel::fillTube() {
-  openFunnel();
-  delay(pourDelay);
-  closeFunnel();
-}
-
 void DirtCarousel::fillSection() {
   // goToSectionStart();
   for (int i = 0; i < tubesPerSection; i++) {
     if (i != 0) nextTube();
-    fillTube();
+    //fillTube();
   }
 }
 
 void DirtCarousel::goToTests() {
   stepper.moveBy(testOffset); 
   stepper.block();
+  nextTube();
+  nextTube();
   nextSection();
 }
 
 void DirtCarousel::goToPicture() {
   stepper.moveBy(testOffset * -1);
   stepper.block();
-  nextSection();
+  prevSection();
   nextTube();
 }

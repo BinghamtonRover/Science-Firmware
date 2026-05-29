@@ -1,10 +1,17 @@
 #include "co2_sensor.h"
 
-#define CO2_READ_DELAY 500
+#define CO2_READ_DELAY 20
 
 // The Teensy has two I2C interfaces: Wire and Wire1.
 // This lets us easily switch between them.
 #define WIRE Wire1
+
+/// The constant offset to add to the CO2 sensor's readings.
+///
+/// The CO2 sensor is *precise*, but not accurate. Meaning, it will accurately detect spikes and
+/// dips, but the actual value it reports may not be accurate. A simple fix is to just add a 
+/// constant amount to all its readings, preserving the shape while fixing the accuracy.
+const int co2Offset = 10;
 
 Co2Sensor::Co2Sensor(int address) : address(address) {}
 
@@ -22,7 +29,7 @@ bool Co2Sensor::hasError() {
   return WIRE.read() != 1;
 }
 
-float Co2Sensor::read() {
+int Co2Sensor::read() {
   // Send the 'r' (read) command to the CO2 sensor.
   WIRE.beginTransmission(address);
   WIRE.write('r');
@@ -36,10 +43,10 @@ float Co2Sensor::read() {
   char response[20];
   while (WIRE.available()) {
     char character = WIRE.read();
-    response[i] = character;
+    response[i++] = character;
     if (character == 0) break;
   }
 
   // The response is an ASCII-encoded string of the ppm value.
-  return atoi(response);
+  return atoi(response) + co2Offset;
 }
