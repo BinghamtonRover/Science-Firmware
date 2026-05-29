@@ -1,6 +1,6 @@
 #include "co2_sensor.h"
 
-#define CO2_READ_DELAY 500
+#define CO2_READ_DELAY 20
 
 // The Teensy has two I2C interfaces: Wire and Wire1.
 // This lets us easily switch between them.

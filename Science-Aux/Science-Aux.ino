@@ -44,9 +44,9 @@ void setup() {
   upper_servo.setup();
   lower_servo.setup();
   
-  lidar.setup();
+  //lidar.setup();
 
-  // currentSensor.begin();
+  currentSensor.begin();
 
   //Timer1.initialize(1000);
   //Timer1.attachInterrupt(sampleISR);
@@ -64,7 +64,7 @@ void setup() {
 void loop(){
   augerMotor.update();
   linearSlider.update();
-  lidar.update();
+  //lidar.update();
   serial.update();
   dataTimer.update();
 }
@@ -104,6 +104,9 @@ void scienceHandler(const uint8_t* data, int length) {
   if (command.auger.speed_rpm != 0){
     augerMotor.setMotorRps(command.auger.speed_rpm);
   }
+  if(command.auger.speed_rpm == 0.0){
+    augerMotor.setMotorRps(0);
+  }
   if (command.linear_slider != 0){
     linearSlider.moveBy(command.linear_slider);
   }
@@ -112,7 +115,7 @@ void scienceHandler(const uint8_t* data, int length) {
   lower_servo.handleCommand(command.auger.lower_servo);
 
   // General commands
-  if (command.stop) stopEverything();
+  if (command.stop) {}//stopEverything();
   else if (command.calibrate){
     augerMotor.calibrate();
     linearSlider.calibrate();
@@ -123,29 +126,17 @@ void sendData() {
 
   ScienceData data = ScienceData_init_zero;
   data.sample = sample_number;
-  serial.send(&data);
 
-  data = ScienceData_init_zero;
   data.state = state;
-  serial.send(&data);
 
-  //if (state != ScienceState_COLLECT_DATA) return;
-
-  // Removed CO2 here
-
-  data = ScienceData_init_zero;
   data.humidity = tempHumidity.getHumidity();
-  serial.send(&data);
 
-  data = ScienceData_init_zero;
   data.temperature = tempHumidity.getTemperature();
-  serial.send(&data);
-  
-  data = ScienceData_init_zero;
-  data.auger.distance_to_ground_cm = lidar.getDistance();
+
+  data.has_auger = true;
+  //data.auger.distance_to_ground_cm = lidar.getDistance();
+
+  data.auger.current = currentSensor.getFilteredCurrent();
   serial.send(&data);
 
-  // data = ScienceData_init_zero;
-  // data.auger.current = currentSensor.getFilteredCurrent();
-  // serial.send(&data);
 }

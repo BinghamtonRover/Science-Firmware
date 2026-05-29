@@ -16,3 +16,4 @@ DirtCarousel carousel(dirtCarouselMotor);
 Co2Sensor co2(co2_address);
 
 Pumps pumps;
+// 8 - 9 seconds

@@ -42,19 +42,19 @@ void Pumps::handleCommand(ScienceCommand command) {
 void Pumps::fillTubes() {
   // Timings to be tested
   turnOn();
+  delay(7000);
+  // delay(pumpDelay3);
 
-  delay(pumpDelay3);
+  // digitalWrite(PUMP2, LOW);
 
-  digitalWrite(PUMP2, LOW);
+  // delay(pumpDelay3 - pumpDelay2);
 
-  delay(pumpDelay2 - pumpDelay3);
+  // digitalWrite(PUMP1, LOW);
+  // digitalWrite(PUMP4, LOW);
 
-  digitalWrite(PUMP1, LOW);
-  digitalWrite(PUMP4, LOW);
+  // delay(pumpDelay3 - pumpDelay1);
 
-  delay(pumpDelay3 - pumpDelay1);
-
-  digitalWrite(PUMP3, LOW);
+  // digitalWrite(PUMP3, LOW);
 
   turnOff();
 }

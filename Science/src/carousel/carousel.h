@@ -2,6 +2,7 @@
 
 #include <Arduino.h>
 #include <Servo.h>
+#include <Encoder.h>
 
 #include "../tmc/BURT_TMC.h"
 #include "../science.pb.h"
@@ -10,6 +11,7 @@
 class DirtCarousel {
   private: 
     StepperMotor stepper;
+    // Encoder()
     int tubeIndex = 0;
     int sectionIndex = 0;
 

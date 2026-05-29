@@ -7,7 +7,6 @@ const int pourDelay = 200;
 const int testOffset = 15;
 
 const int indexPin = 40;
-bool atHome = false;
 
 DirtCarousel::DirtCarousel(StepperMotor stepper) : 
   stepper(stepper)
@@ -47,6 +46,7 @@ void DirtCarousel::nextTube() {
 }
 
 void DirtCarousel::nextSection() {
+  
   for (int index = tubeIndex; index < tubesPerSection; index++) {
     nextTube();
   }
@@ -71,7 +71,7 @@ void DirtCarousel::prevSection() {
 }
 
 void DirtCarousel::goToSection(int section) {
-  // goHome();
+  //goHome();
   for (int i = 0; i < section; i++) {
     nextSection();
   }
@@ -85,16 +85,16 @@ void DirtCarousel::fillSection() {
 }
 
 void DirtCarousel::goToTests() {
-  // stepper.moveBy(testOffset); 
-  // stepper.block();
-  // nextTube();
+  stepper.moveBy(testOffset); 
+  stepper.block();
+  nextTube();
   nextTube();
   nextSection();
 }
 
 void DirtCarousel::goToPicture() {
-  // stepper.moveBy(testOffset * -1);
-  // stepper.block();
-  // prevSection();
+  stepper.moveBy(testOffset * -1);
+  stepper.block();
+  prevSection();
   nextTube();
 }

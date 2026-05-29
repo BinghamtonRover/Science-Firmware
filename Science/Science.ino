@@ -30,7 +30,7 @@ void stopEverything() {
 void setup() {
 	Serial.begin(9600);
   Serial.println("Initializing...");
-
+  dataTimer.setup();
   Serial.println("Initializing communications...");
 
   Serial.println("Initializing hardware...");
@@ -104,12 +104,15 @@ void scienceHandler(const uint8_t* data, int length) {
 }
 
 void sendData() {
+
   ScienceData data = ScienceData_init_zero;
   data.sample = sample_number;
   serial.send(&data);
+
   data = ScienceData_init_zero;
   data.state = state;
   serial.send(&data);
+  
   // if (state != ScienceState_COLLECT_DATA) return;
   data = ScienceData_init_zero;
   data.co2 = co2.read();
@@ -117,11 +120,22 @@ void sendData() {
 }
 
 void test_sample(int sample) {
-  // motors.calibrate();
-  carousel.goToSection(sample);
-  carousel.fillSection();
-  carousel.goToTests();
-  delay(1000);
+  // carousel.nextTube();
+  // carousel.nextTube();
+  // carousel.nextTube();
+  // carousel.nextTube();
   pumps.fillTubes();
-  carousel.goToPicture();
+  
+  // delay(1000);
+
+  // carousel.prevTube();
+  // carousel.prevTube();
+  // carousel.prevTube();
+
+  // carousel.goToSection(sample);
+  // carousel.fillSection();
+  // carousel.goToTests();
+  // delay(1000);
+  // pumps.fillTubes();
+  // carousel.goToPicture();
 }

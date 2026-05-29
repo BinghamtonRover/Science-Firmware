@@ -12,9 +12,9 @@ void TempHumiditySensor::readReg(){
   if(code != 0){
     // Wiping buffer if there is an error
     memset(buf, 0, 4);
-    // Serial.print("Error: Could not read temperature/humidity (Error code ");
-    // Serial.print(code);
-    // Serial.println(")");
+    Serial.print("Error: Could not read temperature/humidity (Error code ");
+    Serial.print(code);
+    Serial.println(")");
     return;
   }
   

@@ -10,8 +10,8 @@
 const int upper_servo_pin = 10;
 const int lower_servo_pin = 3;
 
-AugerServo upper_servo(upper_servo_pin, 90, 150);
-AugerServo lower_servo(lower_servo_pin,90, 150);
+AugerServo upper_servo(upper_servo_pin, 0, 87);
+AugerServo lower_servo(lower_servo_pin, 160, 97);
 
 LidarSensor lidar;
 
@@ -54,9 +54,9 @@ StepperMotorPins {
 },
 
 StepDirConfig {
-    .gear_ratio = 24,
+    .gear_ratio = 48,
     .double_edge = false,
-    .run_current_scale = 16,
+    .run_current_scale = 28,
     .hold_current_scale = 4,
     .ihold_delay_scale = 8,
     .invert_dir = false,

@@ -14,7 +14,7 @@ StepperMotorPins {
 },
 
 InternalRampConfig {
-	.current = 250, 
-	.speed = 20'000,
+	.current = 1000, 
+	.speed = 200'000,
 	.acceleration = 200'000,
 });
