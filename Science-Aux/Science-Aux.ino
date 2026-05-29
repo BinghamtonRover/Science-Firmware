@@ -9,7 +9,10 @@
 #define USE_SERIAL_MONITOR false
 
 Version version = {major: 1, minor: 1};
-
+// Note to posterity: there's some bs in the tmc lib as of 5/29/26 at 1:09am
+// dont remove unless the ability to configure the hold current of an internal pos stepper is added
+// if it has been, set it to 0
+// ouchie ouchie hot stepper
 void scienceHandler(const uint8_t* data, int length);
 void sendData();
 void shutdown() { }
