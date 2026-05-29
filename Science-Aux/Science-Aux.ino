@@ -23,6 +23,12 @@ BurtTimer dataTimer(250, sendData);
 ScienceState state = ScienceState_STOP_COLLECTING;
 
 int sample_number = 0;
+
+// UART LiDAR (TFMini-Plus) readings (copied from Control)
+int16_t tfDist = 0;    // Distance to object in centimeters
+int16_t tfFlux = 0;    // Strength or quality of return signal
+int16_t tfTemp = 0;    // Internal temperature of Lidar sensor chip
+
   
 void stopEverything() {
   augerMotor.stop();
@@ -47,6 +53,28 @@ void setup() {
   upper_servo.setup();
   lower_servo.setup();
   
+  // Initialize UF UART LiDAR (TFMini-Plus)
+  Serial2.begin(115200);
+  delay(20);
+  tfmp.begin(&Serial2);
+
+  // safe reset lidar
+  if (tfmp.sendCommand(SOFT_RESET, 0)) {
+    Serial.println("LiDAR init success");
+    delay(500);
+  } else {
+    Serial.println("Error: Unexpected response from LiDAR");
+    tfmp.printReply();
+  }
+
+  if (tfmp.sendCommand(SET_FRAME_RATE, FRAME_20)) {
+    Serial.print("LiDAR rate: ");
+    Serial.print(FRAME_20);
+    Serial.println("Hz.");
+  } else {
+    tfmp.printReply();
+  }
+
   //lidar.setup();
 
   currentSensor.begin();
@@ -70,6 +98,14 @@ void loop(){
   //lidar.update();
   serial.update();
   dataTimer.update();
+
+  // Read UART LiDAR (non-blocking check)
+  int16_t dist;
+  if (tfmp.getData(dist)) {
+    tfDist = dist;
+  } else {
+    tfDist = 0;
+  }
 }
 
 /* Temporary Serial Monitor interface for testing. 
@@ -137,9 +173,8 @@ void sendData() {
   data.temperature = tempHumidity.getTemperature();
 
   data.has_auger = true;
-  //data.auger.distance_to_ground_cm = lidar.getDistance();
+  data.auger.distance_to_ground_cm = (float)tfDist;
 
   data.auger.current = currentSensor.getFilteredCurrent();
   serial.send(&data);
-
 }

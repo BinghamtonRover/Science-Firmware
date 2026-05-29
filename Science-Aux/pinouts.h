@@ -2,6 +2,10 @@
 #include "src/auger_servo/auger_servo.h"
 #include "src/lidar/lidar.h"
 #include "src/temp_humidity/temp_humidity.h"
+#include "/src/TFMini-Plus/src/TFMPlus.h"
+
+// UART LiDAR (TFMini-Plus)
+TFMPlus tfmp;
 #include "src/tmc/BURT_TMC.h"
 #include "src/current_sensor/current_sensor.h"
 
